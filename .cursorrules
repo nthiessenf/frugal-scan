@@ -1,0 +1,244 @@
+# SpendSense - Cursor Rules
+
+## Project Overview
+SpendSense is a privacy-first personal finance app where users upload bank statement PDFs to receive AI-powered spending insights. No account linking required - upload, analyze, done.
+
+**Current Phase:** MVP Development
+**Tech Stack:** Next.js 14 (App Router), Tailwind CSS v3, TypeScript, Claude API, Recharts, Supabase (future)
+
+---
+
+## Architecture Rules
+
+### Framework & Routing
+- **ALWAYS** use Next.js 14 App Router (NOT Pages Router)
+- API routes go in `app/api/[route-name]/route.ts`
+- Page components go in `app/[page]/page.tsx`
+- Layouts go in `app/[page]/layout.tsx`
+
+### Styling (CRITICAL)
+- **ALWAYS** use Tailwind CSS v3 (NOT v4 - compatibility issues)
+- **ALWAYS** reference DESIGN_SYSTEM.md before creating UI components
+- **NEVER** use pure black (#000) - use #1d1d1f instead
+- **NEVER** approximate colors - use exact hex values
+
+### Design System Colors (Memorize These)
+```css
+Background: #f5f5f7
+Primary Text: #1d1d1f
+Secondary Text: #6e6e73
+Tertiary Text: #86868b
+
+Accent Blue: #93c5fd
+Accent Purple: #c4b5fd
+Accent Pink: #fbcfe8
+
+Gradient: linear-gradient(135deg, #93c5fd 0%, #c4b5fd 50%, #fbcfe8 100%)
+```
+
+### Glassmorphism (Required for Cards)
+Every card component MUST have all three effects:
+1. **Background blur:** `bg-white/70 backdrop-blur-xl backdrop-saturate-[180%]`
+2. **Gradient border on hover:** See DESIGN_SYSTEM.md "Gradient Border" section
+3. **Spotlight effect on hover:** See DESIGN_SYSTEM.md "Spotlight Effect" section
+
+### Hover States (Standard)
+```tsx
+className="transition-all duration-400 hover:-translate-y-2 hover:scale-[1.02]"
+```
+
+### Typography Scale
+- Hero: `text-5xl md:text-6xl lg:text-8xl font-bold tracking-[-0.03em]`
+- Section Title: `text-3xl md:text-4xl lg:text-5xl font-bold tracking-[-0.03em]`
+- Card Title: `text-xl md:text-2xl font-semibold tracking-[-0.02em]`
+- Body: `text-base text-[#6e6e73]`
+- Label: `text-xs font-semibold uppercase tracking-wider text-[#86868b]`
+
+---
+
+## File Organization
+
+```
+spendsense/
+├── app/
+│   ├── globals.css           # Global styles + design system utilities
+│   ├── layout.tsx            # Root layout (fonts, background)
+│   ├── page.tsx              # Landing page
+│   ├── results/
+│   │   └── page.tsx          # Results dashboard
+│   └── api/
+│       ├── parse-statement/
+│       │   └── route.ts      # PDF parsing endpoint
+│       └── analyze/
+│           └── route.ts      # Claude AI analysis endpoint
+├── components/
+│   ├── ui/                   # Reusable UI primitives
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   └── upload-zone.tsx
+│   ├── charts/               # Data visualizations
+│   │   ├── spending-pie.tsx
+│   │   └── spending-bar.tsx
+│   └── sections/             # Page sections
+│       ├── hero.tsx
+│       ├── insights-grid.tsx
+│       └── subscriptions.tsx
+├── lib/
+│   ├── utils.ts              # cn() helper
+│   ├── parse-pdf.ts          # PDF text extraction
+│   ├── categorize.ts         # Transaction categorization
+│   └── claude.ts             # Claude API wrapper
+├── types/
+│   └── index.ts              # All TypeScript interfaces
+└── DESIGN_SYSTEM.md          # Full design reference
+```
+
+---
+
+## Code Patterns
+
+### Component Structure
+```typescript
+// 1. Imports (grouped)
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Icon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+// 2. Types
+interface ComponentProps {
+  title: string;
+  className?: string;
+}
+
+// 3. Component
+export function Component({ title, className }: ComponentProps) {
+  // Hooks first
+  const [state, setState] = React.useState(false);
+  
+  // Handlers
+  const handleClick = () => setState(!state);
+  
+  // Render
+  return (
+    <div className={cn("base-classes", className)}>
+      {/* Content */}
+    </div>
+  );
+}
+```
+
+### Tailwind Class Order
+```tsx
+<div className={cn(
+  // Layout
+  "relative flex items-center",
+  // Sizing
+  "w-full h-64",
+  // Spacing
+  "p-10 gap-5",
+  // Colors
+  "bg-white/70 text-[#1d1d1f]",
+  // Effects
+  "backdrop-blur-xl rounded-3xl shadow-lg",
+  // Interactions
+  "transition-all duration-400 hover:scale-105",
+  // Responsive
+  "md:w-auto lg:h-80"
+)} />
+```
+
+### API Route Pattern
+```typescript
+// app/api/example/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function POST(request: NextRequest) {
+  try {
+    const data = await request.json();
+    // Process data
+    return NextResponse.json({ success: true, data: result });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: 'Processing failed' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+---
+
+## What NOT to Do
+
+### Security
+- ❌ Don't store raw transaction data in localStorage
+- ❌ Don't expose API keys in client-side code
+- ❌ Don't log sensitive financial data to console in production
+
+### Styling
+- ❌ Don't use Tailwind v4 syntax
+- ❌ Don't skip glassmorphism effects to "simplify"
+- ❌ Don't approximate colors (use exact hex values)
+- ❌ Don't use vh/vw units (mobile issues)
+- ❌ Don't animate width/height (use transform/opacity)
+
+### Architecture
+- ❌ Don't use Pages Router patterns
+- ❌ Don't create files outside the established structure
+- ❌ Don't add dependencies without documenting in README
+
+---
+
+## Testing Checkpoints
+
+After each session, verify:
+- [ ] `npm run dev` starts without errors
+- [ ] No TypeScript errors in terminal
+- [ ] Components render at 375px (mobile)
+- [ ] Components render at 1440px (desktop)
+- [ ] Hover effects work on glass cards
+- [ ] Colors match design system exactly
+
+---
+
+## Current Build Status
+
+Track progress here (update after each session):
+
+- [ ] Session 1: Project Scaffolding
+- [ ] Session 2: Core UI Components
+- [ ] Session 3: Landing Page
+- [ ] Session 4: PDF Parsing Backend
+- [ ] Session 5: Transaction Categorization
+- [ ] Session 6: Claude AI Integration
+- [ ] Session 7: Results Dashboard
+- [ ] Session 8: Connect Everything
+- [ ] Session 9: Polish & Deploy
+
+---
+
+## Environment Variables Required
+
+```env
+# .env.local
+ANTHROPIC_API_KEY=your_claude_api_key_here
+```
+
+---
+
+## Quick Commands
+
+```bash
+# Start development
+npm run dev
+
+# Build for production
+npm run build
+
+# Clear Next.js cache (if styles not updating)
+rm -rf .next && npm run dev
+
+# Install all dependencies
+npm install framer-motion lucide-react clsx tailwind-merge recharts pdf-parse @anthropic-ai/sdk
+```
