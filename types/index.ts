@@ -21,6 +21,7 @@ export interface ParsedStatement {
     totalCredits: number | null;
     endingBalance: number | null;
   };
+  pageCount?: number;  // How many pages Claude found transactions on
   parsingMetadata: {
     totalTransactionsFound: number;
     lowConfidenceCount: number;

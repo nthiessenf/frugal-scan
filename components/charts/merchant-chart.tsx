@@ -14,8 +14,8 @@ interface MerchantChartProps {
 }
 
 export function MerchantChart({ data }: MerchantChartProps) {
-  // Take top 8 merchants
-  const chartData = data.slice(0, 8).map(item => ({
+  // Take top 10 merchants
+  const chartData = data.slice(0, 10).map(item => ({
     name: item.name,
     fullName: item.name,
     amount: item.amount,
@@ -28,23 +28,25 @@ export function MerchantChart({ data }: MerchantChartProps) {
   // Gradient colors for bars (top to bottom by amount)
   const getBarColor = (index: number) => {
     const colors = [
-      '#8b5cf6', // violet
-      '#a78bfa',
-      '#c4b5fd',
-      '#93c5fd', // blue
-      '#a5b4fc',
-      '#c7d2fe',
-      '#ddd6fe',
-      '#e9d5ff',
+      '#7c3aed', // violet-600 (darkest)
+      '#8b5cf6', // violet-500
+      '#a78bfa', // violet-400
+      '#b794f6', // custom violet
+      '#c4b5fd', // violet-300
+      '#d4c4fd', // custom lighter
+      '#ddd6fe', // violet-200
+      '#e4dcfe', // custom
+      '#ebe5fe', // custom
+      '#f3f0ff', // lightest but still visible
     ];
     return colors[index] || '#c4b5fd';
   };
 
   return (
     <GlassCard className="p-6" hover={false}>
-      <h3 className="text-lg font-semibold text-[#1d1d1f] mb-4">Top Merchants</h3>
+      <h3 className="text-lg font-semibold text-[#1d1d1f] mb-4">Top 10 Merchants</h3>
 
-      <div className="h-80">
+      <div className="h-96">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}

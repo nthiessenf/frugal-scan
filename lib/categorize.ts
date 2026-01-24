@@ -3,64 +3,157 @@ import { MERCHANT_KEYWORDS } from './constants';
 
 // Clean up messy merchant names from bank statements
 export function cleanMerchantName(description: string): string {
-  let cleaned = description;
+  let name = description;
   
-  // Remove common bank prefixes
+  // Step 1: Remove common payment prefixes
   const prefixes = [
-    'POS DEBIT',
-    'POS PURCHASE',
-    'PURCHASE AUTHORIZED ON \\d{2}/\\d{2}',
-    'RECURRING PAYMENT AUTHORIZED ON \\d{2}/\\d{2}',
-    'CHECKCARD \\d{4}',
-    'ACH RECURRING',
-    'ACH DEBIT',
-    'DEBIT CARD PURCHASE',
-    'VISA DEBIT',
-    'PENDING',
+    'APLPAY ', 'APPLE PAY ', 'APPLEPAY ',
+    'SQ *', 'SQU*', 'SQUARE ', 
+    'TST* ', 'TST ', 'TST*',
+    'PP*', 'PAYPAL *', 'PAYPAL*',
+    'SP ', 'SP* ', 'SQ ',
+    'POS ', 'POS DEBIT ', 'POS PURCHASE ',
+    'DEBIT ', 'PURCHASE ', 'CHECKCARD ',
+    'ACH ', 'ACH DEBIT ', 'ACH CREDIT ',
+    'RECURRING ', 'AUTOPAY ',
+    'VISA ', 'MASTERCARD ', 'AMEX ',
+    'CREDIT CARD ', 'DEBIT CARD ',
   ];
   
   for (const prefix of prefixes) {
-    cleaned = cleaned.replace(new RegExp(prefix, 'gi'), '');
+    if (name.toUpperCase().startsWith(prefix)) {
+      name = name.substring(prefix.length);
+    }
   }
   
-  // Remove card numbers (Card XXXX or Card 3394)
-  cleaned = cleaned.replace(/card\s*\d{4}/gi, '');
+  // Step 2: Remove trailing location info (city, state, zip patterns)
+  // Remove zip codes (5 digits or 5+4 format)
+  name = name.replace(/\s+\d{5}(-\d{4})?\s*$/g, '');
+  name = name.replace(/\s+\d{5,}\s*\d*\s*$/g, ''); // Multiple number sequences at end
   
-  // Remove reference numbers (S followed by 15+ digits)
-  cleaned = cleaned.replace(/S\d{15,}/g, '');
+  // Remove state abbreviations at the end (e.g., "TX", "CA", "NY")
+  name = name.replace(/\s+[A-Z]{2}\s*$/g, '');
   
-  // Remove long number sequences (8+ digits)
-  cleaned = cleaned.replace(/\d{8,}/g, '');
-  
-  // Remove state abbreviations at end (TX, CA, NY, etc.)
-  cleaned = cleaned.replace(/\s+[A-Z]{2}\s*$/g, '');
+  // Remove city + state patterns (e.g., "Austin TX", "New York NY")
+  name = name.replace(/\s+(Austin|Houston|Dallas|San Antonio|Round Rock|Cedar Park|Fremont|New York|Los Angeles|Chicago|Phoenix|Seattle|Denver|Boston|Atlanta|Miami|Portland|San Francisco|San Diego|Las Vegas|Orlando|Tampa|Nashville|Charlotte|Minneapolis|Detroit|Cleveland|Pittsburgh|Baltimore|Philadelphia|Washington|Richmond|Raleigh|Durham|Kansas City|St Louis|Indianapolis|Columbus|Cincinnati|Milwaukee|Sacramento|San Jose|Oakland|Berkeley|Palo Alto|Mountain View|Sunnyvale|Cupertino|Santa Clara|Menlo Park|Redwood City|Foster City|Burlingame|San Mateo|Daly City|South San Francisco|Emeryville|Alameda|Hayward|Fremont|Newark|Union City|Milpitas|Santa Cruz|Monterey|Carmel|Salinas|Fresno|Bakersfield|Modesto|Stockton|Riverside|Anaheim|Irvine|Long Beach|Pasadena|Glendale|Burbank|Santa Monica|Venice|Malibu|Beverly Hills|Hollywood|West Hollywood|Culver City|Inglewood|Torrance|Huntington Beach|Newport Beach|Laguna Beach|Costa Mesa|Santa Ana|Garden Grove|Fullerton|Ontario|Pomona|Rancho Cucamonga|Fontana|Moreno Valley|Corona|Temecula|Murrieta|Oceanside|Carlsbad|Escondido|El Cajon|Chula Vista|National City|Imperial Beach)\s+[A-Z]{2}\s*$/gi, '');
   
   // Remove common suffixes
-  cleaned = cleaned.replace(/\s+(LLC|INC|CORP|CO|LTD)\.?\s*/gi, ' ');
+  const suffixes = [
+    ' 888BESTBUY', ' 800-', ' 888-', ' 877-', ' 866-',
+    ' WWW.', ' HTTP', ' .COM', ' .NET', ' .ORG',
+    ' MERCHANDISE', ' PAYMENT', ' PURCHASE',
+    ' /BILL', ' NA PA', ' NA ', 
+    ' INSURANCE SALES', ' SALES',
+    ' + ', ' # ', ' #',
+  ];
   
-  // Remove URLs
-  cleaned = cleaned.replace(/(WWW\.)?\S+\.(COM|NET|ORG)/gi, '');
-  
-  // Remove extra whitespace
-  cleaned = cleaned.replace(/\s+/g, ' ').trim();
-  
-  // Take first meaningful part (before weird codes)
-  const parts = cleaned.split(/[*#\\]/);
-  cleaned = parts[0].trim();
-  
-  // Title case
-  cleaned = cleaned
-    .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-  
-  // If we cleaned too aggressively, use first 30 chars of original
-  if (cleaned.length < 3) {
-    cleaned = description.slice(0, 30).trim();
+  for (const suffix of suffixes) {
+    const idx = name.toUpperCase().indexOf(suffix);
+    if (idx > 3) { // Keep at least some characters
+      name = name.substring(0, idx);
+    }
   }
   
-  return cleaned;
+  // Step 3: Remove reference numbers (sequences of 6+ digits)
+  name = name.replace(/\s+\d{6,}\s*/g, ' ');
+  name = name.replace(/\s*#\d+/g, '');
+  name = name.replace(/\s+-\s+\d+/g, '');
+  
+  // Step 4: Clean up extra whitespace and special characters
+  name = name.replace(/\s+/g, ' ').trim();
+  name = name.replace(/^[^a-zA-Z0-9]+/, ''); // Remove leading special chars
+  name = name.replace(/[^a-zA-Z0-9]+$/, ''); // Remove trailing special chars
+  
+  // Step 5: Handle specific known merchants that come through badly
+  const merchantMappings: Record<string, string> = {
+    'TST': 'Toast Restaurant',
+    'TSTA': 'Toast Restaurant', 
+    'BRGHTWHL': 'Brightwheel',
+    'BRGHTWHL M': 'Brightwheel',
+    'BRGHTWHEEL': 'Brightwheel',
+    'HEB': 'H-E-B',
+    'H-E-B': 'H-E-B',
+    'AMZN': 'Amazon',
+    'AMAZON MARKETPLACE': 'Amazon',
+    'AMAZON MKTPLACE': 'Amazon',
+    'AMZN MKTP': 'Amazon',
+    'WHOLEFDS': 'Whole Foods',
+    'WHOLE FOODS': 'Whole Foods',
+    'WHOLEFOODS': 'Whole Foods',
+    'CHICK-FIL': 'Chick-fil-A',
+    'CHICKFILA': 'Chick-fil-A',
+    'MCDONALDS': "McDonald's",
+    'MCDONALD\'S': "McDonald's",
+    'STARBUCKS': 'Starbucks',
+    'SBUX': 'Starbucks',
+    'WALGREENS': 'Walgreens',
+    'WALGREE': 'Walgreens',
+    'CVS': 'CVS Pharmacy',
+    'CVS/PHARM': 'CVS Pharmacy',
+    'TARGET': 'Target',
+    'TARGT': 'Target',
+    'WALMART': 'Walmart',
+    'WAL-MART': 'Walmart',
+    'COSTCO': 'Costco',
+    'COSTCO WHSE': 'Costco',
+    'UBER EATS': 'Uber Eats',
+    'UBEREATS': 'Uber Eats',
+    'UBER': 'Uber',
+    'LYFT': 'Lyft',
+    'DOORDASH': 'DoorDash',
+    'GRUBHUB': 'Grubhub',
+    'POSTMATES': 'Postmates',
+    'NETFLIX': 'Netflix',
+    'SPOTIFY': 'Spotify',
+    'HULU': 'Hulu',
+    'DISNEY PLUS': 'Disney+',
+    'DISNEY+': 'Disney+',
+    'APPLE.COM': 'Apple',
+    'APLPAY APPLE': 'Apple',
+    'GOOGLE': 'Google',
+    'MICROSOFT': 'Microsoft',
+    'ADOBE': 'Adobe',
+    'DROPBOX': 'Dropbox',
+  };
+  
+  // Check if cleaned name matches a known mapping
+  const upperName = name.toUpperCase().trim();
+  for (const [key, value] of Object.entries(merchantMappings)) {
+    if (upperName === key || upperName.startsWith(key + ' ')) {
+      return value;
+    }
+  }
+  
+  // Step 6: Title case the result
+  name = name
+    .toLowerCase()
+    .split(' ')
+    .map(word => {
+      // Keep certain words lowercase
+      if (['and', 'the', 'of', 'in', 'at', 'by', 'for'].includes(word) && name.indexOf(word) !== 0) {
+        return word;
+      }
+      // Keep abbreviations uppercase
+      if (word.length <= 2) {
+        return word.toUpperCase();
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
+  
+  // Step 7: Final cleanup - limit length
+  if (name.length > 30) {
+    // Try to cut at a word boundary
+    const truncated = name.substring(0, 30);
+    const lastSpace = truncated.lastIndexOf(' ');
+    if (lastSpace > 15) {
+      name = truncated.substring(0, lastSpace);
+    } else {
+      name = truncated;
+    }
+  }
+  
+  return name || 'Unknown Merchant';
 }
 
 // Determine category based on merchant keywords
