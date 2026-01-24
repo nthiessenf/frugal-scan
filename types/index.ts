@@ -44,3 +44,44 @@ export interface ApiResponse<T> {
   validation?: ValidationResult;
   error?: string;
 }
+
+// Spending categories
+export type Category = 
+  | 'food_dining'
+  | 'groceries'
+  | 'shopping'
+  | 'transportation'
+  | 'subscriptions'
+  | 'bills_utilities'
+  | 'entertainment'
+  | 'health_fitness'
+  | 'travel'
+  | 'income'
+  | 'transfer'
+  | 'other';
+
+// Category display info
+export interface CategoryInfo {
+  id: Category;
+  label: string;
+  color: string;
+  icon: string;
+}
+
+// Categorized transaction (extends RawTransaction)
+export interface CategorizedTransaction extends RawTransaction {
+  category: Category;
+  merchant: string;
+  isRecurring: boolean;
+  needsReview: boolean;
+}
+
+// Detected subscription
+export interface Subscription {
+  name: string;
+  amount: number;
+  frequency: 'weekly' | 'monthly' | 'yearly';
+  lastCharge: string;
+  category: 'streaming' | 'software' | 'fitness' | 'news' | 'gaming' | 'other';
+  confidence: number;
+}
