@@ -85,3 +85,63 @@ export interface Subscription {
   category: 'streaming' | 'software' | 'fitness' | 'news' | 'gaming' | 'other';
   confidence: number;
 }
+
+// AI-generated insight
+export interface Insight {
+  id: string;
+  title: string;
+  description: string;
+  severity: 'info' | 'warning' | 'positive';
+  category?: Category;
+  amount?: number;
+}
+
+// Savings recommendation
+export interface SavingsTip {
+  id: string;
+  title: string;
+  description: string;
+  potentialSavings: number;
+  difficulty: 'easy' | 'medium' | 'hard';
+  timeframe: 'immediate' | 'monthly' | 'yearly';
+}
+
+// Spending summary statistics
+export interface SpendingSummary {
+  totalSpent: number;
+  totalIncome: number;
+  netCashFlow: number;
+  transactionCount: number;
+  averageTransaction: number;
+  topCategory: Category;
+  topCategoryAmount: number;
+  subscriptionTotal: number;
+  periodDays: number;
+}
+
+// Category breakdown for charts
+export interface CategoryBreakdown {
+  category: Category;
+  amount: number;
+  percentage: number;
+  transactionCount: number;
+}
+
+// Top merchant info
+export interface TopMerchant {
+  name: string;
+  amount: number;
+  count: number;
+  category: Category;
+}
+
+// Full analysis result (everything combined)
+export interface AnalysisResult {
+  summary: SpendingSummary;
+  categoryBreakdown: CategoryBreakdown[];
+  topMerchants: TopMerchant[];
+  subscriptions: Subscription[];
+  insights: Insight[];
+  tips: SavingsTip[];
+  generatedAt: string;
+}
