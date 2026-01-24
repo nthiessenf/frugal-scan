@@ -158,59 +158,44 @@ export function cleanMerchantName(description: string): string {
 
 // Determine category based on merchant keywords
 export function categorizeTransaction(transaction: RawTransaction): CategorizedTransaction {
-  const description = transaction.description.toLowerCase();
   const merchant = cleanMerchantName(transaction.description);
-  
-  // Check for income patterns first
-  const incomePatterns = ['payroll', 'direct deposit', 'salary', 'deposit from', 'tax refund', 'irs treas'];
+  const lowerMerchant = merchant.toLowerCase();
+  const lowerDesc = transaction.description.toLowerCase();
+
+  // Check for income first (credits are often income)
   if (transaction.type === 'credit') {
-    for (const pattern of incomePatterns) {
-      if (description.includes(pattern)) {
-        return {
-          ...transaction,
-          category: 'income',
-          merchant,
-          isRecurring: false,
-          needsReview: transaction.confidence < 0.8,
-        };
-      }
-    }
-  }
-  
-  // Check for transfer patterns
-  const transferPatterns = ['transfer', 'zelle', 'venmo', 'paypal', 'cash app', 'wise'];
-  for (const pattern of transferPatterns) {
-    if (description.includes(pattern)) {
+    const incomeKeywords = ['payroll', 'direct deposit', 'salary', 'refund', 'cashback', 'cash back', 'rebate', 'reimbursement', 'payment received', 'thank you'];
+    if (incomeKeywords.some(kw => lowerDesc.includes(kw))) {
       return {
         ...transaction,
-        category: 'transfer',
+        category: 'income',
         merchant,
         isRecurring: false,
         needsReview: transaction.confidence < 0.8,
       };
     }
   }
-  
-  // Check against merchant keywords
+
+  // Check both cleaned merchant name AND original description against keywords
   for (const [keyword, category] of Object.entries(MERCHANT_KEYWORDS)) {
-    if (description.includes(keyword.toLowerCase())) {
+    if (lowerMerchant.includes(keyword) || lowerDesc.includes(keyword)) {
       return {
         ...transaction,
         category,
         merchant,
-        isRecurring: false,
+        isRecurring: category === 'subscriptions',
         needsReview: transaction.confidence < 0.8,
       };
     }
   }
-  
-  // Default to 'other' if no match
+
+  // Default to other
   return {
     ...transaction,
-    category: transaction.type === 'credit' ? 'income' : 'other',
+    category: 'other',
     merchant,
     isRecurring: false,
-    needsReview: transaction.confidence < 0.8,
+    needsReview: true, // Flag uncategorized for potential review
   };
 }
 
@@ -223,83 +208,123 @@ export function categorizeAll(transactions: RawTransaction[]): CategorizedTransa
 
 // Detect recurring subscriptions
 export function detectSubscriptions(transactions: CategorizedTransaction[]): Subscription[] {
+  // Known subscription services (whitelist approach for accuracy)
+  const knownSubscriptions: Record<string, { category: Subscription['category'], minAmount?: number }> = {
+    'netflix': { category: 'streaming' },
+    'spotify': { category: 'streaming' },
+    'hulu': { category: 'streaming' },
+    'disney': { category: 'streaming' },
+    'hbo': { category: 'streaming' },
+    'apple tv': { category: 'streaming' },
+    'apple music': { category: 'streaming' },
+    'apple one': { category: 'streaming' },
+    'youtube premium': { category: 'streaming' },
+    'amazon prime': { category: 'streaming' },
+    'audible': { category: 'streaming' },
+    'paramount': { category: 'streaming' },
+    'peacock': { category: 'streaming' },
+    'espn': { category: 'streaming' },
+    'adobe': { category: 'software' },
+    'microsoft 365': { category: 'software' },
+    'dropbox': { category: 'software' },
+    'icloud': { category: 'software' },
+    'google one': { category: 'software' },
+    'chatgpt': { category: 'software' },
+    'openai': { category: 'software' },
+    'notion': { category: 'software' },
+    'figma': { category: 'software' },
+    'canva': { category: 'software' },
+    'github': { category: 'software' },
+    '1password': { category: 'software' },
+    'nordvpn': { category: 'software' },
+    'planet fitness': { category: 'fitness' },
+    'equinox': { category: 'fitness' },
+    'orangetheory': { category: 'fitness' },
+    'peloton': { category: 'fitness' },
+    'ymca': { category: 'fitness' },
+    'nytimes': { category: 'news' },
+    'new york times': { category: 'news' },
+    'wsj': { category: 'news' },
+    'washington post': { category: 'news' },
+    'the athletic': { category: 'news' },
+    'xbox': { category: 'gaming' },
+    'playstation': { category: 'gaming' },
+    'nintendo': { category: 'gaming' },
+    'game pass': { category: 'gaming' },
+    'brightwheel': { category: 'other', minAmount: 100 },
+  };
+
+  // Explicitly NOT subscriptions (blacklist)
+  const notSubscriptions = [
+    'amex travel', 'chase travel', 'hotel', 'airline', 'airbnb', 'vrbo',
+    'restaurant', 'cafe', 'coffee', 'grocery', 'target', 'walmart', 'amazon',
+    'best buy', 'gas', 'shell', 'chevron', 'uber', 'lyft', 'doordash',
+    'grubhub', 'houndstooth', 'faherty', 'four seasons', 'toyota', 'insurance',
+    'electric', 'water', 'rent', 'mortgage', 'us mobile', 'at&t', 'verizon',
+    't-mobile', 'comcast', 'spectrum',
+  ];
+
   const subscriptions: Subscription[] = [];
-  
-  // Group transactions by cleaned merchant name
-  const merchantGroups = new Map<string, CategorizedTransaction[]>();
-  
-  for (const t of transactions) {
-    if (t.type !== 'debit') continue;
-    
-    const key = t.merchant.toLowerCase();
-    if (!merchantGroups.has(key)) {
-      merchantGroups.set(key, []);
-    }
-    merchantGroups.get(key)!.push(t);
-  }
-  
-  // Analyze each merchant for recurring patterns
-  for (const [merchantKey, txns] of merchantGroups) {
-    if (txns.length < 2) continue;
-    
-    // Sort by date
-    txns.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    
-    // Check if amounts are similar (within $2)
-    const amounts = txns.map(t => t.amount);
-    const avgAmount = amounts.reduce((a, b) => a + b, 0) / amounts.length;
-    const amountsConsistent = amounts.every(a => Math.abs(a - avgAmount) <= 2);
-    
-    if (!amountsConsistent) continue;
-    
-    // Calculate average interval between charges
-    const intervals: number[] = [];
-    for (let i = 1; i < txns.length; i++) {
-      const days = (new Date(txns[i].date).getTime() - new Date(txns[i-1].date).getTime()) / (1000 * 60 * 60 * 24);
-      intervals.push(days);
-    }
-    
-    const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-    
-    // Determine frequency
-    let frequency: 'weekly' | 'monthly' | 'yearly';
-    if (avgInterval <= 10) {
-      frequency = 'weekly';
-    } else if (avgInterval <= 45) {
-      frequency = 'monthly';
-    } else if (avgInterval <= 380) {
-      frequency = 'yearly';
-    } else {
-      continue; // Not a subscription
-    }
-    
-    // Determine subscription category
-    const desc = merchantKey.toLowerCase();
-    let subCategory: Subscription['category'] = 'other';
-    
-    if (['netflix', 'hulu', 'disney', 'hbo', 'max', 'prime video', 'spotify', 'apple music', 'youtube'].some(s => desc.includes(s))) {
-      subCategory = 'streaming';
-    } else if (['adobe', 'microsoft', 'dropbox', 'notion', 'figma', 'canva', 'openai', 'chatgpt', 'github'].some(s => desc.includes(s))) {
-      subCategory = 'software';
-    } else if (['gym', 'fitness', 'peloton', 'equinox', 'planet'].some(s => desc.includes(s))) {
-      subCategory = 'fitness';
-    } else if (['news', 'times', 'post', 'journal', 'magazine'].some(s => desc.includes(s))) {
-      subCategory = 'news';
-    } else if (['xbox', 'playstation', 'nintendo', 'steam', 'game'].some(s => desc.includes(s))) {
-      subCategory = 'gaming';
-    }
-    
-    subscriptions.push({
-      name: txns[0].merchant,
-      amount: avgAmount,
-      frequency,
-      lastCharge: txns[txns.length - 1].date,
-      category: subCategory,
-      confidence: amountsConsistent ? 0.9 : 0.7,
+  const merchantGroups: Map<string, CategorizedTransaction[]> = new Map();
+
+  // Group debit transactions by merchant
+  transactions
+    .filter(t => t.type === 'debit')
+    .forEach(t => {
+      const key = t.merchant.toLowerCase();
+
+      // Skip if in blacklist
+      if (notSubscriptions.some(ns => key.includes(ns))) {
+        return;
+      }
+
+      if (!merchantGroups.has(key)) {
+        merchantGroups.set(key, []);
+      }
+      merchantGroups.get(key)!.push(t);
     });
-  }
-  
-  // Sort by amount descending
+
+  // Analyze each merchant group
+  merchantGroups.forEach((txns, merchantKey) => {
+    let subscriptionCategory: Subscription['category'] | null = null;
+    let minAmount = 0;
+
+    // Check if it's a known subscription
+    for (const [known, config] of Object.entries(knownSubscriptions)) {
+      if (merchantKey.includes(known)) {
+        subscriptionCategory = config.category;
+        minAmount = config.minAmount || 0;
+        break;
+      }
+    }
+
+    // If not a known subscription, skip (be conservative)
+    if (!subscriptionCategory) {
+      return;
+    }
+
+    // Get the most recent transaction
+    const sortedTxns = [...txns].sort((a, b) =>
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    const mostRecent = sortedTxns[0];
+
+    // Skip if below minimum amount
+    if (mostRecent.amount < minAmount) {
+      return;
+    }
+
+    subscriptions.push({
+      name: mostRecent.merchant,
+      amount: mostRecent.amount,
+      frequency: 'monthly',
+      lastCharge: mostRecent.date,
+      category: subscriptionCategory,
+      confidence: txns.length >= 2 ? 0.9 : 0.7,
+    });
+  });
+
+  // Sort by amount descending (highest subscriptions first)
   return subscriptions.sort((a, b) => b.amount - a.amount);
 }
 
