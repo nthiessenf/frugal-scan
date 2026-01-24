@@ -26,6 +26,19 @@ export function cleanMerchantName(description: string): string {
     }
   }
   
+  // Remove asterisk followed by alphanumeric codes (e.g., "Dropbox*5s76hpyc9bxf")
+  name = name.replace(/\*[a-zA-Z0-9]+/g, '');
+
+  // Remove .com/bill and similar URL patterns
+  name = name.replace(/\.com\/\w+/gi, '');
+  name = name.replace(/\.com/gi, '');
+  name = name.replace(/\.net/gi, '');
+  name = name.replace(/\.org/gi, '');
+
+  // Remove "Subscr" abbreviation and similar
+  name = name.replace(/\bsubscr\b/gi, '');
+  name = name.replace(/\bsubscription\b/gi, '');
+  
   // Step 2: Remove trailing location info (city, state, zip patterns)
   // Remove zip codes (5 digits or 5+4 format)
   name = name.replace(/\s+\d{5}(-\d{4})?\s*$/g, '');
@@ -104,22 +117,69 @@ export function cleanMerchantName(description: string): string {
     'GRUBHUB': 'Grubhub',
     'POSTMATES': 'Postmates',
     'NETFLIX': 'Netflix',
+    'NETFLIX.COM': 'Netflix',
     'SPOTIFY': 'Spotify',
+    'SPOTIFY.COM': 'Spotify',
     'HULU': 'Hulu',
-    'DISNEY PLUS': 'Disney+',
+    'HLU*': 'Hulu',
+    'HULUPLUS': 'Hulu',
+    'HULU.COM': 'Hulu',
     'DISNEY+': 'Disney+',
+    'DISNEY PLUS': 'Disney+',
+    'DISNEYPLUS': 'Disney+',
+    'DISNEYSTORE': 'Disney+',
+    'DISNEYSTORE.COM': 'Disney+',
+    'DROPBOX': 'Dropbox',
+    'DROPBOX*': 'Dropbox',
+    'OPENAI': 'ChatGPT',
+    'CHATGPT': 'ChatGPT',
+    'OPENAI *CHATGPT': 'ChatGPT',
+    'APPLE.COM/BILL': 'Apple',
     'APPLE.COM': 'Apple',
     'APLPAY APPLE': 'Apple',
-    'GOOGLE': 'Google',
-    'MICROSOFT': 'Microsoft',
+    'GITHUB': 'GitHub',
     'ADOBE': 'Adobe',
-    'DROPBOX': 'Dropbox',
+    'MICROSOFT': 'Microsoft 365',
+    'GOOGLE *': 'Google',
+    'GOOGLE ONE': 'Google One',
+    'ICLOUD': 'iCloud',
+    'PARAMOUNT+': 'Paramount+',
+    'PARAMOUNT PLUS': 'Paramount+',
+    'PEACOCK': 'Peacock',
+    'HBO MAX': 'Max',
+    'HBO': 'Max',
+    'AUDIBLE': 'Audible',
+    'AMAZON PRIME': 'Amazon Prime',
+    'PRIME VIDEO': 'Prime Video',
+    'YOUTUBE PREMIUM': 'YouTube Premium',
+    'YOUTUBE MUSIC': 'YouTube Music',
+    'LINKEDIN': 'LinkedIn Premium',
+    'CALM.COM': 'Calm',
+    'CALM': 'Calm',
+    'HEADSPACE': 'Headspace',
+    'DUOLINGO': 'Duolingo',
+    'NYTIMES': 'NY Times',
+    'NEW YORK TIMES': 'NY Times',
+    'WSJ': 'Wall Street Journal',
+    'WALL STREET': 'Wall Street Journal',
+    '1PASSWORD': '1Password',
+    'NORDVPN': 'NordVPN',
+    'EXPRESSVPN': 'ExpressVPN',
   };
   
   // Check if cleaned name matches a known mapping
   const upperName = name.toUpperCase().trim();
   for (const [key, value] of Object.entries(merchantMappings)) {
-    if (upperName === key || upperName.startsWith(key + ' ')) {
+    // Exact match
+    if (upperName === key) {
+      return value;
+    }
+    // Starts with match
+    if (upperName.startsWith(key + ' ') || upperName.startsWith(key)) {
+      return value;
+    }
+    // Contains match for short distinctive names
+    if (key.length >= 5 && upperName.includes(key)) {
       return value;
     }
   }
