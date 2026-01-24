@@ -16,7 +16,7 @@ interface MerchantChartProps {
 export function MerchantChart({ data }: MerchantChartProps) {
   // Take top 8 merchants
   const chartData = data.slice(0, 8).map(item => ({
-    name: item.name.length > 12 ? item.name.substring(0, 12) + '...' : item.name,
+    name: item.name,
     fullName: item.name,
     amount: item.amount,
     transactions: item.count,
@@ -49,7 +49,7 @@ export function MerchantChart({ data }: MerchantChartProps) {
           <BarChart
             data={chartData}
             layout="vertical"
-            margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+            margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
           >
             <XAxis 
               type="number" 
@@ -63,8 +63,8 @@ export function MerchantChart({ data }: MerchantChartProps) {
               dataKey="name"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#1d1d1f', fontSize: 13 }}
-              width={75}
+              tick={{ fill: '#1d1d1f', fontSize: 12 }}
+              width={160}
             />
             <Tooltip
               formatter={(value: number | undefined) => value ? formatCurrency(value) : ''}
@@ -83,15 +83,6 @@ export function MerchantChart({ data }: MerchantChartProps) {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </div>
-
-      {/* Transaction counts */}
-      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#86868b]">
-        {chartData.slice(0, 5).map((item) => (
-          <span key={item.name}>
-            {item.fullName.length > 10 ? item.fullName.substring(0, 10) + '...' : item.fullName}: {item.transactions} txn{item.transactions !== 1 ? 's' : ''}
-          </span>
-        ))}
       </div>
     </GlassCard>
   );
