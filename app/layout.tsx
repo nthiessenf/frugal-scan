@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AnalysisProvider } from '@/contexts/AnalysisContext';
 
 export const metadata: Metadata = {
   title: "SpendSense",
@@ -26,7 +27,9 @@ export default function RootLayout({
           minHeight: "100vh",
         }}
       >
-        {children}
+        <AnalysisProvider>
+          {children}
+        </AnalysisProvider>
       </body>
     </html>
   );

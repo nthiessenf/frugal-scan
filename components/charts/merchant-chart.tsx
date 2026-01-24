@@ -1,51 +1,98 @@
 'use client';
 
-import { BarChart } from '@tremor/react';
-import { TopMerchant } from '@/types';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { GlassCard } from '@/components/ui/card';
+import { Category } from '@/types';
 
 interface MerchantChartProps {
-  data: TopMerchant[];
+  data: Array<{
+    name: string;
+    amount: number;
+    count: number;
+    category: Category;
+  }>;
 }
 
 export function MerchantChart({ data }: MerchantChartProps) {
-  // Transform data for Tremor - take top 8
+  // Take top 8 merchants
   const chartData = data.slice(0, 8).map(item => ({
-    name: item.name.length > 15 ? item.name.slice(0, 15) + '...' : item.name,
-    'Amount': item.amount,
+    name: item.name.length > 12 ? item.name.substring(0, 12) + '...' : item.name,
+    fullName: item.name,
+    amount: item.amount,
     transactions: item.count,
   }));
 
-  const valueFormatter = (value: number) => 
-    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+
+  // Gradient colors for bars (top to bottom by amount)
+  const getBarColor = (index: number) => {
+    const colors = [
+      '#8b5cf6', // violet
+      '#a78bfa',
+      '#c4b5fd',
+      '#93c5fd', // blue
+      '#a5b4fc',
+      '#c7d2fe',
+      '#ddd6fe',
+      '#e9d5ff',
+    ];
+    return colors[index] || '#c4b5fd';
+  };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl p-6 bg-white/70 backdrop-blur-xl border border-black/[0.08] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_40px_rgba(0,0,0,0.03)]">
+    <GlassCard className="p-6" hover={false}>
       <h3 className="text-lg font-semibold text-[#1d1d1f] mb-4">Top Merchants</h3>
-      
-      <BarChart
-        data={chartData}
-        index="name"
-        categories={['Amount']}
-        colors={['violet']}
-        valueFormatter={valueFormatter}
-        className="h-64"
-        showAnimation={true}
-        layout="vertical"
-        yAxisWidth={100}
-      />
+
+      <div className="h-80">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={chartData}
+            layout="vertical"
+            margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+          >
+            <XAxis 
+              type="number" 
+              tickFormatter={(value) => `$${value}`}
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#6e6e73', fontSize: 12 }}
+            />
+            <YAxis
+              type="category"
+              dataKey="name"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#1d1d1f', fontSize: 13 }}
+              width={75}
+            />
+            <Tooltip
+              formatter={(value: number | undefined) => value ? formatCurrency(value) : ''}
+              contentStyle={{
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                borderRadius: '12px',
+                border: 'none',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+              }}
+              labelStyle={{ fontWeight: 600 }}
+            />
+            <Bar dataKey="amount" radius={[0, 6, 6, 0]}>
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={getBarColor(index)} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
       {/* Transaction counts */}
-      <div className="mt-4 pt-4 border-t border-black/[0.05]">
-        <div className="flex flex-wrap gap-3">
-          {data.slice(0, 5).map(merchant => (
-            <div key={merchant.name} className="text-xs text-[#86868b]">
-              <span className="font-medium text-[#6e6e73]">{merchant.name.split(' ')[0]}</span>
-              {' · '}{merchant.count} txn{merchant.count > 1 ? 's' : ''}
-            </div>
-          ))}
-        </div>
+      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#86868b]">
+        {chartData.slice(0, 5).map((item) => (
+          <span key={item.name}>
+            {item.fullName.length > 10 ? item.fullName.substring(0, 10) + '...' : item.fullName}: {item.transactions} txn{item.transactions !== 1 ? 's' : ''}
+          </span>
+        ))}
       </div>
-    </div>
+    </GlassCard>
   );
 }
-

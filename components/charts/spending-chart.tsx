@@ -1,90 +1,118 @@
 'use client';
 
-import { DonutChart } from '@tremor/react';
-import { CategoryBreakdown } from '@/types';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { GlassCard } from '@/components/ui/card';
+import { Category } from '@/types';
 import { CATEGORIES } from '@/lib/constants';
 
 interface SpendingChartProps {
-  data: CategoryBreakdown[];
+  data: Array<{
+    category: Category;
+    amount: number;
+    percentage: number;
+    transactionCount: number;
+  }>;
   totalSpent: number;
 }
 
+// Direct color mapping
+const COLORS: Record<string, string> = {
+  food_dining: '#f97316',
+  groceries: '#84cc16',
+  shopping: '#8b5cf6',
+  transportation: '#3b82f6',
+  subscriptions: '#ec4899',
+  bills_utilities: '#6366f1',
+  entertainment: '#f43f5e',
+  health_fitness: '#10b981',
+  travel: '#0ea5e9',
+  income: '#22c55e',
+  transfer: '#94a3b8',
+  other: '#64748b',
+};
+
 export function SpendingChart({ data, totalSpent }: SpendingChartProps) {
-  // Transform data for Tremor
+  // Filter and transform data
   const chartData = data
-    .filter(item => item.amount > 0)
+    .filter(item => item.amount > 0 && item.category !== 'income' && item.category !== 'transfer')
     .map(item => {
       const categoryInfo = CATEGORIES.find(c => c.id === item.category);
       return {
         name: categoryInfo?.label || item.category,
         value: item.amount,
-        percentage: item.percentage,
+        percentage: Math.round(item.percentage),
+        category: item.category,
       };
-    });
+    })
+    .sort((a, b) => b.value - a.value);
 
-  // Custom colors matching our design system
-  const colors = data
-    .filter(item => item.amount > 0)
-    .map(item => {
-      const categoryInfo = CATEGORIES.find(c => c.id === item.category);
-      // Map hex colors to Tremor color names (approximate matches)
-      const colorMap: Record<string, string> = {
-        '#f97316': 'orange',
-        '#84cc16': 'lime',
-        '#8b5cf6': 'violet',
-        '#3b82f6': 'blue',
-        '#ec4899': 'pink',
-        '#6366f1': 'indigo',
-        '#f43f5e': 'rose',
-        '#10b981': 'emerald',
-        '#0ea5e9': 'cyan',
-        '#22c55e': 'green',
-        '#94a3b8': 'slate',
-        '#64748b': 'gray',
-      };
-      return colorMap[categoryInfo?.color || '#64748b'] || 'gray';
-    });
-
-  const valueFormatter = (value: number) => 
-    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl p-6 bg-white/70 backdrop-blur-xl border border-black/[0.08] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_40px_rgba(0,0,0,0.03)]">
+    <GlassCard className="p-6" hover={false}>
       <h3 className="text-lg font-semibold text-[#1d1d1f] mb-4">Spending by Category</h3>
-      
-      <div className="flex flex-col items-center">
-        <DonutChart
-          data={chartData}
-          category="value"
-          index="name"
-          valueFormatter={valueFormatter}
-          colors={colors}
-          className="h-52"
-          showAnimation={true}
-        />
+
+      <div className="relative h-64">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={100}
+              paddingAngle={2}
+              dataKey="value"
+            >
+              {chartData.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={COLORS[entry.category] || '#64748b'}
+                  stroke="none"
+                />
+              ))}
+            </Pie>
+            <Tooltip
+              formatter={(value: number | undefined) => value ? formatCurrency(value) : ''}
+              contentStyle={{
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                borderRadius: '12px',
+                border: 'none',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+              }}
+            />
+          </PieChart>
+        </ResponsiveContainer>
         
-        <div className="text-center mt-2">
-          <p className="text-2xl font-bold text-[#1d1d1f]">
-            ${totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </p>
-          <p className="text-sm text-[#86868b]">Total Spent</p>
+        {/* Center label */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="text-center">
+            <p className="text-xl font-bold text-[#1d1d1f]">{formatCurrency(totalSpent)}</p>
+          </div>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="mt-6 grid grid-cols-2 gap-2">
-        {chartData.slice(0, 6).map((item, index) => (
-          <div key={item.name} className="flex items-center gap-2">
-            <div 
-              className="w-3 h-3 rounded-full" 
-              style={{ backgroundColor: CATEGORIES.find(c => c.label === item.name)?.color || '#64748b' }}
-            />
-            <span className="text-xs text-[#6e6e73] truncate">{item.name}</span>
-            <span className="text-xs font-medium text-[#1d1d1f] ml-auto">{item.percentage.toFixed(0)}%</span>
+      <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
+        {chartData.slice(0, 6).map((item) => (
+          <div key={item.name} className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-3 h-3 rounded-full flex-shrink-0"
+                style={{ backgroundColor: COLORS[item.category] || '#64748b' }}
+              />
+              <span className="text-[#6e6e73] truncate">{item.name}</span>
+            </div>
+            <span className="text-[#1d1d1f] font-medium ml-2">{item.percentage}%</span>
           </div>
         ))}
       </div>
-    </div>
+
+      <div className="mt-4 text-center border-t border-black/5 pt-4">
+        <p className="text-2xl font-bold text-[#1d1d1f]">{formatCurrency(totalSpent)}</p>
+        <p className="text-sm text-[#86868b]">Total Spent</p>
+      </div>
+    </GlassCard>
   );
 }
-

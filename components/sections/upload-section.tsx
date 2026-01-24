@@ -3,11 +3,11 @@
 import React from "react";
 import { UploadZone } from "@/components/ui/upload-zone";
 
-export function UploadSection() {
-  const handleFileSelect = (file: File) => {
-    console.log("File selected:", file.name, file.size, "bytes");
-  };
+interface UploadSectionProps {
+  onFileSelect?: (file: File) => void;
+}
 
+export function UploadSection({ onFileSelect }: UploadSectionProps) {
   return (
     <section id="upload" className="py-20 px-5">
       <div className="max-w-2xl mx-auto text-center">
@@ -17,7 +17,12 @@ export function UploadSection() {
         </h2>
 
         {/* Upload Zone */}
-        <UploadZone onFileSelect={handleFileSelect} />
+        <UploadZone 
+          onFileSelect={(file) => {
+            console.log('File selected:', file.name);
+            onFileSelect?.(file);
+          }}
+        />
 
         {/* Privacy Note */}
         <p className="mt-6 text-sm text-[#86868b]">
