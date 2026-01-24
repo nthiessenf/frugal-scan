@@ -251,7 +251,6 @@ export function detectSubscriptions(transactions: CategorizedTransaction[]): Sub
     'playstation': { category: 'gaming' },
     'nintendo': { category: 'gaming' },
     'game pass': { category: 'gaming' },
-    'brightwheel': { category: 'other', minAmount: 100 },
   };
 
   // Explicitly NOT subscriptions (blacklist)
@@ -262,6 +261,10 @@ export function detectSubscriptions(transactions: CategorizedTransaction[]): Sub
     'grubhub', 'houndstooth', 'faherty', 'four seasons', 'toyota', 'insurance',
     'electric', 'water', 'rent', 'mortgage', 'us mobile', 'at&t', 'verizon',
     't-mobile', 'comcast', 'spectrum',
+    // Education & Childcare - not discretionary
+    'brightwheel', 'daycare', 'childcare', 'preschool', 'school', 'tuition',
+    // Other non-discretionary
+    'medical', 'doctor', 'hospital', 'pharmacy', 'cvs', 'walgreens',
   ];
 
   const subscriptions: Subscription[] = [];
@@ -315,7 +318,7 @@ export function detectSubscriptions(transactions: CategorizedTransaction[]): Sub
     }
 
     subscriptions.push({
-      name: mostRecent.merchant,
+      name: cleanMerchantName(mostRecent.description),
       amount: mostRecent.amount,
       frequency: 'monthly',
       lastCharge: mostRecent.date,
