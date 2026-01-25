@@ -35,11 +35,11 @@ export default function ResultsPage() {
     <main className="min-h-screen bg-[#f5f5f7] py-10 px-5">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-[#1d1d1f] md:text-4xl">
+        <div className="mb-6 sm:mb-8 text-center">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#1d1d1f]">
             Your Spending Analysis
           </h1>
-          <p className="mt-2 text-[#6e6e73]">
+          <p className="mt-2 text-sm sm:text-base text-[#6e6e73]">
             Based on {result.summary.transactionCount} transactions
           </p>
         </div>

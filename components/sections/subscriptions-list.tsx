@@ -43,7 +43,7 @@ export function SubscriptionsList({ subscriptions, total }: SubscriptionsListPro
 
   return (
     <GlassCard className="p-6" hover={false}>
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-1 gap-1">
         <div className="flex items-center gap-2">
           <RefreshCw className="w-5 h-5 text-[#8b5cf6]" />
           <h3 className="text-lg font-semibold text-[#1d1d1f]">Subscriptions</h3>

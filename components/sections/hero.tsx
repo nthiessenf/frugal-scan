@@ -20,7 +20,7 @@ export function Hero() {
         </p>
 
         {/* Main Headline */}
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-[-0.03em] text-[#1d1d1f] mb-6">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-[-0.03em] text-[#1d1d1f] mb-6">
           See where your money{" "}
           <span className="bg-gradient-to-r from-[#93c5fd] via-[#c4b5fd] to-[#fbcfe8] bg-clip-text text-transparent">
             really

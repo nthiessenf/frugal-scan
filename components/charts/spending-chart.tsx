@@ -94,7 +94,7 @@ export function SpendingChart({ data, totalSpent }: SpendingChartProps) {
       </div>
 
       {/* Legend */}
-      <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
+      <div className="mt-4 grid grid-cols-2 gap-x-2 gap-y-2 text-xs sm:text-sm">
         {chartData.slice(0, 6).map((item) => (
           <div key={item.name} className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
