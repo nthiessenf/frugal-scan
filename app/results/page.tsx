@@ -78,7 +78,7 @@ export default function ResultsPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+        <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center no-print">
           <Button 
             variant="primary" 
             size="lg"

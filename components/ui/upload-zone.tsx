@@ -89,12 +89,22 @@ export function UploadZone({
         isLoading && "opacity-50 cursor-not-allowed",
         className
       )}
+      role="button"
+      tabIndex={0}
+      aria-label="Upload bank statement PDF"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          fileInputRef.current?.click();
+        }
+      }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       onClick={handleClick}
     >
       <input
+        id="file-upload"
         ref={fileInputRef}
         type="file"
         accept=".pdf"
