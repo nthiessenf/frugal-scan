@@ -1,6 +1,6 @@
 # SpendSense - Claude Project Context
 
-**Last Updated:** January 22, 2025  
+**Last Updated:** January 25, 2025  
 **Project Owner:** Nikolas  
 **Role:** Non-technical Product Manager building with AI assistance
 
@@ -29,12 +29,6 @@ SpendSense is a privacy-first personal finance web app. Users upload bank statem
 - Pain point: Knows money is "leaking" somewhere but can't pinpoint where
 - Technical comfort: Uses apps daily but isn't technical
 
-**What Kate wants:**
-1. Quick answer to "where does my money go?"
-2. Surprising insights she didn't know
-3. Actionable tips (not just data dumps)
-4. No ongoing commitment or account linking
-
 ---
 
 ## 🗺️ Architecture Overview
@@ -45,11 +39,11 @@ SpendSense is a privacy-first personal finance web app. Users upload bank statem
 | Framework | Next.js 14 (App Router) | SSR, API routes, Nikolas's existing knowledge |
 | Styling | Tailwind CSS v3 | Matches design system, NOT v4 |
 | Language | TypeScript | Type safety, better AI code generation |
-| PDF Parsing | Claude API (Anthropic) | Native PDF reading, 99%+ accuracy, context-aware |
+| PDF Parsing | Claude API (Anthropic) | Native PDF reading, 99%+ accuracy |
 | AI Insights | Claude API (Anthropic) | Best at structured extraction and analysis |
-| Charts | Recharts | Simple, works with React |
-| Hosting | Vercel | Easy deployment, Nikolas knows it |
-| Database | None (MVP) → Supabase (v2) | Keep MVP simple |
+| Charts | Recharts | Full control over styling (replaced Tremor) |
+| Hosting | Vercel | Easy deployment |
+| Storage | None (MVP) → localStorage (v1.2) → Supabase (v2) | Progressive complexity |
 
 ### Data Flow
 ```
@@ -57,19 +51,15 @@ User uploads PDF
        ↓
 [/api/parse-statement]
   - Convert PDF to base64
-  - Send to Claude API with structured prompt
+  - Send to Claude API with multi-page parsing instructions
   - Claude returns validated JSON with transactions
-  - Apply validation rules (dates, amounts, types)
-  - Return RawTransaction[] or validation errors
-       ↓
-[Client-side]
-  - Show user transaction list for review
-  - Allow editing/removing incorrect transactions
-  - User confirms data looks correct
+  - Validate: schema, totals cross-check
+  - Return RawTransaction[] with confidence scores
        ↓
 [Client-side categorization]
+  - Clean merchant names (remove junk, codes, locations)
   - Categorize transactions by merchant keywords
-  - Detect recurring subscriptions
+  - Detect recurring subscriptions (whitelist approach)
        ↓
 [/api/analyze]
   - Send categorized transactions to Claude
@@ -77,127 +67,92 @@ User uploads PDF
   - Return full AnalysisResult
        ↓
 [Results Dashboard]
-  - Display charts (category breakdown, top merchants)
+  - Display charts (Recharts pie + bar)
   - Show AI insights
-  - Display detected subscriptions
+  - Display detected subscriptions (top 5 + expand)
   - Offer export/print
 ```
 
-### Key Design Decisions
+### Key Architecture Decisions
 
-1. **No user accounts (MVP):** Validate core value before building auth
+1. **Claude API for PDF parsing** - 99%+ accuracy vs 70-85% with regex. Must use max_tokens: 16000 and explicit multi-page instructions.
 
-2. **Claude API for PDF parsing:** (Updated Jan 22, 2025)
-   - Replaces pdf-parse + regex approach
-   - Better accuracy (99%+ vs 70-85%)
-   - Handles all bank formats automatically
-   - Native PDF reading capability
-   - Simpler codebase to maintain
-   - Cost: ~$0.10 per parse (acceptable for MVP)
+2. **Client-side categorization** - Reduces API costs, faster processing. Uses 200+ merchant keywords.
 
-3. **User review step:** Users can edit transactions before analysis
-   - Catches the ~1% parsing errors
-   - Builds trust through transparency
-   - Allows corrections without re-uploading
+3. **Whitelist for subscriptions** - Only flag known subscription services. More conservative but more accurate.
 
-4. **Client-side categorization:** Reduce API costs, faster processing
-   - Use keyword matching for common merchants
-   - Only use AI for insights, not categorization
+4. **Accuracy over prettiness** - Don't aggressively rename merchants. "Disneystore" stays as-is, not mapped to "Disney+".
 
-5. **PDF-only (no CSV):** Simpler UX, most users have statement PDFs
+5. **Recharts over Tremor** - Tremor had color rendering issues. Recharts gives full control.
 
 ---
 
-## 🛡️ Risk Mitigation Strategy
+## 🛡️ Accuracy Metrics (Current)
 
-### Handling Claude's Probabilistic Nature
-
-While Claude is probabilistic (not deterministic like regex), we mitigate accuracy risks through:
-
-**1. Structured Output Validation**
-- Strict JSON schema enforcement in prompt
-- Post-parse validation of all fields
-- Type checking (dates, amounts, enums)
-- Range checking (amounts must be reasonable)
-
-**2. Cross-Validation**
-- Compare parsed transaction totals with statement totals (when available)
-- Flag discrepancies for user review
-- Validate date ranges match statement period
-
-**3. Confidence Scoring**
-- Claude provides 0-1 confidence score per transaction
-- Flag low-confidence transactions (< 0.8) for user review
-- Higher scrutiny on unusual transactions
-
-**4. User Review Step**
-- Always show users parsed transactions before analysis
-- Allow editing/removing incorrect transactions
-- Users confirm data looks correct before proceeding
-- This catches the ~1% parsing errors
-
-**5. Monitoring & Logging**
-- Log all parsing attempts (success/failure)
-- Track validation error patterns
-- Monitor API costs vs. budget
-- Build regression test suite over time
-
-### Expected Accuracy
-
-Based on similar implementations:
-- **Target:** 99%+ accuracy on standard bank statements
-- **Reality:** ~98-99.5% in practice (better than regex at 70-85%)
-- **Errors:** Usually formatting issues, not wrong data
-- **User catches:** Manual review catches remaining 0.5-1%
-
-### Cost Management
-
-Per-statement costs:
-- Parsing: ~$0.10 (Claude 3.5 Sonnet with PDF)
-- Insights: ~$0.05 (text-only analysis)
-- **Total: ~$0.15 per analysis**
-
-Budget protection:
-- Set rate limits on API endpoint
-- Cache results per PDF (don't re-parse same file)
-- Monitor costs in Anthropic console
-- Add user limits in v2 (max 10 analyses/month free)
+| Metric | Value |
+|--------|-------|
+| Transactions extracted | 196 (from 13-page statement) |
+| Total accuracy | 99.7% ($29 discrepancy on $10,703) |
+| "Other" category | ~15% (target: <15%) |
+| Processing time | 2-3 minutes for large PDFs |
 
 ---
 
-## 📋 Feature Scope
+## 📋 Feature Scope & Roadmap
 
-### MVP (Version 1.0) - Current Focus
+### MVP (Version 1.0) - ✅ COMPLETE
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Landing page with upload | ✅ Complete | Glass cards, hero section |
-| PDF upload & parsing | 🔜 Session 4 | Claude API for parsing |
-| Transaction validation | 🔜 Session 4 | Strict validation rules |
-| User review step | 🔜 Session 8 | Edit transactions before analysis |
-| Transaction categorization | 🔜 Session 5 | 11 categories + "Other" |
-| Subscription detection | 🔜 Session 5 | Recurring charge pattern matching |
-| Spending by category chart | 🔜 Session 7 | Recharts pie chart |
-| Top merchants chart | 🔜 Session 7 | Recharts bar chart |
-| AI-generated insights (5) | 🔜 Session 6 | Claude API integration |
-| Savings tips | 🔜 Session 6 | Claude-generated recommendations |
-| Export as PDF | 🔜 Session 9 | Browser print for MVP |
-| Mobile responsive | 🔜 Session 9 | 375px → 768px → 1440px |
+| PDF upload & parsing | ✅ Complete | Claude API, multi-page support |
+| Transaction validation | ✅ Complete | Schema + totals cross-check |
+| Transaction categorization | ✅ Complete | 200+ merchant keywords |
+| Subscription detection | ✅ Complete | Whitelist approach, discretionary only |
+| Spending by category chart | ✅ Complete | Recharts pie chart |
+| Top 10 merchants chart | ✅ Complete | Recharts bar chart |
+| AI-generated insights (5) | ✅ Complete | Claude API integration |
+| Savings tips | ✅ Complete | Claude-generated recommendations |
+| Processing screen | ✅ Complete | Animated progress bar |
+| Error handling | ✅ Complete | Error messages, retry options |
+| Export as PDF | 📋 Session 9 | Browser print |
+| Mobile responsive | 📋 Session 9 | Final polish |
+| Deploy to Vercel | 📋 Session 9 | Production deployment |
 
-### Future (Version 2.0+) - NOT building now
-- User accounts & history
-- Multi-statement trends
-- Custom category rules
-- Bank account linking (Plaid)
-- Budget creation tools
-- Subscription cancellation links
-- Spending alerts
-- Comparative analytics
+### Version 1.1 - Quick Wins (4-6 hours)
+*Focus: Immediate value, low risk, pure frontend work*
+
+| Feature | Status | Time Est. | Description |
+|---------|--------|-----------|-------------|
+| Merchants by category drill-down | 📋 Session 10 | 2-3 hrs | Click pie chart category → see top merchants in that category |
+| Color-coded bar chart | 📋 Session 11 | 1-2 hrs | Each merchant bar colored by its category |
+| Better AI insights | 📋 Session 12 | 3-4 hrs | Specific, surprising, actionable insights (not obvious observations) |
+
+**Why v1.1 first:** All frontend/prompt work using existing architecture. High user value, low risk. Builds confidence before tackling new patterns.
+
+### Version 1.2 - Personal Finance Features (6-8 hours)
+*Focus: Transform from analysis tool to personal finance companion*
+
+| Feature | Status | Time Est. | Description |
+|---------|--------|-----------|-------------|
+| Budget targets | 📋 Session 13 | 4-6 hrs | Set spending limits per category, see progress bars |
+| Month-over-month trends | 📋 Session 14 | 6-8 hrs | Upload multiple statements, see line charts over time |
+
+**Why v1.2 second:** Introduces localStorage (new skill). Both features use same storage pattern—learn once, apply twice. Dramatically increases stickiness.
+
+### Version 2.0 - Platform Features (15-20+ hours)
+*Focus: Full personal finance platform*
+
+| Feature | Status | Time Est. | Description |
+|---------|--------|-----------|-------------|
+| Multi-account consolidation | 📋 Planned | 10-15 hrs | Upload checking + credit card → unified view |
+| User accounts (Supabase) | 📋 Planned | 8-10 hrs | Persist data, enable history |
+| Historical data persistence | 📋 Planned | 4-6 hrs | Save and retrieve past analyses |
+
+**Why v2.0 last:** Requires database infrastructure. Complex edge cases (deduplication). Better to validate product-market fit first.
 
 ---
 
 ## 🎨 Design System Summary
-
-Nikolas has a comprehensive design system (see DESIGN_SYSTEM.md). Key points:
 
 ### Philosophy: "Radical Minimalism"
 - Inspired by Apple, Linear, Swiss design
@@ -205,7 +160,7 @@ Nikolas has a comprehensive design system (see DESIGN_SYSTEM.md). Key points:
 - Whitespace is intentional
 - Subtle micro-interactions
 
-### Colors (EXACT values required)
+### Colors (EXACT values)
 ```
 Background: #f5f5f7
 Primary Text: #1d1d1f
@@ -224,174 +179,52 @@ backdrop-filter: blur(20px) saturate(180%);
 border-radius: 24px;
 ```
 
-### Standard Hover
-```css
-transform: translateY(-8px) scale(1.02);
-transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-```
-
 ---
 
-## 📂 File Structure
+## 📂 Current File Structure
 ```
 spendsense/
 ├── app/
 │   ├── globals.css
-│   ├── layout.tsx
-│   ├── page.tsx                 # Landing
-│   ├── results/page.tsx         # Dashboard
+│   ├── layout.tsx (with AnalysisProvider)
+│   ├── page.tsx (integrated upload flow)
+│   ├── results/page.tsx (real data from context)
 │   └── api/
 │       ├── parse-statement/route.ts
 │       └── analyze/route.ts
 ├── components/
-│   ├── ui/                      # button, card, upload-zone
-│   ├── charts/                  # spending-pie, spending-bar
-│   └── sections/                # hero, insights-grid, subscriptions
+│   ├── ui/ (button, card, upload-zone, error-message)
+│   ├── charts/ (spending-chart, merchant-chart - Recharts)
+│   └── sections/ (hero, how-it-works, upload-section, processing-screen, summary-header, insights-grid, subscriptions-list, tips-section)
+├── contexts/
+│   └── AnalysisContext.tsx
 ├── lib/
-│   ├── utils.ts                 # cn() helper
-│   ├── parse-with-claude.ts     # Claude PDF parsing
-│   ├── validate-transactions.ts # Validation rules
-│   ├── categorize.ts            # Transaction categorization
-│   └── claude.ts                # Insights generation
+│   ├── utils.ts
+│   ├── constants.ts (200+ merchant keywords)
+│   ├── parse-with-claude.ts (multi-page parsing)
+│   ├── validate-transactions.ts
+│   ├── categorize.ts (improved cleaning)
+│   ├── analysis.ts
+│   ├── claude-insights.ts
+│   └── hooks/useAnalysis.ts
 ├── types/index.ts
-├── .cursorrules
-├── .env.local
-└── DESIGN_SYSTEM.md
+└── .env.local
 ```
 
 ---
 
-## 📐 TypeScript Interfaces
-```typescript
-// Raw transaction from PDF parsing
-interface RawTransaction {
-  date: string;           // ISO format: YYYY-MM-DD
-  description: string;
-  amount: number;         // Always positive
-  type: 'debit' | 'credit';
-}
+## 🔑 Key Decisions Log
 
-// Enhanced with confidence score
-interface ParsedTransaction extends RawTransaction {
-  confidence?: number;    // 0-1 score from Claude
-}
-
-// Validation result
-interface ValidationResult {
-  valid: boolean;
-  errors: string[];       // Blocking issues
-  warnings: string[];     // Suspicious but not blocking
-  transactionCount: number;
-}
-
-// After categorization
-interface CategorizedTransaction extends RawTransaction {
-  category: Category;
-  merchant: string;       // Cleaned merchant name
-}
-
-// Spending categories
-type Category = 
-  | 'food_dining'
-  | 'shopping'
-  | 'transportation'
-  | 'subscriptions'
-  | 'bills_utilities'
-  | 'entertainment'
-  | 'health_fitness'
-  | 'travel'
-  | 'income'
-  | 'transfer'
-  | 'other';
-
-// Detected subscription
-interface Subscription {
-  name: string;
-  amount: number;
-  frequency: 'monthly' | 'yearly' | 'weekly';
-  lastCharge: string;
-  category: 'streaming' | 'software' | 'fitness' | 'news' | 'other';
-}
-
-// AI-generated insight
-interface Insight {
-  title: string;
-  description: string;
-  severity: 'info' | 'warning' | 'positive';
-}
-
-// Savings recommendation
-interface SavingsTip {
-  title: string;
-  description: string;
-  potentialSavings: number;
-  difficulty: 'easy' | 'medium' | 'hard';
-}
-
-// Spending summary
-interface SpendingSummary {
-  totalSpent: number;
-  totalIncome: number;
-  netCashFlow: number;
-  transactionCount: number;
-  averageTransaction: number;
-  topCategory: Category;
-  subscriptionTotal: number;
-}
-
-// Full analysis result
-interface AnalysisResult {
-  summary: SpendingSummary;
-  categoryBreakdown: Array<{
-    category: Category;
-    amount: number;
-    percentage: number;
-    transactionCount: number;
-  }>;
-  topMerchants: Array<{
-    name: string;
-    amount: number;
-    count: number;
-    category: Category;
-  }>;
-  subscriptions: Subscription[];
-  insights: Insight[];
-  tips: SavingsTip[];
-}
-```
-
----
-
-## 🚦 Build Progress Tracker
-
-Update this section after each Cursor session:
-
-| Session | Task | Status | Notes |
-|---------|------|--------|-------|
-| 1 | Project Scaffolding | ✅ Complete | Next.js setup, design system |
-| 2 | Core UI Components | ✅ Complete | Button, Card, UploadZone |
-| 3 | Landing Page | ✅ Complete | Hero, How it Works, Upload section |
-| 4 | PDF Parsing with Claude | 🔜 Next | Rewritten for Claude API |
-| 5 | Transaction Categorization | 🔲 Not Started | |
-| 6 | Claude Insights Generation | 🔲 Not Started | Simplified (only insights) |
-| 7 | Results Dashboard | 🔲 Not Started | |
-| 8 | Connect Everything | 🔲 Not Started | Add user review step |
-| 9 | Polish & Deploy | 🔲 Not Started | |
-
-**Status Key:** 🔲 Not Started | 🟡 In Progress | ✅ Complete | ❌ Blocked
-
----
-
-## 🛠️ Known Issues & Decisions Log
-
-Track problems encountered and decisions made:
-
-| Date | Issue/Decision | Resolution |
-|------|----------------|------------|
-| Jan 21, 2025 | Project initiated | Starting with MVP scope |
-| Jan 21, 2025 | pdf-parse webpack conflicts | Tried multiple import approaches, all failed |
-| Jan 22, 2025 | **Architecture pivot** | Switched to Claude API for PDF parsing |
-| Jan 22, 2025 | Probabilistic nature concerns | Implemented 5-point risk mitigation strategy |
+| Date | Decision | Rationale |
+|------|----------|-----------|
+| Jan 22 | Claude API for PDF parsing | 99%+ accuracy vs 70-85% with regex |
+| Jan 24 | max_tokens: 16000 | Large statements need room for all transactions |
+| Jan 24 | Recharts over Tremor | Tremor had color rendering bugs |
+| Jan 24 | Whitelist for subscriptions | Pattern detection had too many false positives |
+| Jan 24 | Accuracy over prettiness | Don't rename merchants aggressively (Disney Store ≠ Disney+) |
+| Jan 24 | Subscriptions = discretionary | Phone bills, insurance, daycare are bills, not subscriptions |
+| Jan 25 | v1.1 before v1.2 | Frontend-only changes build confidence before localStorage |
+| Jan 25 | localStorage before Supabase | Progressive complexity; validate before adding infrastructure |
 
 ---
 
@@ -408,14 +241,8 @@ Track problems encountered and decisions made:
 2. **Plain language explanations:** Explain the "why" simply
 3. **Proactive warnings:** Anticipate errors before they happen
 4. **Simple first:** Propose minimal version, then offer enhancements
-5. **Celebrate wins:** He's learning—acknowledge progress
-6. **Challenge assumptions:** Recommend better solutions when appropriate
-
-### What NOT to Do
-- Don't write code directly (Cursor's job)
-- Don't assume he knows file structures
-- Don't leave steps ambiguous
-- Don't suggest complex changes without explaining trade-offs
+5. **Challenge assumptions:** Recommend better solutions when appropriate
+6. **Learning moments:** After each session, explain what was built and why
 
 ### Response Pattern
 ```
@@ -427,57 +254,48 @@ Track problems encountered and decisions made:
 
 ---
 
-## 🔑 Environment Variables
+## 🔧 Environment Variables
 ```env
-# Required for MVP
+# Required
 ANTHROPIC_API_KEY=sk-ant-api03-...
-
-# Future (not needed yet)
-# SUPABASE_URL=
-# SUPABASE_ANON_KEY=
 ```
 
 ---
 
-## 📚 Reference Documents
+## 🚀 Next Steps
 
-These files should be uploaded to Claude Projects:
+### Immediate (Session 9)
+1. **SEO & Metadata** - Title, description, Open Graph
+2. **Error pages** - Custom 404, error boundaries
+3. **Accessibility** - aria labels, keyboard navigation
+4. **Mobile optimization** - Final check at 375px
+5. **Deploy to Vercel** - Get it live!
 
-1. **DESIGN_SYSTEM.md** - Complete design reference
-2. **QUICK_REFERENCE.md** - Copy-paste code snippets
-3. **AI_INSTRUCTIONS.md** - How AI should work with Nikolas's style
-4. **CLAUDE_PROJECT_CONTEXT.md** - This file
-5. **IMPLEMENTATION_PLAN.md** - Detailed build steps
-6. **SESSION_LOG.md** - Progress tracker
-7. **.cursorrules** - Cursor-specific rules
+### Then (v1.1 - Sessions 10-12)
+1. **Merchants by category** - Click to drill down
+2. **Color-coded bar chart** - Visual category connection
+3. **Better AI insights** - Specific, surprising, actionable
 
----
-
-## 🚀 Quick Start for New Session
-
-When Nikolas starts a new Claude conversation about SpendSense:
-
-1. **Check build progress** (Session tracker above)
-2. **Identify current session** to work on (Session 4 is next)
-3. **Reference the specific prompt** from IMPLEMENTATION_PLAN.md
-4. **Verify prerequisites** from previous sessions
-5. **Provide the prompt** with any session-specific context
-
-**Example opening:**
-> "Last time we completed Session 3 (Landing Page). We've pivoted to Claude API for PDF parsing. Ready to start Session 4. Here's the prompt for Cursor..."
+### Later (v1.2 - Sessions 13-14)
+1. **Budget targets** - Set limits, track progress
+2. **Month-over-month trends** - Multi-statement comparison
 
 ---
 
-## 📞 Escalation Paths
+## 📞 Quick Commands
 
-If Cursor can't solve something:
+```bash
+# Start development
+npm run dev
 
-1. **Styling issues:** Check DESIGN_SYSTEM.md, verify exact colors
-2. **Build errors:** `rm -rf .next && npm run dev`
-3. **TypeScript errors:** Check types/index.ts matches usage
-4. **API failures:** Check .env.local has correct ANTHROPIC_API_KEY
-5. **Claude API errors:** Check Anthropic console for quota/billing
-6. **Parsing issues:** Log raw Claude response, adjust prompt structure
+# Clear cache
+rm -rf .next && npm run dev
+
+# Commit progress
+git add .
+git commit -m "description"
+git push
+```
 
 ---
 

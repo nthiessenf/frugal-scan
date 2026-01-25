@@ -4,6 +4,54 @@
 
 ---
 
+## Session 9 Planning: January 25, 2025
+
+### 📋 Roadmap Planning Session
+
+**What happened:** Reviewed MVP completion and planned post-launch roadmap based on identified limitations and opportunities.
+
+**Features Evaluated:**
+
+| Feature | User Value | Tech Complexity | Skill Fit | Decision |
+|---------|-----------|-----------------|-----------|----------|
+| Merchants by category drill-down | 🟢 High | 🟢 Low | 🟢 Perfect | **v1.1** |
+| Color-coded bar chart | 🟡 Medium | 🟢 Low | 🟢 Perfect | **v1.1** |
+| Better AI insights | 🟢 High | 🟡 Medium | 🟢 Good | **v1.1** |
+| Budget targets | 🟢 High | 🟡 Medium | 🟡 Stretch | **v1.2** |
+| Month-over-month trends | 🟢 High | 🟡 Medium | 🟡 Stretch | **v1.2** |
+| Multi-account consolidation | 🟢 High | 🔴 High | 🔴 Complex | **v2.0** |
+
+**Roadmap Structure:**
+
+1. **v1.1 (Quick Wins)** - 4-6 hours total
+   - All frontend/prompt work
+   - No new storage patterns
+   - Sessions 10-12
+
+2. **v1.2 (Personal Finance)** - 6-8 hours total
+   - Introduces localStorage
+   - Both features use same pattern
+   - Sessions 13-14
+
+3. **v2.0 (Platform)** - 15-20+ hours total
+   - Requires Supabase
+   - Complex edge cases
+   - Sessions 15+
+
+**Key Insight:** Prioritize v1.1 features because they're pure frontend work using existing architecture. This builds confidence before tackling localStorage (new skill) in v1.2.
+
+**Documentation Updated:**
+- IMPLEMENTATION_PLAN.md - Added Sessions 10-14 with detailed prompts for v1.1
+- CLAUDE_PROJECT_CONTEXT.md - Updated roadmap section with full feature breakdown
+- SESSION_LOG.md - Added this planning session
+
+### 🔜 Next Steps
+
+1. Complete Session 9 (Polish & Deploy)
+2. Start Session 10 (Merchants by Category Drill-Down)
+
+---
+
 ## Session 8: January 24, 2025
 
 ### ✅ What Was Completed
@@ -123,16 +171,6 @@ SpendSense/
 | Pages scanned | 1 | 13 |
 | "Other" category | ~50% | ~15% |
 
-### 📝 Next Steps (Session 9: Polish & Deploy)
-
-1. **SEO & Metadata** - Title, description, Open Graph
-2. **Error pages** - Custom 404, error boundaries
-3. **Loading states** - App-wide loading component
-4. **Accessibility** - aria labels, keyboard navigation
-5. **Mobile optimization** - Final check at 375px
-6. **Performance** - Lazy loading, optimizations
-7. **Deploy to Vercel** - Get it live!
-
 ### 🔧 Commands to Remember
 ```bash
 # Start development
@@ -153,7 +191,7 @@ git push
 
 2. **Merchant name edge cases** - Some names still have minor junk. Could continue refining cleanMerchantName() patterns.
 
-3. **No data persistence** - Results are lost on page refresh. Future: Add user accounts with Supabase.
+3. **No data persistence** - Results are lost on page refresh. Future: Add localStorage (v1.2) then user accounts (v2.0).
 
 4. **No user review step** - Originally planned to let users edit transactions before analysis. Deferred to v2.
 
@@ -208,4 +246,4 @@ git push
 
 ---
 
-*Last updated: January 24, 2025*
+*Last updated: January 25, 2025*
