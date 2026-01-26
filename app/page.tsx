@@ -32,9 +32,21 @@ export default function Home() {
     router.push('/results');
   };
 
+  // Map status to stage for ProcessingScreen
+  const getStage = (): 'uploading' | 'parsing' | 'analyzing' | 'complete' => {
+    switch (status) {
+      case 'uploading': return 'uploading';
+      case 'parsing': 
+      case 'categorizing': return 'parsing';
+      case 'analyzing': return 'analyzing';
+      case 'complete': return 'complete';
+      default: return 'parsing';
+    }
+  };
+
   // Show processing screen during analysis
   if (status !== 'idle' && status !== 'error' && status !== 'complete') {
-    return <ProcessingScreen status={status} progress={progress} />;
+    return <ProcessingScreen stage={getStage()} />;
   }
 
   // Show error screen
