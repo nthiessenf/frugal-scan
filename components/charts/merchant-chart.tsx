@@ -26,9 +26,6 @@ export function MerchantChart({ data, title = 'Top 10 Merchants' }: MerchantChar
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 
-  // Dynamic bar thickness: thicker bars when there are fewer items
-  const barThickness = chartData.length <= 3 ? 40 : chartData.length <= 5 ? 32 : 24;
-
   // Gradient colors for bars (top to bottom by amount)
   const getBarColor = (index: number) => {
     const colors = [
@@ -50,13 +47,13 @@ export function MerchantChart({ data, title = 'Top 10 Merchants' }: MerchantChar
     <GlassCard className="p-6" hover={false}>
       <h3 className="text-lg font-semibold text-[#1d1d1f] mb-4">{title}</h3>
 
-      <div className="h-64">
+      <div className="h-[280px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
             layout="vertical"
-            margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
-            barSize={barThickness}
+            margin={{ top: 0, right: 30, left: 10, bottom: 0 }}
+            barCategoryGap="15%"
           >
             <XAxis 
               type="number" 

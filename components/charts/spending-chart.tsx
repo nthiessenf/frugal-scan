@@ -62,7 +62,7 @@ export function SpendingChart({ data, totalSpent, onCategoryClick, title = 'Spen
     <GlassCard className="p-6" hover={false}>
       <h3 className="text-lg font-semibold text-[#1d1d1f] mb-4">{title}</h3>
 
-      <div className="relative h-64">
+      <div className="relative h-56">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -105,7 +105,7 @@ export function SpendingChart({ data, totalSpent, onCategoryClick, title = 'Spen
       </div>
 
       {/* Legend */}
-      <div className="mt-4 grid grid-cols-2 gap-x-2 gap-y-2 text-xs sm:text-sm">
+      <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-2 text-xs sm:text-sm">
         {chartData.slice(0, 6).map((item) => (
           <div 
             key={item.name} 
@@ -122,11 +122,6 @@ export function SpendingChart({ data, totalSpent, onCategoryClick, title = 'Spen
             <span className="text-[#1d1d1f] font-medium ml-2">{Math.round(item.percentage)}%</span>
           </div>
         ))}
-      </div>
-
-      <div className="mt-4 text-center border-t border-black/5 pt-4">
-        <p className="text-2xl font-bold text-[#1d1d1f]">{formatCurrency(totalSpent)}</p>
-        <p className="text-sm text-[#86868b]">Total Spent</p>
       </div>
     </GlassCard>
   );
