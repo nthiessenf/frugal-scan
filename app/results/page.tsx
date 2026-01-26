@@ -25,17 +25,19 @@ export default function ResultsPage() {
     if (!result) return [];
     
     // Find the category ID from the label
+    // categoryName is the LABEL (e.g., "Food & Dining") 
+    // but transactions use the ID (e.g., "food_dining")
     const categoryInfo = CATEGORIES.find(c => c.label === categoryName);
-    if (!categoryInfo) return [];
+    const categoryId = categoryInfo?.id || categoryName;
     
     // Filter transactions by category ID
     const categoryTransactions = (result as any).transactions?.filter(
-      (t: any) => t.category === categoryInfo.id
+      (t: any) => t.category === categoryId
     ) || [];
     
     // Group by merchant and sum amounts
     const merchantTotals = categoryTransactions.reduce((acc: Record<string, number>, t: any) => {
-      const merchant = t.merchant || t.description;
+      const merchant = t.cleanedName || t.description;
       acc[merchant] = (acc[merchant] || 0) + Math.abs(t.amount);
       return acc;
     }, {} as Record<string, number>);
