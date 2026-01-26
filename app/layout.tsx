@@ -3,19 +3,19 @@ import "./globals.css";
 import { AnalysisProvider } from '@/contexts/AnalysisContext';
 
 export const metadata: Metadata = {
-  title: 'SpendSense - AI-Powered Spending Insights',
+  title: 'FrugalScan - AI-Powered Spending Insights',
   description: 'Upload your bank statement and get instant AI-powered insights into your spending habits. Free, private, no account linking required.',
-  keywords: ['spending tracker', 'budget analysis', 'personal finance', 'AI finance', 'bank statement analyzer'],
-  authors: [{ name: 'SpendSense' }],
+  keywords: ['spending tracker', 'budget analysis', 'personal finance', 'AI finance', 'bank statement analyzer', 'frugal', 'frugalscan'],
+  authors: [{ name: 'FrugalScan' }],
   openGraph: {
-    title: 'SpendSense - See Where Your Money Really Goes',
+    title: 'FrugalScan - See Where Your Money Really Goes',
     description: 'Upload your bank statement and get AI-powered spending insights in 60 seconds.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SpendSense - AI Spending Insights',
+    title: 'FrugalScan - AI Spending Insights',
     description: 'Upload your bank statement and get AI-powered spending insights in 60 seconds.',
   },
 };
