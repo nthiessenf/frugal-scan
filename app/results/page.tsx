@@ -24,16 +24,27 @@ export default function ResultsPage() {
   const getMerchantsForCategory = (categoryName: string) => {
     if (!result) return [];
     
+    // DEBUG: Log what we're looking for
+    console.log('=== FILTER DEBUG ===');
+    console.log('Looking for category label:', categoryName);
+    
     // Find the category ID from the label
-    // categoryName is the LABEL (e.g., "Food & Dining") 
-    // but transactions use the ID (e.g., "food_dining")
     const categoryInfo = CATEGORIES.find(c => c.label === categoryName);
+    console.log('Found category info:', categoryInfo);
+    
     const categoryId = categoryInfo?.id || categoryName;
+    console.log('Using category ID:', categoryId);
+    
+    // DEBUG: Log what categories exist in transactions
+    const uniqueCategories = [...new Set((result as any).transactions?.map((t: any) => t.category) || [])];
+    console.log('Categories in transactions:', uniqueCategories);
     
     // Filter transactions by category ID
     const categoryTransactions = (result as any).transactions?.filter(
       (t: any) => t.category === categoryId
     ) || [];
+    console.log('Matching transactions found:', categoryTransactions.length);
+    console.log('===================');
     
     // Group by merchant and sum amounts
     const merchantTotals = categoryTransactions.reduce((acc: Record<string, number>, t: any) => {
