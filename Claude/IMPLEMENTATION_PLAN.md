@@ -29,7 +29,7 @@
 
 | Session | Task | Status | Time Est. |
 |---------|------|--------|-----------|
-| 10 | Merchants by Category Drill-Down | 📋 Next | 2-3 hrs |
+| 10 | Merchants by Category Drill-Down | ✅ Complete | 2-3 hrs (actual: ~4-5 hrs) |
 | 11 | Color-Coded Bar Chart by Category | 📋 Planned | 1-2 hrs |
 | 12 | Better AI Insights | 📋 Planned | 3-4 hrs |
 
@@ -62,13 +62,20 @@
 
 ---
 
-## Session 10: Merchants by Category Drill-Down
+## Session 10: Merchants by Category Drill-Down ✅ COMPLETE
 
 **Goal:** Click a category in the pie chart → see top merchants in that category
 
-**Time estimate:** 2-3 hours
+**Time estimate:** 2-3 hours  
+**Actual time:** ~4-5 hours (expanded to include mock data system, Haiku migration, loading UX overhaul)
 
 **Prerequisites:** Session 9 complete (MVP deployed)
+
+**Note:** Session 10 expanded beyond the original scope to include:
+- Mock data system for instant dev testing
+- Claude Haiku migration (60% faster parsing)
+- Multi-mode animated loading screen
+- Production bug fixes
 
 **New skills you'll learn:**
 - React state for view switching

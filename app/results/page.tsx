@@ -17,18 +17,6 @@ export default function ResultsPage() {
   const router = useRouter();
   const { result, clearAll } = useAnalysisContext();
 
-  // DEBUG: Log what's in result
-  useEffect(() => {
-    if (result) {
-      console.log('=== RESULT DEBUG ===');
-      console.log('result keys:', Object.keys(result));
-      console.log('result.transactions:', (result as any).transactions);
-      console.log('result.transactions length:', (result as any).transactions?.length);
-      console.log('result.categoryBreakdown:', result.categoryBreakdown);
-      console.log('====================');
-    }
-  }, [result]);
-
   // Category drill-down state
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -36,27 +24,16 @@ export default function ResultsPage() {
   const getMerchantsForCategory = (categoryName: string) => {
     if (!result) return [];
     
-    // DEBUG: Log what we're looking for
-    console.log('=== FILTER DEBUG ===');
-    console.log('Looking for category label:', categoryName);
-    
     // Find the category ID from the label
+    // categoryName is the LABEL (e.g., "Food & Dining") 
+    // but transactions use the ID (e.g., "food_dining")
     const categoryInfo = CATEGORIES.find(c => c.label === categoryName);
-    console.log('Found category info:', categoryInfo);
-    
     const categoryId = categoryInfo?.id || categoryName;
-    console.log('Using category ID:', categoryId);
-    
-    // DEBUG: Log what categories exist in transactions
-    const uniqueCategories = [...new Set((result as any).transactions?.map((t: any) => t.category) || [])];
-    console.log('Categories in transactions:', uniqueCategories);
     
     // Filter transactions by category ID
     const categoryTransactions = (result as any).transactions?.filter(
       (t: any) => t.category === categoryId
     ) || [];
-    console.log('Matching transactions found:', categoryTransactions.length);
-    console.log('===================');
     
     // Group by merchant and sum amounts
     const merchantTotals = categoryTransactions.reduce((acc: Record<string, number>, t: any) => {

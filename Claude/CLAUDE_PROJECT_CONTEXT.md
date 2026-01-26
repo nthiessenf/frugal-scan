@@ -1,6 +1,6 @@
 # FrugalScan - Claude Project Context
 
-**Last Updated:** January 25, 2025  
+**Last Updated:** January 26, 2025  
 **Project Owner:** Nikolas  
 **Role:** Non-technical Product Manager building with AI assistance  
 **Live URL:** [frugalscan.com](https://frugalscan.com)
@@ -40,8 +40,8 @@ FrugalScan is a privacy-first personal finance web app. Users upload bank statem
 | Framework | Next.js 14 (App Router) | SSR, API routes, Nikolas's existing knowledge |
 | Styling | Tailwind CSS v3 | Matches design system, NOT v4 |
 | Language | TypeScript | Type safety, better AI code generation |
-| PDF Parsing | Claude API (Anthropic) | Native PDF reading, 99%+ accuracy |
-| AI Insights | Claude API (Anthropic) | Best at structured extraction and analysis |
+| PDF Parsing | Claude Haiku API (Anthropic) | Native PDF reading, 99%+ accuracy, ~$0.02 per analysis |
+| AI Insights | Claude Sonnet API (Anthropic) | Best at structured extraction and analysis, ~$0.05 per analysis |
 | Charts | Recharts | Full control over styling (replaced Tremor) |
 | Hosting | Vercel | Easy deployment |
 | Storage | None (MVP) → localStorage (v1.2) → Supabase (v2) | Progressive complexity |
@@ -95,7 +95,7 @@ User uploads PDF
 | Transactions extracted | 196 (from 13-page statement) |
 | Total accuracy | 99.7% ($29 discrepancy on $10,703) |
 | "Other" category | ~15% (target: <15%) |
-| Processing time | 2-3 minutes for large PDFs |
+| Processing time | 77 seconds for large PDFs (down from 192s with Haiku) |
 
 ---
 
@@ -119,12 +119,19 @@ User uploads PDF
 | Mobile responsive | ✅ Complete | Tested at 375px |
 | Deploy to Vercel | ✅ Complete | Live at frugalscan.com |
 
+**Latest Updates (Session 10 - January 26, 2025):**
+- Category drill-down filter implemented (click category → see merchants)
+- Mock data system for instant dev testing
+- PDF parsing switched to Claude Haiku (60% faster: 192s → 77s)
+- Multi-mode animated loading screen
+- Production bug fixed: transactions now included in AnalysisResult
+
 ### Version 1.1 - Quick Wins (4-6 hours)
 *Focus: Immediate value, low risk, pure frontend work*
 
 | Feature | Status | Time Est. | Description |
 |---------|--------|-----------|-------------|
-| Merchants by category drill-down | 📋 Session 10 | 2-3 hrs | Click pie chart category → see top merchants in that category |
+| Merchants by category drill-down | ✅ Session 10 Complete | 2-3 hrs | Click pie chart category → see top merchants in that category |
 | Color-coded bar chart | 📋 Session 11 | 1-2 hrs | Each merchant bar colored by its category |
 | Better AI insights | 📋 Session 12 | 3-4 hrs | Specific, surprising, actionable insights (not obvious observations) |
 
@@ -230,6 +237,7 @@ frugalscan/
 | Jan 25 | v1.1 before v1.2 | Frontend-only changes build confidence before localStorage |
 | Jan 25 | localStorage before Supabase | Progressive complexity; validate before adding infrastructure |
 | Jan 25 | Renamed to FrugalScan | Better brand name, secured frugalscan.com domain |
+| Jan 26 | Claude Haiku for PDF parsing | 60% faster (192s → 77s), 80% cheaper, same accuracy |
 
 ---
 
@@ -269,8 +277,8 @@ ANTHROPIC_API_KEY=sk-ant-api03-...
 
 ## 🚀 Next Steps
 
-### Immediate (Session 10)
-1. **Merchants by category drill-down** - Click to see top merchants per category
+### Immediate (Session 11)
+1. **Color-coded bar chart** - Visual category connection
 
 ### Then (v1.1 - Sessions 11-12)
 2. **Color-coded bar chart** - Visual category connection

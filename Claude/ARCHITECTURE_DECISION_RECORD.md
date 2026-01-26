@@ -1,5 +1,45 @@
 # Architecture Decision Record
 
+## Decision: Use Claude Haiku for PDF Parsing
+
+**Date:** January 26, 2025  
+**Status:** ✅ Accepted  
+**Deciders:** Nikolas (Product), Claude (Technical Advisor)
+
+---
+
+### Context
+
+PDF parsing with Claude Sonnet was taking 192 seconds for a 13-page statement. This created a poor user experience and made development iteration slow.
+
+### Decision
+
+Switch PDF parsing from Claude Sonnet to Claude Haiku while keeping insights generation on Sonnet.
+
+### Rationale
+
+- **Haiku is 3-5x faster** for structured extraction tasks
+- **10x cheaper** ($0.25 vs $3 per million input tokens)
+- **Accuracy maintained** - transaction extraction is structured, not creative
+- **Insights stay on Sonnet** - reasoning benefits from larger model
+
+### Results
+
+| Metric | Sonnet | Haiku | Improvement |
+|--------|--------|-------|-------------|
+| Parse time | 192s | 77s | 60% faster |
+| Parse cost | ~$0.10 | ~$0.02 | 80% cheaper |
+| Accuracy | 99.7% | 99.7% | No change |
+
+### Consequences
+
+✅ Much faster user experience
+✅ Lower API costs
+✅ Same accuracy for structured extraction
+⚠️ If accuracy issues appear, can revert to Sonnet
+
+---
+
 ## Decision: Use Claude API for PDF Parsing
 
 **Date:** January 22, 2025  

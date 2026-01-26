@@ -4,6 +4,118 @@
 
 ---
 
+## Session 10: January 26, 2025
+
+### ✅ What Was Completed
+
+**Category Drill-Down Filter**
+- Click any pie chart category to filter the entire dashboard
+- Filter banner shows active filter with "Showing: [Category] ✕" 
+- Pie chart transforms to show merchants within selected category
+- Bar chart filters to show only merchants from selected category
+- Click ✕ or clear to return to full view
+
+**Mock Data System**
+- Created `lib/mock-data.ts` with 40+ realistic transactions
+- "⚡ Load Mock Data (Dev Only)" button on homepage (dev only)
+- Enables instant testing without 160-second API waits
+- Realistic data across all categories for demos
+
+**Performance: Claude Haiku Migration**
+- Switched PDF parsing from Claude Sonnet to Claude Haiku
+- Result: 192s → 77s (60% faster)
+- Added timing diagnostics to API routes
+- Insights generation remains on Sonnet for quality
+
+**Loading UX Overhaul**
+- Created multi-mode animated processing screen
+- 4 animation modes rotating every 10 seconds:
+  1. Document scanning (abstract lines being read)
+  2. Category sorting (icons lighting up)
+  3. Chart building (bars growing)
+  4. Generating insights (cards highlighting)
+- Removed fake progress bar in favor of honest time estimate
+- "Usually takes 60-90 seconds" messaging
+
+**Chart Sizing Polish**
+- Fixed pie chart excess whitespace (h-96 → h-56)
+- Removed duplicate "Total Spent" display
+- Balanced bar chart height with pie chart
+- Tightened margins throughout
+
+**Bug Fixes**
+- Fixed category filter not working in production
+- Root cause: `result.transactions` was not included in AnalysisResult
+- Fixed by adding transactions to analyze API response
+- Fixed TypeScript build errors for production deployment
+
+### 🔑 Key Decisions Made
+
+1. **Filter mode over detail view** - Instead of replacing pie chart with a different component, we filter both charts in place. Better UX - same mental model, easy comparison.
+
+2. **Abstract loading animation** - No fake transaction data shown (privacy anxiety). Abstract shapes represent document scanning without revealing sensitive-looking info.
+
+3. **Haiku for parsing, Sonnet for insights** - Parsing is structured extraction (Haiku excels). Insights need reasoning (Sonnet better). Best of both worlds.
+
+4. **Honest time estimate over fake progress** - Users prefer knowing "60-90 seconds" over watching a fake progress bar that lies.
+
+### 📊 Performance Metrics
+
+| Metric | Before | After |
+|--------|--------|-------|
+| PDF parsing time | 192s | 77s |
+| Total analysis time | ~210s | ~95s |
+| Dev testing time | 160s+ | <1s (mock) |
+
+### 🐛 Bugs Encountered & Fixed
+
+1. **ProcessingScreen props mismatch** - Component interface changed but page still passed old props. Fixed by updating page to use new `stage` prop.
+
+2. **Category filter showing $0.00** - `result.transactions` was undefined in production. Root cause: transactions weren't included in AnalysisResult from API. Fixed by adding to response.
+
+3. **Build passes locally, fails on Vercel** - Dev mode is lenient with TypeScript errors. `npm run build` is strict. Lesson: always run `npm run build` before pushing.
+
+### 🧪 Testing Notes
+
+- Created demo PDF matching mock data for consistent testing
+- Debug logging pattern: add console.logs, deploy, check browser console, remove logs
+- Filter works with both mock data and real PDF uploads
+
+### 📁 Files Created/Modified
+
+**Created:**
+- `lib/mock-data.ts` - Mock transaction data and analysis result
+- `components/ui/filter-banner.tsx` - Filter indicator component
+
+**Modified:**
+- `app/results/page.tsx` - Added filter state, helper functions, conditional rendering
+- `components/charts/spending-chart.tsx` - Added onCategoryClick, title prop, custom colors
+- `components/charts/merchant-chart.tsx` - Added title prop, fixed sizing
+- `components/sections/processing-screen.tsx` - Complete rewrite with multi-mode animation
+- `app/page.tsx` - Added mock data button, updated ProcessingScreen usage
+- `lib/parse-with-claude.ts` - Switched to Claude Haiku model
+- `app/api/analyze/route.ts` - Added transactions to response, timing logs
+- `app/api/parse-statement/route.ts` - Added timing logs
+- `app/globals.css` - Added animation keyframes
+
+### 🔧 Commands to Remember
+```bash
+# Test production build locally (catches TypeScript errors)
+npm run build
+
+# Full deploy flow
+npm run build && git add . && git commit -m "message" && git push
+```
+
+### 📋 Next Steps
+
+Session 11: Better AI Insights
+- Pre-calculate interesting metrics for Claude
+- Prompt engineering for specific, surprising, actionable insights
+- Move beyond obvious observations ("your biggest category was X")
+
+---
+
 ## Session 8: January 24, 2025
 
 ### ✅ What Was Completed
@@ -208,4 +320,4 @@ git push
 
 ---
 
-*Last updated: January 24, 2025*
+*Last updated: January 26, 2025*
