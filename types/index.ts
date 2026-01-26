@@ -145,4 +145,5 @@ export interface AnalysisResult {
   insights: Insight[];
   tips: SavingsTip[];
   generatedAt: string;
+  transactions: CategorizedTransaction[];
 }

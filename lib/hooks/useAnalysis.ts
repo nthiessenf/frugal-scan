@@ -110,6 +110,7 @@ export function useAnalysis() {
         insights: analyzeData.data?.insights || [],
         tips: analyzeData.data?.tips || [],
         generatedAt: new Date().toISOString(),
+        transactions: categorized,
       };
 
       setResult(fullResult);
