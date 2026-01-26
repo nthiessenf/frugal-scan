@@ -9,7 +9,9 @@ import { MerchantChart } from '@/components/charts/merchant-chart';
 import { InsightsGrid } from '@/components/sections/insights-grid';
 import { SubscriptionsList } from '@/components/sections/subscriptions-list';
 import { TipsSection } from '@/components/sections/tips-section';
+import { FilterBanner } from '@/components/ui/filter-banner';
 import { Button } from '@/components/ui/button';
+import { CATEGORIES } from '@/lib/constants';
 
 export default function ResultsPage() {
   const router = useRouter();
@@ -22,14 +24,18 @@ export default function ResultsPage() {
   const getMerchantsForCategory = (categoryName: string) => {
     if (!result) return [];
     
-    // Filter transactions by category
+    // Find the category ID from the label
+    const categoryInfo = CATEGORIES.find(c => c.label === categoryName);
+    if (!categoryInfo) return [];
+    
+    // Filter transactions by category ID
     const categoryTransactions = (result as any).transactions?.filter(
-      (t: any) => t.category === categoryName
+      (t: any) => t.category === categoryInfo.id
     ) || [];
     
     // Group by merchant and sum amounts
     const merchantTotals = categoryTransactions.reduce((acc: Record<string, number>, t: any) => {
-      const merchant = t.cleanedName || t.description;
+      const merchant = t.merchant || t.description;
       acc[merchant] = (acc[merchant] || 0) + Math.abs(t.amount);
       return acc;
     }, {} as Record<string, number>);
@@ -39,6 +45,53 @@ export default function ResultsPage() {
       .map(([name, amount]) => ({ name, amount: amount as number }))
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 10); // Top 10
+  };
+
+  // Transform merchants into pie chart format when filtering by category
+  const getMerchantsPieData = (categoryName: string) => {
+    const merchants = getMerchantsForCategory(categoryName);
+    const total = merchants.reduce((sum, m) => sum + m.amount, 0);
+    
+    // Find the category to get its base color
+    const category = CATEGORIES.find(c => c.label === categoryName);
+    const baseColor = category?.color || '#8b5cf6';
+    
+    // Generate color variations (lighter shades of the category color)
+    const generateShade = (hex: string, index: number, total: number): string => {
+      // Convert hex to RGB, blend with white for lighter shades
+      const blend = 0.15 + (index * 0.12); // Each subsequent slice slightly lighter
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      const newR = Math.round(r + (255 - r) * blend);
+      const newG = Math.round(g + (255 - g) * blend);
+      const newB = Math.round(b + (255 - b) * blend);
+      return `rgb(${newR}, ${newG}, ${newB})`;
+    };
+    
+    return merchants.map((merchant, index) => ({
+      category: merchant.name as any, // Use merchant name as the category key
+      amount: merchant.amount,
+      percentage: total > 0 ? (merchant.amount / total) * 100 : 0,
+      transactionCount: 1,
+      merchantName: merchant.name,
+      color: generateShade(baseColor, index, merchants.length),
+    }));
+  };
+
+  // Get filtered top merchants for the bar chart
+  const getFilteredTopMerchants = (categoryName: string) => {
+    const merchants = getMerchantsForCategory(categoryName);
+    const category = CATEGORIES.find(c => c.label === categoryName);
+    const categoryColor = category?.color || '#8b5cf6';
+    
+    return merchants.map(m => ({
+      name: m.name,
+      amount: m.amount,
+      count: 1,
+      category: category?.id || 'other',
+      color: categoryColor,
+    }));
   };
 
   // Redirect to home if no results
@@ -73,13 +126,34 @@ export default function ResultsPage() {
         {/* Summary Stats */}
         <SummaryHeader summary={result.summary} />
 
+        {/* Filter Banner - shows when category is selected */}
+        {selectedCategory && (
+          <div className="mt-8 mb-2">
+            <FilterBanner 
+              categoryName={selectedCategory} 
+              onClear={() => setSelectedCategory(null)} 
+            />
+          </div>
+        )}
+
         {/* Charts Row */}
-        <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <div className={`${selectedCategory ? 'mt-4' : 'mt-8'} grid grid-cols-1 gap-5 lg:grid-cols-2`}>
+          {/* Spending/Merchant Pie Chart */}
           <SpendingChart 
-            data={result.categoryBreakdown} 
-            totalSpent={result.summary.totalSpent} 
+            data={selectedCategory ? getMerchantsPieData(selectedCategory) as any : result.categoryBreakdown} 
+            totalSpent={selectedCategory 
+              ? getMerchantsForCategory(selectedCategory).reduce((sum, m) => sum + m.amount, 0)
+              : result.summary.totalSpent
+            }
+            onCategoryClick={selectedCategory ? undefined : setSelectedCategory}
+            title={selectedCategory ? `Merchants in ${selectedCategory}` : 'Spending by Category'}
           />
-          <MerchantChart data={result.topMerchants} />
+
+          {/* Top Merchants Bar Chart */}
+          <MerchantChart 
+            data={selectedCategory ? getFilteredTopMerchants(selectedCategory) : result.topMerchants}
+            title={selectedCategory ? `Top Merchants in ${selectedCategory}` : 'Top 10 Merchants'}
+          />
         </div>
 
         {/* Insights */}

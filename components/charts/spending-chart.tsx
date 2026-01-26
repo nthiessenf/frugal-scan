@@ -11,9 +11,12 @@ interface SpendingChartProps {
     amount: number;
     percentage: number;
     transactionCount: number;
+    merchantName?: string;  // Add this for filtered mode
+    color?: string;         // Add this for custom colors
   }>;
   totalSpent: number;
   onCategoryClick?: (categoryName: string) => void;
+  title?: string;  // Add this
 }
 
 // Direct color mapping
@@ -32,17 +35,22 @@ const COLORS: Record<string, string> = {
   other: '#64748b',
 };
 
-export function SpendingChart({ data, totalSpent, onCategoryClick }: SpendingChartProps) {
+export function SpendingChart({ data, totalSpent, onCategoryClick, title = 'Spending by Category' }: SpendingChartProps) {
   // Filter and transform data
   const chartData = data
     .filter(item => item.amount > 0 && item.category !== 'income' && item.category !== 'transfer')
     .map(item => {
-      const categoryInfo = CATEGORIES.find(c => c.id === item.category);
+      // Use merchantName if available (filtered mode), otherwise use category label
+      const name = item.merchantName || (() => {
+        const categoryInfo = CATEGORIES.find(c => c.id === item.category);
+        return categoryInfo?.label || item.category;
+      })();
       return {
-        name: categoryInfo?.label || item.category,
+        name,
         value: item.amount,
         percentage: Math.round(item.percentage),
         category: item.category,
+        color: item.color, // Preserve custom color if provided
       };
     })
     .sort((a, b) => b.value - a.value);
@@ -52,10 +60,7 @@ export function SpendingChart({ data, totalSpent, onCategoryClick }: SpendingCha
 
   return (
     <GlassCard className="p-6" hover={false}>
-      <h3 className="text-lg font-semibold text-[#1d1d1f] mb-4">Spending by Category</h3>
-      {onCategoryClick && (
-        <p className="text-xs text-[#86868b] mb-2">Click a category to see details</p>
-      )}
+      <h3 className="text-lg font-semibold text-[#1d1d1f] mb-4">{title}</h3>
 
       <div className="relative h-64">
         <ResponsiveContainer width="100%" height="100%">
@@ -74,7 +79,7 @@ export function SpendingChart({ data, totalSpent, onCategoryClick }: SpendingCha
               {chartData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
-                  fill={COLORS[entry.category] || '#64748b'}
+                  fill={entry.color || COLORS[entry.category] || '#64748b'}
                   stroke="none"
                 />
               ))}
@@ -110,11 +115,11 @@ export function SpendingChart({ data, totalSpent, onCategoryClick }: SpendingCha
             <div className="flex items-center gap-2">
               <div
                 className="w-3 h-3 rounded-full flex-shrink-0"
-                style={{ backgroundColor: COLORS[item.category] || '#64748b' }}
+                style={{ backgroundColor: item.color || COLORS[item.category] || '#64748b' }}
               />
               <span className="text-[#6e6e73] truncate">{item.name}</span>
             </div>
-            <span className="text-[#1d1d1f] font-medium ml-2">{item.percentage}%</span>
+            <span className="text-[#1d1d1f] font-medium ml-2">{Math.round(item.percentage)}%</span>
           </div>
         ))}
       </div>

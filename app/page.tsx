@@ -9,11 +9,12 @@ import { ProcessingScreen } from '@/components/sections/processing-screen';
 import { ErrorMessage } from '@/components/ui/error-message';
 import { useAnalysis } from '@/lib/hooks/useAnalysis';
 import { useAnalysisContext } from '@/contexts/AnalysisContext';
+import { mockAnalysisResult } from '@/lib/mock-data';
 
 export default function Home() {
   const router = useRouter();
   const { status, progress, error, analyzeStatement, reset } = useAnalysis();
-  const { result } = useAnalysisContext();
+  const { result, setResult } = useAnalysisContext();
 
   // Navigate to results when analysis is complete
   useEffect(() => {
@@ -24,6 +25,11 @@ export default function Home() {
 
   const handleFileSelect = async (file: File) => {
     await analyzeStatement(file);
+  };
+
+  const handleLoadMockData = () => {
+    setResult(mockAnalysisResult as any);
+    router.push('/results');
   };
 
   // Show processing screen during analysis
@@ -51,6 +57,16 @@ export default function Home() {
       <Hero />
       <HowItWorks />
       <UploadSection onFileSelect={handleFileSelect} />
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-6 text-center">
+          <button
+            onClick={handleLoadMockData}
+            className="px-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] underline transition-colors"
+          >
+            ⚡ Load Mock Data (Dev Only)
+          </button>
+        </div>
+      )}
     </main>
   );
 }

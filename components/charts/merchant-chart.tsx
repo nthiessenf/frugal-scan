@@ -11,9 +11,10 @@ interface MerchantChartProps {
     count: number;
     category: Category;
   }>;
+  title?: string;
 }
 
-export function MerchantChart({ data }: MerchantChartProps) {
+export function MerchantChart({ data, title = 'Top 10 Merchants' }: MerchantChartProps) {
   // Take top 10 merchants
   const chartData = data.slice(0, 10).map(item => ({
     name: item.name,
@@ -24,6 +25,9 @@ export function MerchantChart({ data }: MerchantChartProps) {
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+
+  // Dynamic bar thickness: thicker bars when there are fewer items
+  const barThickness = chartData.length <= 3 ? 40 : chartData.length <= 5 ? 32 : 24;
 
   // Gradient colors for bars (top to bottom by amount)
   const getBarColor = (index: number) => {
@@ -44,14 +48,15 @@ export function MerchantChart({ data }: MerchantChartProps) {
 
   return (
     <GlassCard className="p-6" hover={false}>
-      <h3 className="text-lg font-semibold text-[#1d1d1f] mb-4">Top 10 Merchants</h3>
+      <h3 className="text-lg font-semibold text-[#1d1d1f] mb-4">{title}</h3>
 
-      <div className="h-96">
+      <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
             layout="vertical"
-            margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+            margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
+            barSize={barThickness}
           >
             <XAxis 
               type="number" 
