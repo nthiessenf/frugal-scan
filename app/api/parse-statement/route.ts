@@ -4,9 +4,13 @@ import { validateParsedStatement, validateTransactionSchema } from '@/lib/valida
 import { ApiResponse, ParsedStatement } from '@/types';
 
 export async function POST(request: NextRequest) {
-  const startTime = Date.now();
+  const timings: Record<string, number> = {};
+  const startTotal = Date.now();
   
   try {
+    // Log: Start file processing
+    const startFileProcess = Date.now();
+    
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     
@@ -39,10 +43,20 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    timings['1_file_processing'] = Date.now() - startFileProcess;
+    
+    // Log: Start base64 conversion
+    const startBase64 = Date.now();
+    
     const buffer = Buffer.from(await file.arrayBuffer());
     const base64 = buffer.toString('base64');
     
+    timings['2_base64_conversion'] = Date.now() - startBase64;
+    
     console.log(`[parse-statement] Processing file: ${file.name}, size: ${file.size} bytes`);
+    
+    // Log: Start Claude API call
+    const startClaude = Date.now();
     
     let parsed: ParsedStatement;
     try {
@@ -57,6 +71,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    
+    timings['3_claude_api_call'] = Date.now() - startClaude;
+    
+    // Log: Start validation
+    const startValidation = Date.now();
     
     const invalidTransactions = parsed.transactions.filter(
       (t) => !validateTransactionSchema(t)
@@ -74,14 +93,14 @@ export async function POST(request: NextRequest) {
     
     const validation = validateParsedStatement(parsed);
     
-    const totalTime = Date.now() - startTime;
-    console.log(
-      `[parse-statement] Complete. ` +
-      `Transactions: ${parsed.transactions.length}, ` +
-      `Valid: ${validation.isValid}, ` +
-      `Warnings: ${validation.warnings.length}, ` +
-      `Time: ${totalTime}ms`
-    );
+    timings['4_validation'] = Date.now() - startValidation;
+    
+    // Log total time
+    timings['5_total'] = Date.now() - startTotal;
+    
+    console.log('=== PARSE-STATEMENT TIMING ===');
+    console.log(JSON.stringify(timings, null, 2));
+    console.log('==============================');
     
     return NextResponse.json<ApiResponse<ParsedStatement>>({
       success: true,

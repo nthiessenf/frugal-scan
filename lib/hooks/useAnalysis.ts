@@ -17,6 +17,10 @@ export function useAnalysis() {
   const [needsReview, setNeedsReview] = useState<CategorizedTransaction[]>([]);
 
   const analyzeStatement = useCallback(async (file: File) => {
+    // At the start of the analysis function
+    console.log('=== CLIENT TIMING START ===');
+    const clientStart = Date.now();
+    
     try {
       // Reset state
       setError(null);
@@ -33,12 +37,19 @@ export function useAnalysis() {
       setStatus('parsing');
       setProgress(30);
 
+      // Before calling parse-statement API
+      console.log('Starting PDF parse...');
+      const parseStart = Date.now();
+
       const parseResponse = await fetch('/api/parse-statement', {
         method: 'POST',
         body: formData,
       });
 
       const parseData = await parseResponse.json();
+
+      // After parse-statement returns
+      console.log(`PDF parse complete: ${Date.now() - parseStart}ms`);
 
       if (!parseData.success) {
         throw new Error(parseData.error || 'Failed to parse statement');
@@ -51,8 +62,10 @@ export function useAnalysis() {
       setStatus('categorizing');
       setProgress(50);
 
+      const categorizeStart = Date.now();
       const categorized = categorizeAll(parseData.data.transactions);
       const subscriptions = detectSubscriptions(categorized);
+      console.log(`Categorization complete: ${Date.now() - categorizeStart}ms`);
 
       // Check for low-confidence transactions
       const lowConfidence = categorized.filter(t => t.needsReview);
@@ -62,6 +75,10 @@ export function useAnalysis() {
       setStatus('analyzing');
       setProgress(70);
 
+      // Before calling analyze API
+      console.log('Starting analysis...');
+      const analyzeStart = Date.now();
+
       const analyzeResponse = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -69,6 +86,9 @@ export function useAnalysis() {
       });
 
       const analyzeData = await analyzeResponse.json();
+
+      // After analyze returns
+      console.log(`Analysis complete: ${Date.now() - analyzeStart}ms`);
 
       if (!analyzeData.success) {
         // Even if insights fail, we can show partial results
@@ -96,10 +116,14 @@ export function useAnalysis() {
       setStatus('complete');
       setProgress(100);
 
+      // At the end
+      console.log(`=== CLIENT TOTAL: ${Date.now() - clientStart}ms ===`);
+
     } catch (err) {
       setStatus('error');
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
       console.error('Analysis error:', err);
+      console.log(`=== CLIENT TOTAL (ERROR): ${Date.now() - clientStart}ms ===`);
     }
   }, [setResult, setParsedStatement, setValidationResult]);
 

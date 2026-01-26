@@ -4,9 +4,13 @@ import { calculateSummary, getCategoryBreakdown, getTopMerchants } from '@/lib/a
 import { generateInsights } from '@/lib/claude-insights';
 
 export async function POST(request: NextRequest) {
-  const startTime = Date.now();
+  const timings: Record<string, number> = {};
+  const startTotal = Date.now();
   
   try {
+    // Log: Start request parsing
+    const startParse = Date.now();
+    
     const body = await request.json();
     const { transactions, subscriptions } = body as {
       transactions: CategorizedTransaction[];
@@ -28,18 +32,25 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    timings['1_request_parsing'] = Date.now() - startParse;
+    
     console.log(`[analyze] Processing ${transactions.length} transactions`);
     
     // Calculate statistics
+    const startStats = Date.now();
     const summary = calculateSummary(transactions, subscriptions || []);
     const categoryBreakdown = getCategoryBreakdown(transactions);
     const topMerchants = getTopMerchants(transactions, 10);
+    timings['2_statistics_calculation'] = Date.now() - startStats;
     
     console.log(`[analyze] Summary: spent=$${summary.totalSpent.toFixed(2)}, income=$${summary.totalIncome.toFixed(2)}`);
     
     // Generate AI insights
     let insights: Insight[] = [];
     let tips: SavingsTip[] = [];
+    
+    // Log: Start Claude insights call
+    const startClaude = Date.now();
     
     try {
       const aiResponse = await generateInsights(
@@ -63,6 +74,11 @@ export async function POST(request: NextRequest) {
       tips = [];
     }
     
+    timings['3_claude_insights_call'] = Date.now() - startClaude;
+    
+    // Log: Start response formatting
+    const startFormat = Date.now();
+    
     const result: AnalysisResult = {
       summary,
       categoryBreakdown,
@@ -73,8 +89,14 @@ export async function POST(request: NextRequest) {
       generatedAt: new Date().toISOString(),
     };
     
-    const totalTime = Date.now() - startTime;
-    console.log(`[analyze] Complete in ${totalTime}ms`);
+    timings['4_response_formatting'] = Date.now() - startFormat;
+    
+    // Log total time
+    timings['5_total'] = Date.now() - startTotal;
+    
+    console.log('=== ANALYZE TIMING ===');
+    console.log(JSON.stringify(timings, null, 2));
+    console.log('======================');
     
     return NextResponse.json<ApiResponse<AnalysisResult>>({
       success: true,
