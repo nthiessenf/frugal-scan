@@ -17,6 +17,18 @@ export default function ResultsPage() {
   const router = useRouter();
   const { result, clearAll } = useAnalysisContext();
 
+  // DEBUG: Log what's in result
+  useEffect(() => {
+    if (result) {
+      console.log('=== RESULT DEBUG ===');
+      console.log('result keys:', Object.keys(result));
+      console.log('result.transactions:', (result as any).transactions);
+      console.log('result.transactions length:', (result as any).transactions?.length);
+      console.log('result.categoryBreakdown:', result.categoryBreakdown);
+      console.log('====================');
+    }
+  }, [result]);
+
   // Category drill-down state
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
