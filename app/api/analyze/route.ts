@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
       insights,
       tips,
       generatedAt: new Date().toISOString(),
+      transactions,
     };
     
     timings['4_response_formatting'] = Date.now() - startFormat;
