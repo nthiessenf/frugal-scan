@@ -87,3 +87,16 @@
   animation: fade-in 0.5s ease-out forwards;
 }
 
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(6px);
+  }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+

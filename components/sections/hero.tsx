@@ -12,7 +12,7 @@ export function Hero() {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center py-20 px-5">
+    <section className="relative min-h-screen flex items-center justify-center py-20 px-5">
       <div className="max-w-4xl mx-auto text-center">
         {/* Label */}
         <p className="text-xs font-semibold uppercase tracking-widest text-[#86868b] mb-4">
@@ -45,6 +45,24 @@ export function Hero() {
           <p className="text-sm text-[#86868b]">⚡ Results in 60 seconds</p>
           <p className="text-sm text-[#86868b]">💳 No account linking</p>
         </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce-subtle">
+        <span className="text-sm font-medium text-[#6e6e73]">See how it works</span>
+        <svg 
+          className="w-6 h-6 text-[#6e6e73]" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={2} 
+            d="M19 9l-7 7-7-7" 
+          />
+        </svg>
       </div>
     </section>
   );
