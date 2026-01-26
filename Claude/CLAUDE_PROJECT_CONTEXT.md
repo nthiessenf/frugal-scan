@@ -1,14 +1,15 @@
-# SpendSense - Claude Project Context
+# FrugalScan - Claude Project Context
 
 **Last Updated:** January 25, 2025  
 **Project Owner:** Nikolas  
-**Role:** Non-technical Product Manager building with AI assistance
+**Role:** Non-technical Product Manager building with AI assistance  
+**Live URL:** [frugalscan.com](https://frugalscan.com)
 
 ---
 
 ## 🎯 What This Project Is
 
-SpendSense is a privacy-first personal finance web app. Users upload bank statement PDFs and receive AI-powered spending insights within 60 seconds—no account linking required.
+FrugalScan is a privacy-first personal finance web app. Users upload bank statement PDFs and receive AI-powered spending insights within 60 seconds—no account linking required.
 
 ### Core Value Proposition
 > "Upload your bank statement, get AI-powered spending insights in 60 seconds—no account linking required."
@@ -114,9 +115,9 @@ User uploads PDF
 | Savings tips | ✅ Complete | Claude-generated recommendations |
 | Processing screen | ✅ Complete | Animated progress bar |
 | Error handling | ✅ Complete | Error messages, retry options |
-| Export as PDF | 📋 Session 9 | Browser print |
-| Mobile responsive | 📋 Session 9 | Final polish |
-| Deploy to Vercel | 📋 Session 9 | Production deployment |
+| Export as PDF | ✅ Complete | Browser print |
+| Mobile responsive | ✅ Complete | Tested at 375px |
+| Deploy to Vercel | ✅ Complete | Live at frugalscan.com |
 
 ### Version 1.1 - Quick Wins (4-6 hours)
 *Focus: Immediate value, low risk, pure frontend work*
@@ -183,12 +184,15 @@ border-radius: 24px;
 
 ## 📂 Current File Structure
 ```
-spendsense/
+frugalscan/
 ├── app/
 │   ├── globals.css
 │   ├── layout.tsx (with AnalysisProvider)
 │   ├── page.tsx (integrated upload flow)
 │   ├── results/page.tsx (real data from context)
+│   ├── error.tsx (error boundary)
+│   ├── not-found.tsx (404 page)
+│   ├── loading.tsx (loading state)
 │   └── api/
 │       ├── parse-statement/route.ts
 │       └── analyze/route.ts
@@ -225,6 +229,7 @@ spendsense/
 | Jan 24 | Subscriptions = discretionary | Phone bills, insurance, daycare are bills, not subscriptions |
 | Jan 25 | v1.1 before v1.2 | Frontend-only changes build confidence before localStorage |
 | Jan 25 | localStorage before Supabase | Progressive complexity; validate before adding infrastructure |
+| Jan 25 | Renamed to FrugalScan | Better brand name, secured frugalscan.com domain |
 
 ---
 
@@ -264,21 +269,16 @@ ANTHROPIC_API_KEY=sk-ant-api03-...
 
 ## 🚀 Next Steps
 
-### Immediate (Session 9)
-1. **SEO & Metadata** - Title, description, Open Graph
-2. **Error pages** - Custom 404, error boundaries
-3. **Accessibility** - aria labels, keyboard navigation
-4. **Mobile optimization** - Final check at 375px
-5. **Deploy to Vercel** - Get it live!
+### Immediate (Session 10)
+1. **Merchants by category drill-down** - Click to see top merchants per category
 
-### Then (v1.1 - Sessions 10-12)
-1. **Merchants by category** - Click to drill down
+### Then (v1.1 - Sessions 11-12)
 2. **Color-coded bar chart** - Visual category connection
 3. **Better AI insights** - Specific, surprising, actionable
 
 ### Later (v1.2 - Sessions 13-14)
-1. **Budget targets** - Set limits, track progress
-2. **Month-over-month trends** - Multi-statement comparison
+4. **Budget targets** - Set limits, track progress
+5. **Month-over-month trends** - Multi-statement comparison
 
 ---
 
@@ -299,4 +299,4 @@ git push
 
 ---
 
-*This document is the single source of truth for SpendSense development. Update it as the project evolves.*
+*This document is the single source of truth for FrugalScan development. Update it as the project evolves.*

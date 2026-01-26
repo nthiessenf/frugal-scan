@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAnalysisContext } from '@/contexts/AnalysisContext';
 import { SummaryHeader } from '@/components/sections/summary-header';
@@ -14,6 +14,32 @@ import { Button } from '@/components/ui/button';
 export default function ResultsPage() {
   const router = useRouter();
   const { result, clearAll } = useAnalysisContext();
+
+  // Category drill-down state
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Get merchants for a selected category
+  const getMerchantsForCategory = (categoryName: string) => {
+    if (!result) return [];
+    
+    // Filter transactions by category
+    const categoryTransactions = (result as any).transactions?.filter(
+      (t: any) => t.category === categoryName
+    ) || [];
+    
+    // Group by merchant and sum amounts
+    const merchantTotals = categoryTransactions.reduce((acc: Record<string, number>, t: any) => {
+      const merchant = t.cleanedName || t.description;
+      acc[merchant] = (acc[merchant] || 0) + Math.abs(t.amount);
+      return acc;
+    }, {} as Record<string, number>);
+    
+    // Convert to array and sort by amount
+    return Object.entries(merchantTotals)
+      .map(([name, amount]) => ({ name, amount: amount as number }))
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 10); // Top 10
+  };
 
   // Redirect to home if no results
   useEffect(() => {

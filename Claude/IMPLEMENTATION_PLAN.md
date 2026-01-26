@@ -1,6 +1,6 @@
-# SpendSense - Implementation Plan
+# FrugalScan - Implementation Plan
 
-**Purpose:** Step-by-step Cursor prompts for building SpendSense
+**Purpose:** Step-by-step Cursor prompts for building FrugalScan
 **How to use:** Complete sessions in order. Copy each prompt directly into Cursor.
 
 **Updated:** January 25, 2025
@@ -21,13 +21,15 @@
 | 6 | Claude Insights Generation | ✅ Complete |
 | 7 | Results Dashboard | ✅ Complete |
 | 8 | Connect Everything | ✅ Complete |
-| 9 | Polish & Deploy | 📋 Next |
+| 9 | Polish & Deploy | ✅ Complete |
+
+**🚀 Live at [frugalscan.com](https://frugalscan.com)**
 
 ### Version 1.1 - Quick Wins (4-6 hours)
 
 | Session | Task | Status | Time Est. |
 |---------|------|--------|-----------|
-| 10 | Merchants by Category Drill-Down | 📋 Planned | 2-3 hrs |
+| 10 | Merchants by Category Drill-Down | 📋 Next | 2-3 hrs |
 | 11 | Color-Coded Bar Chart by Category | 📋 Planned | 1-2 hrs |
 | 12 | Better AI Insights | 📋 Planned | 3-4 hrs |
 
@@ -60,360 +62,6 @@
 
 ---
 
-## Session 9: Polish and Deploy
-
-**Goal:** Final polish and deploy to Vercel
-
-**Time estimate:** 30-35 minutes
-
-**Prerequisites:** Session 8 complete, full flow working
-
-### Prompt 1: SEO and Metadata
-
-```
-Add comprehensive SEO metadata for SpendSense.
-
-Update app/layout.tsx with this metadata:
-
-```tsx
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'SpendSense - AI-Powered Spending Insights',
-  description: 'Upload your bank statement and get instant AI-powered insights into your spending habits. Free, private, no account linking required.',
-  keywords: ['spending tracker', 'budget analysis', 'personal finance', 'AI finance', 'bank statement analyzer'],
-  authors: [{ name: 'SpendSense' }],
-  openGraph: {
-    title: 'SpendSense - See Where Your Money Really Goes',
-    description: 'Upload your bank statement and get AI-powered spending insights in 60 seconds.',
-    type: 'website',
-    locale: 'en_US',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'SpendSense - AI Spending Insights',
-    description: 'Upload your bank statement and get AI-powered spending insights in 60 seconds.',
-  },
-};
-```
-
-Also add a favicon. Create a simple one by adding this to the head in layout.tsx:
-
-```tsx
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>" />
-```
-```
-
-### Prompt 2: Error Pages
-
-```
-Create custom error pages for better user experience.
-
-1. Create app/error.tsx (client component for runtime errors):
-
-```tsx
-'use client';
-
-import { useEffect } from 'react';
-import { AlertCircle, RefreshCw, Home } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { GlassCard } from '@/components/ui/card';
-
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
-  useEffect(() => {
-    console.error('Application error:', error);
-  }, [error]);
-
-  return (
-    <main className="min-h-screen flex items-center justify-center px-5 bg-[#f5f5f7]">
-      <GlassCard className="max-w-md p-8 text-center" hover={false}>
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-          <AlertCircle className="h-8 w-8 text-red-500" />
-        </div>
-        
-        <h1 className="text-xl font-semibold text-[#1d1d1f] mb-2">
-          Something went wrong
-        </h1>
-        <p className="text-sm text-[#6e6e73] mb-6">
-          We encountered an unexpected error. Please try again.
-        </p>
-        
-        <div className="flex flex-col gap-3">
-          <Button variant="primary" onClick={reset} className="w-full">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Try Again
-          </Button>
-          <Button variant="secondary" onClick={() => window.location.href = '/'} className="w-full">
-            <Home className="w-4 h-4 mr-2" />
-            Go Home
-          </Button>
-        </div>
-      </GlassCard>
-    </main>
-  );
-}
-```
-
-2. Create app/not-found.tsx (404 page):
-
-```tsx
-import { FileQuestion, Home } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { GlassCard } from '@/components/ui/card';
-import Link from 'next/link';
-
-export default function NotFound() {
-  return (
-    <main className="min-h-screen flex items-center justify-center px-5 bg-[#f5f5f7]">
-      <GlassCard className="max-w-md p-8 text-center" hover={false}>
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#f5f5f7]">
-          <FileQuestion className="h-8 w-8 text-[#86868b]" />
-        </div>
-        
-        <h1 className="text-xl font-semibold text-[#1d1d1f] mb-2">
-          Page not found
-        </h1>
-        <p className="text-sm text-[#6e6e73] mb-6">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        
-        <Link href="/">
-          <Button variant="primary" className="w-full">
-            <Home className="w-4 h-4 mr-2" />
-            Back to Home
-          </Button>
-        </Link>
-      </GlassCard>
-    </main>
-  );
-}
-```
-
-3. Create app/loading.tsx (global loading state):
-
-```tsx
-import { Loader2 } from 'lucide-react';
-
-export default function Loading() {
-  return (
-    <main className="min-h-screen flex items-center justify-center bg-[#f5f5f7]">
-      <div className="text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#8b5cf6] mx-auto mb-4" />
-        <p className="text-sm text-[#6e6e73]">Loading...</p>
-      </div>
-    </main>
-  );
-}
-```
-```
-
-### Prompt 3: Print Styles and Accessibility
-
-```
-Add print styles and accessibility improvements.
-
-1. Add print styles to app/globals.css:
-
-```css
-/* Print Styles */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  
-  body {
-    background: white !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  
-  .glass-card {
-    background: white !important;
-    box-shadow: none !important;
-    border: 1px solid #e5e5e5 !important;
-    backdrop-filter: none !important;
-  }
-  
-  /* Ensure charts print with colors */
-  svg {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-}
-```
-
-2. Add "no-print" class to action buttons in app/results/page.tsx:
-
-Find the action buttons section and add the no-print class to the container:
-
-```tsx
-<div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center no-print">
-```
-
-3. Add aria-labels to the upload zone in components/ui/upload-zone.tsx:
-
-Add these attributes to the main drop zone div:
-
-```tsx
-<div
-  role="button"
-  tabIndex={0}
-  aria-label="Upload bank statement PDF"
-  onKeyDown={(e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      // Trigger file picker
-      document.getElementById('file-upload')?.click();
-    }
-  }}
-  // ... existing props
->
-```
-
-And add id to the hidden input:
-
-```tsx
-<input
-  id="file-upload"
-  type="file"
-  // ... existing props
-/>
-```
-```
-
-### Prompt 4: Mobile Optimization Check
-
-```
-Review and fix mobile responsiveness issues.
-
-1. Update the hero section for better mobile display in components/sections/hero.tsx:
-
-Ensure the headline doesn't break awkwardly on mobile:
-
-```tsx
-<h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-[-0.03em] text-[#1d1d1f]">
-```
-
-2. Update the results page header in app/results/page.tsx for mobile:
-
-```tsx
-<div className="mb-6 sm:mb-8 text-center">
-  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#1d1d1f]">
-    Your Spending Analysis
-  </h1>
-  <p className="mt-2 text-sm sm:text-base text-[#6e6e73]">
-    Based on {result.summary.transactionCount} transactions
-  </p>
-</div>
-```
-
-3. Make sure charts are readable on mobile. In components/charts/spending-chart.tsx, update the legend grid:
-
-```tsx
-<div className="mt-4 grid grid-cols-2 gap-x-2 gap-y-2 text-xs sm:text-sm">
-```
-
-4. Update the subscriptions list for mobile in components/sections/subscriptions-list.tsx:
-
-Make the header stack on very small screens:
-
-```tsx
-<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-1 gap-1">
-```
-```
-
-### Prompt 5: Pre-Deploy Checklist and Build Test
-
-```
-Run pre-deployment checks and fix any build issues.
-
-1. First, run the build to check for errors:
-
-```bash
-npm run build
-```
-
-2. If there are any TypeScript errors, fix them.
-
-3. Common issues to check:
-
-- All imports use correct paths (@/ for root)
-- No unused variables or imports
-- All components that use hooks have 'use client' directive
-- Environment variables are referenced correctly
-
-4. Test production build locally:
-
-```bash
-npm run build
-npm run start
-```
-
-5. Open http://localhost:3000 and test:
-- [ ] Landing page loads
-- [ ] Upload a PDF
-- [ ] Processing screen shows
-- [ ] Results page displays correctly
-- [ ] Charts render with colors
-- [ ] Mobile view works (use browser dev tools)
-- [ ] Print/export works (Cmd+P)
-- [ ] "Start Over" works
-```
-
-### Prompt 6: Deploy to Vercel
-
-```
-This is a manual step - no Cursor prompt needed.
-
-## Deploy to Vercel
-
-1. **Push to GitHub** (if not already):
-```bash
-git add .
-git commit -m "SpendSense MVP ready for deployment"
-git push origin main
-```
-
-2. **Go to Vercel:**
-   - Visit https://vercel.com
-   - Sign in with GitHub
-
-3. **Import Project:**
-   - Click "Add New" → "Project"
-   - Select your SpendSense repository
-   - Vercel auto-detects Next.js
-
-4. **Configure Environment Variables:**
-   - Click "Environment Variables"
-   - Add: `ANTHROPIC_API_KEY` = your actual API key
-   - Make sure it's available in Production
-
-5. **Deploy:**
-   - Click "Deploy"
-   - Wait for build (1-2 minutes)
-
-6. **Test Production:**
-   - Visit your .vercel.app URL
-   - Upload a real PDF
-   - Verify full flow works
-   - Test on mobile device
-
-7. **Custom Domain (Optional):**
-   - Go to Project Settings → Domains
-   - Add your domain
-   - Configure DNS:
-     - A record: @ → 76.76.21.21
-     - CNAME: www → cname.vercel-dns.com
-```
-
----
-
 ## Session 10: Merchants by Category Drill-Down
 
 **Goal:** Click a category in the pie chart → see top merchants in that category
@@ -437,13 +85,10 @@ First, add state management for the selected category in app/results/page.tsx:
 
 1. Add state at the top of the component (after useAnalysis hook):
 
-```tsx
 const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-```
 
 2. Add a function to get merchants for the selected category:
 
-```tsx
 const getMerchantsForCategory = (categoryName: string) => {
   // Filter transactions by category
   const categoryTransactions = result.transactions.filter(
@@ -463,13 +108,10 @@ const getMerchantsForCategory = (categoryName: string) => {
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 10); // Top 10
 };
-```
 
 3. Add the import for useState at the top:
 
-```tsx
 import { useState } from 'react';
-```
 ```
 
 ### Prompt 2: Make Pie Chart Clickable
@@ -480,16 +122,13 @@ Update the spending chart to handle click events.
 1. Modify components/charts/spending-chart.tsx to accept an onCategoryClick prop:
 
 Add to the interface:
-```tsx
 interface SpendingChartProps {
   data: CategoryBreakdown[];
   onCategoryClick?: (categoryName: string) => void;
 }
-```
 
 2. Add click handler to the Pie component:
 
-```tsx
 <Pie
   data={data}
   cx="50%"
@@ -501,11 +140,9 @@ interface SpendingChartProps {
   onClick={(data) => onCategoryClick?.(data.name)}
   style={{ cursor: onCategoryClick ? 'pointer' : 'default' }}
 >
-```
 
 3. Also make the legend items clickable. Update the legend section:
 
-```tsx
 {data.map((category) => (
   <div 
     key={category.name} 
@@ -520,7 +157,6 @@ interface SpendingChartProps {
   </div>
 ))}
 ```
-```
 
 ### Prompt 3: Create Category Detail View
 
@@ -529,7 +165,6 @@ Create a new component to show merchants within a selected category.
 
 Create components/sections/category-detail.tsx:
 
-```tsx
 'use client';
 
 import { ArrowLeft } from 'lucide-react';
@@ -634,7 +269,6 @@ export function CategoryDetail({ categoryName, merchants, totalAmount, onBack }:
   );
 }
 ```
-```
 
 ### Prompt 4: Integrate Category Detail into Results Page
 
@@ -645,15 +279,12 @@ Update app/results/page.tsx:
 
 1. Import the new component at the top:
 
-```tsx
 import { CategoryDetail } from '@/components/sections/category-detail';
-```
 
 2. Find the section where SpendingChart is rendered and wrap it with conditional rendering:
 
 Replace the SpendingChart GlassCard with:
 
-```tsx
 {/* Spending by Category - with drill-down */}
 {selectedCategory ? (
   <CategoryDetail
@@ -678,7 +309,6 @@ Replace the SpendingChart GlassCard with:
     />
   </GlassCard>
 )}
-```
 
 3. Make sure the helper function getMerchantsForCategory is defined before the return statement.
 ```
@@ -717,18 +347,15 @@ Update the merchant bar chart to color each bar by its category.
 
 1. First, update the TopMerchant type in types/index.ts to include category info:
 
-```tsx
 export interface TopMerchant {
   name: string;
   amount: number;
   category?: string;
   color?: string;
 }
-```
 
 2. Update lib/analysis.ts getTopMerchants function to include category:
 
-```tsx
 export function getTopMerchants(
   transactions: CategorizedTransaction[],
   limit: number = 10
@@ -756,13 +383,10 @@ export function getTopMerchants(
     .sort((a, b) => b.amount - a.amount)
     .slice(0, limit);
 }
-```
 
 3. Make sure to import CATEGORIES at the top of lib/analysis.ts:
 
-```tsx
 import { CATEGORIES } from './constants';
-```
 ```
 
 ### Prompt 2: Update Merchant Chart Component
@@ -770,7 +394,6 @@ import { CATEGORIES } from './constants';
 ```
 Update components/charts/merchant-chart.tsx to use category colors:
 
-```tsx
 'use client';
 
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from 'recharts';
@@ -841,7 +464,6 @@ export function MerchantChart({ data }: MerchantChartProps) {
     </div>
   );
 }
-```
 
 This will:
 - Color each bar according to its category
@@ -879,7 +501,6 @@ This will:
 ```
 Create a new file lib/insight-calculations.ts that pre-calculates interesting metrics for Claude:
 
-```tsx
 import { CategorizedTransaction } from '@/types';
 import { CATEGORIES } from './constants';
 
@@ -1003,7 +624,6 @@ export function calculateInsightMetrics(
   };
 }
 ```
-```
 
 ### Prompt 2: Update Claude Insights Prompt
 
@@ -1012,13 +632,10 @@ Update lib/claude-insights.ts to use the pre-calculated metrics and generate bet
 
 1. Import the new helper at the top:
 
-```tsx
 import { calculateInsightMetrics } from './insight-calculations';
-```
 
 2. Update the generateInsights function to include metrics in the prompt:
 
-```tsx
 export async function generateInsights(
   transactions: CategorizedTransaction[],
   summary: SpendingSummary,
@@ -1085,7 +702,6 @@ Return as JSON:
 
   // ... rest of the function stays the same
 }
-```
 ```
 
 ### How to Test Session 12
@@ -1159,7 +775,7 @@ git push
 
 ---
 
-## Post-MVP Congratulations! 🎉
+## MVP Complete! 🎉
 
 You've built a complete, production-ready web application:
 
@@ -1172,7 +788,7 @@ You've built a complete, production-ready web application:
 - AI-generated personalized insights
 - Interactive results dashboard with Recharts
 - Full responsive design
-- Production deployment on Vercel
+- Production deployment at frugalscan.com
 
 **Technical achievements:**
 - 99.7% transaction extraction accuracy

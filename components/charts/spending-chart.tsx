@@ -13,6 +13,7 @@ interface SpendingChartProps {
     transactionCount: number;
   }>;
   totalSpent: number;
+  onCategoryClick?: (categoryName: string) => void;
 }
 
 // Direct color mapping
@@ -31,7 +32,7 @@ const COLORS: Record<string, string> = {
   other: '#64748b',
 };
 
-export function SpendingChart({ data, totalSpent }: SpendingChartProps) {
+export function SpendingChart({ data, totalSpent, onCategoryClick }: SpendingChartProps) {
   // Filter and transform data
   const chartData = data
     .filter(item => item.amount > 0 && item.category !== 'income' && item.category !== 'transfer')
@@ -52,6 +53,9 @@ export function SpendingChart({ data, totalSpent }: SpendingChartProps) {
   return (
     <GlassCard className="p-6" hover={false}>
       <h3 className="text-lg font-semibold text-[#1d1d1f] mb-4">Spending by Category</h3>
+      {onCategoryClick && (
+        <p className="text-xs text-[#86868b] mb-2">Click a category to see details</p>
+      )}
 
       <div className="relative h-64">
         <ResponsiveContainer width="100%" height="100%">
@@ -64,6 +68,8 @@ export function SpendingChart({ data, totalSpent }: SpendingChartProps) {
               outerRadius={100}
               paddingAngle={2}
               dataKey="value"
+              onClick={(data) => onCategoryClick?.(data.name)}
+              style={{ cursor: onCategoryClick ? 'pointer' : 'default' }}
             >
               {chartData.map((entry, index) => (
                 <Cell 
@@ -96,7 +102,11 @@ export function SpendingChart({ data, totalSpent }: SpendingChartProps) {
       {/* Legend */}
       <div className="mt-4 grid grid-cols-2 gap-x-2 gap-y-2 text-xs sm:text-sm">
         {chartData.slice(0, 6).map((item) => (
-          <div key={item.name} className="flex items-center justify-between text-sm">
+          <div 
+            key={item.name} 
+            className="flex items-center justify-between text-sm cursor-pointer hover:opacity-70 transition-opacity"
+            onClick={() => onCategoryClick?.(item.name)}
+          >
             <div className="flex items-center gap-2">
               <div
                 className="w-3 h-3 rounded-full flex-shrink-0"
