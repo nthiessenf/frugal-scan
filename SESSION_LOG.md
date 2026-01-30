@@ -4,6 +4,75 @@
 
 ---
 
+## Session 10: January 30, 2025
+
+### ✅ What Was Completed
+
+**Parallel PDF Parsing Implementation**
+- Created `lib/pdf-chunker.ts` - Splits large PDFs into smaller chunks using pdf-lib
+- Created `lib/parse-parallel.ts` - Processes chunks concurrently with rate limiting (p-limit)
+- Updated `lib/parse-with-claude.ts` - Auto-selects parallel vs sequential based on page count
+
+**Performance Optimization**
+- PDFs >5 pages now use parallel processing
+- 4-page chunks with 3 concurrent requests (optimal balance)
+- Added foreign currency handling hint to speed up complex pages
+- Added skip rules for non-transaction items (Pay Over Time, plan summaries)
+
+**New Dependencies**
+- `pdf-lib` - PDF manipulation and splitting
+- `p-limit` - Concurrency control for API requests
+
+### 📊 Performance Results
+
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| Parse time (20-page PDF) | ~70s | ~56s | **20% faster** |
+| Accuracy | 195 txns | 195 txns | ✅ Maintained |
+| Total debits | $10,726.85 | $10,726.85 | ✅ Exact match |
+
+### 🔑 Key Decisions Made
+
+1. **Amounts stay POSITIVE** - Parallel parser outputs same format as original (positive amounts + type field). All downstream code unchanged.
+
+2. **Haiku for parsing, Sonnet for insights** - Haiku is faster for structured extraction; Sonnet better for reasoning tasks.
+
+3. **4-page chunks optimal** - Smaller chunks (2 pages) caused missing transactions at page boundaries. Larger chunks don't parallelize well.
+
+4. **pLimit(3) concurrency** - Balances speed vs rate limits. Higher concurrency didn't help due to API latency variance.
+
+5. **Foreign currency hint** - Explicit instruction to ignore foreign currency column reduced processing time on complex pages by ~50%.
+
+### 📁 Files Changed
+- `lib/parse-with-claude.ts` - Added parallel processing branch
+- `lib/pdf-chunker.ts` - NEW: PDF splitting utility
+- `lib/parse-parallel.ts` - NEW: Parallel chunk processor
+- `package.json` - Added pdf-lib, p-limit dependencies
+
+### ⚠️ Known Limitations
+- API latency variance means times range from 50-90s depending on server load
+- Parallel processing only kicks in for PDFs >5 pages
+- Some complex statements may still have slow chunks
+
+### 🔧 Commands to Remember
+```bash
+# If parsing seems slow, check chunk times in console
+# Look for one chunk taking much longer than others
+
+# To adjust concurrency (in lib/parse-parallel.ts):
+const limit = pLimit(3);  # Current setting
+
+# To adjust chunk size (in lib/parse-with-claude.ts):
+const chunks = await splitPdfIntoChunks(pdfBase64, 4);  # Current setting
+```
+
+### 📝 Next Steps
+- Consider adding progress callbacks to show per-chunk completion in UI
+- Monitor API costs with increased parallel requests
+- Session 11: Color-coded bar chart by category (from original roadmap)
+
+---
+
 ## Session 10: January 26, 2025
 
 ### ✅ What Was Completed
