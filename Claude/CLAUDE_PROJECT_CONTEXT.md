@@ -46,6 +46,34 @@ FrugalScan is a privacy-first personal finance web app. Users upload bank statem
 | Hosting | Vercel | Easy deployment |
 | Storage | None (MVP) → localStorage (v1.2) → Supabase (v2) | Progressive complexity |
 
+### PDF Processing Architecture
+
+**Small PDFs (≤5 pages):** Single request to Claude Haiku
+**Large PDFs (>5 pages):** Parallel processing with these settings:
+- Chunk size: 4 pages
+- Concurrency: 3 simultaneous requests (p-limit)
+- Model: Claude Haiku (claude-haiku-4-5-20251001)
+
+**Data Format Contract (CRITICAL):**
+- Amounts are ALWAYS positive numbers
+- `type: 'debit' | 'credit'` indicates direction
+- All downstream code (validation, categorization, analysis, charts) depends on this format
+- Never change amount signs without updating entire pipeline
+
+**Processing Flow:**
+```
+PDF Upload
+↓
+getPdfPageCount() - Check page count
+↓
+If >5 pages: splitPdfIntoChunks() → parseChunksParallel()
+If ≤5 pages: parseSingleRequest()
+↓
+RawTransaction[] (positive amounts + type)
+↓
+validateTransactionSchema() → categorizeAll() → analysis
+```
+
 ### Data Flow
 ```
 User uploads PDF
@@ -96,6 +124,11 @@ User uploads PDF
 | Total accuracy | 99.7% ($29 discrepancy on $10,703) |
 | "Other" category | ~15% (target: <15%) |
 | Processing time | 77 seconds for large PDFs (down from 192s with Haiku) |
+
+**PDF Parsing Performance:**
+- Small PDFs (≤5 pages): ~10-20 seconds
+- Large PDFs (20 pages): ~50-70 seconds (parallel)
+- Accuracy: 99.7% transaction extraction maintained
 
 ---
 
@@ -212,7 +245,9 @@ frugalscan/
 ├── lib/
 │   ├── utils.ts
 │   ├── constants.ts (200+ merchant keywords)
-│   ├── parse-with-claude.ts (multi-page parsing)
+│   ├── pdf-chunker.ts          # NEW: Splits PDFs into chunks
+│   ├── parse-parallel.ts       # NEW: Parallel chunk processing
+│   ├── parse-with-claude.ts    # UPDATED: Routes to parallel/single
 │   ├── validate-transactions.ts
 │   ├── categorize.ts (improved cleaning)
 │   ├── analysis.ts
@@ -238,6 +273,9 @@ frugalscan/
 | Jan 25 | localStorage before Supabase | Progressive complexity; validate before adding infrastructure |
 | Jan 25 | Renamed to FrugalScan | Better brand name, secured frugalscan.com domain |
 | Jan 26 | Claude Haiku for PDF parsing | 60% faster (192s → 77s), 80% cheaper, same accuracy |
+| Jan 30 | Parallel PDF parsing | 4-page chunks, pLimit(3), Haiku model |
+| Jan 30 | Amounts always positive | Parallel parser matches original format exactly |
+| Jan 30 | Foreign currency hint | Explicit skip instruction speeds up complex pages |
 
 ---
 
