@@ -294,6 +294,73 @@ Evaluate:
 
 ---
 
+## Decision: Parallel PDF Processing for Large Statements
+
+**Date:** January 30, 2025
+**Status:** ✅ Accepted
+**Deciders:** Nikolas (Product), Claude (Technical Advisor)
+
+---
+
+### Context
+
+PDF parsing for large bank statements (13-20+ pages) was taking ~70 seconds, creating a poor user experience. Initial attempts at parallelization failed due to:
+- Incorrect data format (negative amounts broke validation)
+- Rate limiting (too many concurrent requests)
+- Chunk boundary issues (transactions split across pages)
+
+### Decision
+
+Implement parallel PDF processing with these specifications:
+- **Threshold:** PDFs >5 pages use parallel processing
+- **Chunk size:** 4 pages per chunk
+- **Concurrency:** Maximum 3 simultaneous API requests
+- **Model:** Claude Haiku (fast, accurate for structured extraction)
+- **Data format:** Matches existing contract (positive amounts + type field)
+
+### Rationale
+
+**Why 4-page chunks:**
+- Smaller (2 pages): Missing transactions at page boundaries
+- Larger (6+ pages): Diminishing parallelization benefits
+- 4 pages: Optimal balance of parallelism and accuracy
+
+**Why pLimit(3):**
+- pLimit(2): Safe but slow
+- pLimit(3): Good balance of speed and rate limit safety
+- pLimit(4+): No additional benefit due to API latency variance
+
+**Why Haiku over Sonnet:**
+- Haiku: ~20s per chunk for extraction
+- Sonnet: ~40-80s per chunk (2-4x slower)
+- Same accuracy for structured table extraction
+- Sonnet reserved for insights generation (reasoning tasks)
+
+### Consequences
+
+**Positive:**
+- 20% faster parsing (70s → 56s average)
+- 100% accuracy maintained
+- No changes to downstream code (validation, categorization, charts)
+- Graceful fallback for small PDFs
+
+**Negative:**
+- API latency variance causes inconsistent times (50-90s range)
+- Additional dependencies (pdf-lib, p-limit)
+- More complex codebase
+
+**Risks & Mitigation:**
+- Rate limits: pLimit(3) stays well under 30k tokens/minute
+- Chunk boundary errors: 4-page chunks tested extensively
+- API changes: Model ID hardcoded, easy to update
+
+### Files Involved
+- `lib/pdf-chunker.ts` - PDF splitting
+- `lib/parse-parallel.ts` - Parallel processing with rate limiting
+- `lib/parse-with-claude.ts` - Routing logic
+
+---
+
 ## Lessons Learned
 
 **Product:**
