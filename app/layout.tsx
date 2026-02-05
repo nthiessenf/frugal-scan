@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AnalysisProvider } from '@/contexts/AnalysisContext';
+import { organizationSchema, softwareApplicationSchema, faqSchema } from '@/lib/structured-data';
 
 export const metadata: Metadata = {
   title: 'FrugalScan - AI-Powered Spending Insights',
@@ -40,6 +41,12 @@ export default function RootLayout({
           minHeight: "100vh",
         }}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([organizationSchema, softwareApplicationSchema, faqSchema]),
+          }}
+        />
         <AnalysisProvider>
           {children}
         </AnalysisProvider>
