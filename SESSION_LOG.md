@@ -4,6 +4,35 @@
 
 ---
 
+## Session 10.5: January [TODAY], 2025
+
+### 📋 Roadmap Revision
+
+**What changed:**
+- Integrated monetization strategy into roadmap
+- Moved budget/trends features from v1.2 to v1.3 (now Pro-only)
+- Added new sessions for monetization infrastructure (usage tracking, upgrade modal, Stripe)
+- Renumbered sessions to reflect new priorities
+
+**New session order:**
+- Session 11: Better AI Insights
+- Session 12: Usage Tracking + Free Tier Limits
+- Session 13: Upgrade Modal + Pro Teaser Page
+- Session 14: Stripe Payment Links (Manual)
+- Session 15: Pro Tier State Management
+- Session 16: Stripe Checkout Integration
+- Session 17-19: Pro-only features (budgets, trends, export)
+
+**Pricing decided:**
+- Free: 3 analyses/month
+- Pro: $4.99/month or $39/year
+- Power: $9.99/month (future, v2.0)
+
+**Rationale:**
+Building monetization scaffolding early means every future feature can be properly gated. Manual payment MVP validates willingness to pay before building automation.
+
+---
+
 ## Session 10: January 30, 2025
 
 ### ✅ What Was Completed

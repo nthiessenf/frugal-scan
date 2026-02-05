@@ -159,37 +159,63 @@ User uploads PDF
 - Multi-mode animated loading screen
 - Production bug fixed: transactions now included in AnalysisResult
 
-### Version 1.1 - Quick Wins (4-6 hours)
-*Focus: Immediate value, low risk, pure frontend work*
+### Version 1.1 - Quick Wins + Monetization Foundation (8-10 hours)
+*Theme: Polish + free tier gates to enable conversion tracking*
 
-| Feature | Status | Time Est. | Description |
-|---------|--------|-----------|-------------|
-| Merchants by category drill-down | ✅ Session 10 Complete | 2-3 hrs | Click pie chart category → see top merchants in that category |
-| Color-coded bar chart | 📋 Session 11 | 1-2 hrs | Each merchant bar colored by its category |
-| Better AI insights | 📋 Session 12 | 3-4 hrs | Specific, surprising, actionable insights (not obvious observations) |
+| Session | Task | Status | Time Est. |
+|---------|------|--------|-----------|
+| 11 | Better AI Insights | 📋 Next | 3-4 hrs |
+| 12 | Usage Tracking + Free Tier Limits | 📋 Planned | 2-3 hrs |
+| 13 | Upgrade Modal + Pro Teaser Page | 📋 Planned | 2-3 hrs |
 
-**Why v1.1 first:** All frontend/prompt work using existing architecture. High user value, low risk. Builds confidence before tackling new patterns.
+### Version 1.2 - Pro Tier Launch (8-10 hours)
+*Theme: Start making money*
 
-### Version 1.2 - Personal Finance Features (6-8 hours)
-*Focus: Transform from analysis tool to personal finance companion*
+| Session | Task | Status | Time Est. |
+|---------|------|--------|-----------|
+| 14 | Stripe Payment Links (Manual MVP) | 📋 Planned | 2-3 hrs |
+| 15 | Pro Tier State Management | 📋 Planned | 2-3 hrs |
+| 16 | Stripe Checkout Integration | 📋 Planned | 4-5 hrs |
 
-| Feature | Status | Time Est. | Description |
-|---------|--------|-----------|-------------|
-| Budget targets | 📋 Session 13 | 4-6 hrs | Set spending limits per category, see progress bars |
-| Month-over-month trends | 📋 Session 14 | 6-8 hrs | Upload multiple statements, see line charts over time |
+### Version 1.3 - Pro Features / Stickiness (10-12 hours)
+*Theme: Features that make Pro worth keeping*
 
-**Why v1.2 second:** Introduces localStorage (new skill). Both features use same storage pattern—learn once, apply twice. Dramatically increases stickiness.
+| Session | Task | Status | Time Est. |
+|---------|------|--------|-----------|
+| 17 | Budget Targets (Pro-only) | 📋 Planned | 4-6 hrs |
+| 18 | Month-over-Month Trends (Pro-only) | 📋 Planned | 6-8 hrs |
+| 19 | PDF Export (Pro-only) | 📋 Planned | 2-3 hrs |
 
-### Version 2.0 - Platform Features (15-20+ hours)
-*Focus: Full personal finance platform*
+### Version 2.0 - Platform + Power Tier (20+ hours)
+*Theme: Database-backed features, scale*
 
-| Feature | Status | Time Est. | Description |
-|---------|--------|-----------|-------------|
-| Multi-account consolidation | 📋 Planned | 10-15 hrs | Upload checking + credit card → unified view |
-| User accounts (Supabase) | 📋 Planned | 8-10 hrs | Persist data, enable history |
-| Historical data persistence | 📋 Planned | 4-6 hrs | Save and retrieve past analyses |
+| Session | Task | Status | Time Est. |
+|---------|------|--------|-----------|
+| 20+ | Supabase Integration | 📋 Planned | 6-8 hrs |
+| 21+ | User Accounts | 📋 Planned | 4-6 hrs |
+| 22+ | Multi-Account Consolidation (Power-only) | 📋 Planned | 8-10 hrs |
+| 23+ | Power Tier Launch ($9.99/mo) | 📋 Planned | 4-6 hrs |
 
-**Why v2.0 last:** Requires database infrastructure. Complex edge cases (deduplication). Better to validate product-market fit first.
+---
+
+## 💰 Monetization Strategy
+
+### Pricing
+- **Free:** 3 analyses/month, 3 insights
+- **Pro ($4.99/mo):** Unlimited analyses, 5 insights, budgets, trends, export
+- **Power ($9.99/mo):** Multi-account, sharing (future)
+
+### Implementation Approach
+1. v1.1: Add usage tracking + upgrade modal (free tier gates)
+2. v1.2: Stripe Payment Links (manual MVP) → Stripe Checkout (automated)
+3. v1.3: Build Pro-only features (budgets, trends, export)
+4. v2.0: Database + Power tier
+
+### Key Files (when built)
+- `lib/usage-tracking.ts` - Track free tier limits
+- `lib/subscription.ts` - Pro tier state management
+- `components/ui/upgrade-modal.tsx` - Upgrade prompt
+- `app/pro/page.tsx` - Pro landing page
 
 ---
 

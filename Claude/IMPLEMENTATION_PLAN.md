@@ -25,40 +25,87 @@
 
 **🚀 Live at [frugalscan.com](https://frugalscan.com)**
 
-### Version 1.1 - Quick Wins (4-6 hours)
+### Version 1.1 - Quick Wins + Monetization Foundation (8-10 hours)
+*Theme: Polish + free tier gates to enable conversion tracking*
 
 | Session | Task | Status | Time Est. |
 |---------|------|--------|-----------|
-| 10 | Merchants by Category Drill-Down | ✅ Complete | 2-3 hrs (actual: ~4-5 hrs) |
-| 11 | Color-Coded Bar Chart by Category | 📋 Planned | 1-2 hrs |
-| 12 | Better AI Insights | 📋 Planned | 3-4 hrs |
+| 11 | Better AI Insights | 📋 Next | 3-4 hrs |
+| 12 | Usage Tracking + Free Tier Limits | 📋 Planned | 2-3 hrs |
+| 13 | Upgrade Modal + Pro Teaser Page | 📋 Planned | 2-3 hrs |
 
-### Version 1.2 - Personal Finance Features (6-8 hours)
-
-| Session | Task | Status | Time Est. |
-|---------|------|--------|-----------|
-| 13 | Budget Targets (localStorage) | 📋 Planned | 4-6 hrs |
-| 14 | Month-over-Month Trends | 📋 Planned | 6-8 hrs |
-
-### Version 2.0 - Platform Features (15-20+ hours)
+### Version 1.2 - Pro Tier Launch (8-10 hours)
+*Theme: Start making money*
 
 | Session | Task | Status | Time Est. |
 |---------|------|--------|-----------|
-| 15+ | Multi-Account Consolidation | 📋 Planned | 10-15 hrs |
-| 16+ | User Accounts (Supabase) | 📋 Planned | 8-10 hrs |
-| 17+ | Historical Data Persistence | 📋 Planned | 4-6 hrs |
+| 14 | Stripe Payment Links (Manual MVP) | 📋 Planned | 2-3 hrs |
+| 15 | Pro Tier State Management | 📋 Planned | 2-3 hrs |
+| 16 | Stripe Checkout Integration | 📋 Planned | 4-5 hrs |
+
+### Version 1.3 - Pro Features / Stickiness (10-12 hours)
+*Theme: Features that make Pro worth keeping*
+
+| Session | Task | Status | Time Est. |
+|---------|------|--------|-----------|
+| 17 | Budget Targets (Pro-only) | 📋 Planned | 4-6 hrs |
+| 18 | Month-over-Month Trends (Pro-only) | 📋 Planned | 6-8 hrs |
+| 19 | PDF Export (Pro-only) | 📋 Planned | 2-3 hrs |
+
+### Version 2.0 - Platform + Power Tier (20+ hours)
+*Theme: Database-backed features, scale*
+
+| Session | Task | Status | Time Est. |
+|---------|------|--------|-----------|
+| 20+ | Supabase Integration | 📋 Planned | 6-8 hrs |
+| 21+ | User Accounts | 📋 Planned | 4-6 hrs |
+| 22+ | Multi-Account Consolidation (Power-only) | 📋 Planned | 8-10 hrs |
+| 23+ | Power Tier Launch ($9.99/mo) | 📋 Planned | 4-6 hrs |
+
+---
+
+## Monetization Strategy
+
+### Pricing Tiers
+
+**Free Tier:**
+- 3 statement analyses per month
+- Basic category breakdown
+- Top 10 merchants chart
+- 3 AI insights
+
+**Pro Tier ($4.99/month or $39/year):**
+- Unlimited analyses
+- 5 AI insights (instead of 3)
+- Merchant drill-down by category
+- Budget tracking & alerts
+- Month-over-month trends
+- PDF export
+
+**Power Tier ($9.99/month) - Future:**
+- Everything in Pro
+- Multi-account consolidation
+- Household sharing
+- Priority support
+
+### Revenue Math
+- API cost per analysis: ~$0.07
+- Free user (3 analyses): $0.21/month cost
+- Pro user (10 analyses avg): $0.70/month cost
+- Pro gross margin: ~86%
 
 ---
 
 ## Roadmap Rationale
 
-### Why This Order?
+**Why monetization in v1.1?**
+Revenue infrastructure should come before more features. Every feature from now on should either drive upgrades or retain paying users.
 
-**v1.1 (Quick Wins)** - All frontend/prompt work using existing architecture. High user value, low risk. Builds confidence before tackling new patterns.
+**Why manual payments first (v1.2)?**
+Validates willingness to pay with zero code. Manual process works for first 10-50 customers while automation is built.
 
-**v1.2 (Personal Finance)** - Introduces localStorage for data persistence. Both features (budgets + trends) use the same storage pattern, so learning once applies twice.
-
-**v2.0 (Platform)** - Requires database infrastructure and handles complex edge cases. Better to validate product-market fit with v1.1 and v1.2 first.
+**Why Pro features in v1.3 (not v1.2)?**
+Ship payment capability first, then build features that justify the subscription. Proves people will pay before investing in retention features.
 
 ---
 
