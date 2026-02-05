@@ -2,8 +2,8 @@ export const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'FrugalScan',
-  url: 'https://www.frugalscan.com',
-  logo: 'https://www.frugalscan.com/icon.png',
+  url: 'https://frugalscan.com',
+  logo: 'https://frugalscan.com/icon.png',
   description: 'FrugalScan is a privacy-first personal finance app that analyzes bank statement PDFs using AI to provide spending insights without requiring users to link their bank accounts.',
   sameAs: [],
 };
@@ -15,7 +15,7 @@ export const softwareApplicationSchema = {
   applicationCategory: 'FinanceApplication',
   operatingSystem: 'Web',
   description: 'Upload your bank statement PDF and get AI-powered spending insights in 60 seconds. No account linking required. Privacy-first personal finance analysis.',
-  url: 'https://www.frugalscan.com',
+  url: 'https://frugalscan.com',
   offers: {
     '@type': 'Offer',
     price: '0',

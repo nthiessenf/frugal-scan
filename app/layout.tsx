@@ -8,16 +8,22 @@ export const metadata: Metadata = {
   description: 'Upload your bank statement and get instant AI-powered insights into your spending habits. Free, private, no account linking required.',
   keywords: ['spending tracker', 'budget analysis', 'personal finance', 'AI finance', 'bank statement analyzer', 'frugal', 'frugalscan'],
   authors: [{ name: 'FrugalScan' }],
+  metadataBase: new URL('https://frugalscan.com'),
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
-    title: 'FrugalScan - See Where Your Money Really Goes',
-    description: 'Upload your bank statement and get AI-powered spending insights in 60 seconds.',
     type: 'website',
     locale: 'en_US',
+    url: 'https://frugalscan.com',
+    siteName: 'FrugalScan',
+    title: 'FrugalScan - See Where Your Money Really Goes',
+    description: 'Upload your bank statement and get AI-powered spending insights in 60 seconds. No account linking. No subscriptions. Just clarity.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'FrugalScan - AI Spending Insights',
-    description: 'Upload your bank statement and get AI-powered spending insights in 60 seconds.',
+    title: 'FrugalScan - See Where Your Money Really Goes',
+    description: 'Upload your bank statement and get AI-powered spending insights in 60 seconds. Privacy-first personal finance.',
   },
 };
 

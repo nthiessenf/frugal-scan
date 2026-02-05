@@ -30,7 +30,7 @@ User-agent: Bingbot
 Allow: /
 
 # Sitemap location
-Sitemap: https://www.frugalscan.com/sitemap.xml
+Sitemap: https://frugalscan.com/sitemap.xml
 
 # Block API routes from indexing (they're not pages)
 User-agent: *
