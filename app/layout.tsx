@@ -47,12 +47,13 @@ export default function RootLayout({
           minHeight: "100vh",
         }}
       >
-        <script
+        {/* JSON-LD structured data - temporarily disabled to fix runtime error */}
+        {/* <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify([organizationSchema, softwareApplicationSchema, faqSchema]),
+            __html: JSON.stringify([organizationSchema, softwareApplicationSchema, faqSchema], null, 0),
           }}
-        />
+        /> */}
         <AnalysisProvider>
           {children}
         </AnalysisProvider>

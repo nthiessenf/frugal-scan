@@ -57,7 +57,8 @@ export async function POST(request: NextRequest) {
         summary,
         categoryBreakdown,
         topMerchants,
-        subscriptions || []
+        subscriptions || [],
+        transactions
       );
       insights = aiResponse.insights;
       tips = aiResponse.tips;
