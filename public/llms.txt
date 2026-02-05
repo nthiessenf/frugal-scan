@@ -1,0 +1,51 @@
+# FrugalScan
+
+> FrugalScan is a privacy-first personal finance web application that analyzes bank statement PDFs using AI to provide spending insights without requiring users to link their bank accounts.
+
+## What FrugalScan Does
+
+FrugalScan helps people understand where their money goes by:
+- Parsing bank statement PDFs with 99.7% accuracy using AI
+- Automatically categorizing transactions into spending categories
+- Detecting recurring subscriptions
+- Generating personalized insights and savings recommendations
+- Displaying clear charts showing spending by category and top merchants
+
+## Key Differentiators
+
+- **Privacy-First**: No bank account linking required. Your statement is processed and immediately discarded.
+- **No Account Required**: Upload and analyze without creating an account.
+- **AI-Powered Accuracy**: Uses Claude AI to understand context, not brittle regex patterns.
+- **60-Second Results**: Full analysis in about one minute.
+
+## How It Works
+
+1. User uploads a bank or credit card statement PDF
+2. AI extracts and validates all transactions
+3. Transactions are categorized using 200+ merchant keywords
+4. Subscriptions are detected from a whitelist of known services
+5. AI generates personalized insights and savings tips
+6. Results displayed with interactive charts
+
+## Pages
+
+- [Home](https://www.frugalscan.com/): Upload your statement and start analysis
+- [Results](https://www.frugalscan.com/results): View spending breakdown, insights, and recommendations
+
+## Technical Details
+
+- Built with Next.js 14 and TypeScript
+- Uses Claude API for PDF parsing and insights generation
+- Recharts for data visualization
+- Hosted on Vercel
+
+## Target Users
+
+People who want to understand their spending but:
+- Don't want to link their bank accounts to apps like Mint or YNAB
+- Find traditional budgeting apps overwhelming
+- Want a quick, one-time analysis rather than ongoing tracking
+
+## Contact
+
+Website: https://www.frugalscan.com
