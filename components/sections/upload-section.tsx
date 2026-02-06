@@ -5,9 +5,10 @@ import { UploadZone } from "@/components/ui/upload-zone";
 
 interface UploadSectionProps {
   onFileSelect?: (file: File) => void;
+  usageKey?: string;
 }
 
-export function UploadSection({ onFileSelect }: UploadSectionProps) {
+export function UploadSection({ onFileSelect, usageKey }: UploadSectionProps) {
   return (
     <section id="upload" className="py-20 px-5">
       <div className="max-w-2xl mx-auto text-center">
@@ -22,6 +23,7 @@ export function UploadSection({ onFileSelect }: UploadSectionProps) {
             console.log('File selected:', file.name);
             onFileSelect?.(file);
           }}
+          usageKey={usageKey}
         />
 
         {/* Privacy Note */}

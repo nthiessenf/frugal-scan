@@ -3,12 +3,14 @@
 import React, { useState, useRef, DragEvent } from "react";
 import { Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UsageIndicator } from "@/components/ui/usage-indicator";
 
 interface UploadZoneProps {
   onFileSelect: (file: File) => void;
   isLoading?: boolean;
   error?: string;
   className?: string;
+  usageKey?: string;
 }
 
 export function UploadZone({
@@ -16,6 +18,7 @@ export function UploadZone({
   isLoading = false,
   error,
   className,
+  usageKey,
 }: UploadZoneProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -128,6 +131,11 @@ export function UploadZone({
         <p className="text-sm text-[#6e6e73]">
           or click to browse (PDF only, max 10MB)
         </p>
+      </div>
+
+      {/* Usage indicator - subtle helper text */}
+      <div className="mt-4">
+        <UsageIndicator key={usageKey} />
       </div>
 
       {error && (

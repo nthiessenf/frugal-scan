@@ -13,7 +13,7 @@ import { mockAnalysisResult } from '@/lib/mock-data';
 
 export default function Home() {
   const router = useRouter();
-  const { status, progress, error, analyzeStatement, reset } = useAnalysis();
+  const { status, progress, error, analyzeStatement, reset, limitReached } = useAnalysis();
   const { result, setResult } = useAnalysisContext();
 
   // Navigate to results when analysis is complete
@@ -68,7 +68,10 @@ export default function Home() {
     <main>
       <Hero />
       <HowItWorks />
-      <UploadSection onFileSelect={handleFileSelect} />
+      <UploadSection 
+        onFileSelect={handleFileSelect}
+        usageKey={`usage-${status}-${result ? 'complete' : 'idle'}`}
+      />
       {process.env.NODE_ENV === 'development' && (
         <div className="mt-6 text-center">
           <button
