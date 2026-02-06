@@ -12,6 +12,7 @@ frugalscan/
 │   ├── layout.tsx               # Root layout with AnalysisProvider
 │   ├── page.tsx                 # Landing page with upload
 │   ├── results/page.tsx         # Results dashboard
+│   ├── pro/page.tsx             # Pro tier landing page
 │   ├── error.tsx                # Error boundary
 │   ├── not-found.tsx            # 404 page
 │   └── api/
@@ -23,7 +24,9 @@ frugalscan/
 │   │   ├── button.tsx           # Button variants (primary, secondary, ghost)
 │   │   ├── card.tsx             # GlassCard with hover effects
 │   │   ├── upload-zone.tsx      # Drag-and-drop file upload
-│   │   └── error-message.tsx    # Error display component
+│   │   ├── error-message.tsx    # Error display component
+│   │   ├── usage-indicator.tsx  # Shows remaining free analyses
+│   │   └── upgrade-modal.tsx    # Modal when limit reached
 │   ├── charts/
 │   │   ├── spending-chart.tsx   # Pie chart (Recharts)
 │   │   └── merchant-chart.tsx   # Bar chart (Recharts)
@@ -49,7 +52,9 @@ frugalscan/
 │   ├── validate-transactions.ts # Schema validation
 │   ├── categorize.ts            # Merchant cleaning & categorization
 │   ├── analysis.ts              # Summary calculations
+│   ├── insight-metrics.ts       # Pre-calculates metrics for AI insights
 │   ├── claude-insights.ts       # AI insights generation
+│   ├── usage-tracking.ts        # Tracks free tier usage in localStorage
 │   └── hooks/
 │       └── useAnalysis.ts       # Analysis flow hook
 │

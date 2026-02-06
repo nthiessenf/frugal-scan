@@ -30,9 +30,10 @@
 
 | Session | Task | Status | Time Est. |
 |---------|------|--------|-----------|
-| 11 | Better AI Insights | 📋 Next | 3-4 hrs |
-| 12 | Usage Tracking + Free Tier Limits | 📋 Planned | 2-3 hrs |
-| 13 | Upgrade Modal + Pro Teaser Page | 📋 Planned | 2-3 hrs |
+| 11 | Better AI Insights | ✅ Complete | 3-4 hrs |
+| 12 | Usage Tracking + Free Tier Limits | ✅ Complete | 2-3 hrs |
+| 13 | Upgrade Modal + Pro Teaser Page | ✅ Complete | 2-3 hrs |
+| 14 | Stripe Payment Links (Manual MVP) | 📋 Next | 2-3 hrs |
 
 ### Version 1.2 - Pro Tier Launch (8-10 hours)
 *Theme: Start making money*

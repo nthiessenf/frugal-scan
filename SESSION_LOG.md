@@ -4,6 +4,59 @@
 
 ---
 
+## Session 11-12: February [TODAY], 2025
+
+### ✅ What Was Completed
+
+**Session 11: Better AI Insights**
+- Created lib/insight-metrics.ts with calculateInsightMetrics()
+- Calculates: merchant frequency, small purchases (<$5, <$10, <$20), long tail spending, category ratios, annual projections
+- Updated lib/claude-insights.ts to include metrics in prompt
+- Insights now cite specific numbers (visit counts, exact amounts, annual projections)
+
+**Session 12: Usage Tracking + Free Tier Limits**
+- Created lib/usage-tracking.ts with localStorage tracking
+- Functions: getUsageData(), incrementUsage(), canAnalyze(), getRemainingAnalyses()
+- Created components/ui/usage-indicator.tsx - minimal design that escalates:
+  - Full quota: "3 free analyses available" (subtle)
+  - Some used: "2 of 3 free analyses remaining"
+  - Last one: "Last free analysis · Upgrade for unlimited"
+  - Limit reached: "Monthly limit reached · Upgrade to Pro →"
+- Integrated into upload zone
+- Updated useAnalysis hook to check limits and increment after successful analysis
+
+**Session 12 (continued): Upgrade Modal + Pro Page**
+- Created components/ui/upgrade-modal.tsx
+- Created app/pro/page.tsx - single-card design with:
+  - Coming soon badge
+  - Price ($4.99/mo or $39/yr)
+  - 2x2 feature grid with icons
+  - Email capture form
+  - "No spam" reassurance
+- Modal triggers when user tries to upload after hitting limit
+
+### 🎨 Design Decisions
+
+- Usage indicator: "Invisible until it matters" - Apple-style progressive disclosure
+- Pro page: Single centered card, email capture above the fold, features as supporting proof
+- Button colors: Consistent gradient (blue-300 → purple-300 → pink-200) across app
+- Solid white card (not transparent) for Pro page - better readability
+
+### 🔧 Technical Notes
+
+- Usage stored in localStorage with key 'frugalscan_usage'
+- Monthly reset based on monthYear field ("YYYY-MM" format)
+- Mock data bypasses usage tracking (intentional - for UI testing)
+- stopPropagation() on upgrade links to prevent triggering file picker
+
+### 📋 Next Steps
+
+- Session 14: Stripe Payment Links (manual MVP for first customers)
+- Session 15: Pro tier state management
+- Session 16: Stripe Checkout integration
+
+---
+
 ## Session 10.5: January [TODAY], 2025
 
 ### 📋 Roadmap Revision

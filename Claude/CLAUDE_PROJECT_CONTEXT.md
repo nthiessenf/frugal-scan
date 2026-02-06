@@ -152,7 +152,14 @@ User uploads PDF
 | Mobile responsive | ✅ Complete | Tested at 375px |
 | Deploy to Vercel | ✅ Complete | Live at frugalscan.com |
 
-**Latest Updates (Session 10 - January 26, 2025):**
+**Latest Updates (Session 11-12 - February 2025):**
+- Better AI insights with pre-calculated metrics (frequency, small purchases, long tail, annual projections)
+- Free tier usage tracking (3 analyses/month limit)
+- Usage indicator integrated into upload zone
+- Upgrade modal when limit is reached
+- /pro landing page with email capture for waitlist
+
+**Previous Updates (Session 10 - January 26, 2025):**
 - Category drill-down filter implemented (click category → see merchants)
 - Mock data system for instant dev testing
 - PDF parsing switched to Claude Haiku (60% faster: 192s → 77s)
@@ -256,6 +263,7 @@ frugalscan/
 │   ├── layout.tsx (with AnalysisProvider)
 │   ├── page.tsx (integrated upload flow)
 │   ├── results/page.tsx (real data from context)
+│   ├── pro/page.tsx (Pro tier landing page with email capture)
 │   ├── error.tsx (error boundary)
 │   ├── not-found.tsx (404 page)
 │   ├── loading.tsx (loading state)
@@ -263,7 +271,7 @@ frugalscan/
 │       ├── parse-statement/route.ts
 │       └── analyze/route.ts
 ├── components/
-│   ├── ui/ (button, card, upload-zone, error-message)
+│   ├── ui/ (button, card, upload-zone, error-message, usage-indicator, upgrade-modal)
 │   ├── charts/ (spending-chart, merchant-chart - Recharts)
 │   └── sections/ (hero, how-it-works, upload-section, processing-screen, summary-header, insights-grid, subscriptions-list, tips-section)
 ├── contexts/
@@ -271,13 +279,15 @@ frugalscan/
 ├── lib/
 │   ├── utils.ts
 │   ├── constants.ts (200+ merchant keywords)
-│   ├── pdf-chunker.ts          # NEW: Splits PDFs into chunks
-│   ├── parse-parallel.ts       # NEW: Parallel chunk processing
-│   ├── parse-with-claude.ts    # UPDATED: Routes to parallel/single
+│   ├── pdf-chunker.ts          # Splits PDFs into chunks
+│   ├── parse-parallel.ts       # Parallel chunk processing
+│   ├── parse-with-claude.ts    # Routes to parallel/single
 │   ├── validate-transactions.ts
 │   ├── categorize.ts (improved cleaning)
 │   ├── analysis.ts
+│   ├── insight-metrics.ts      # Pre-calculates metrics for AI insights
 │   ├── claude-insights.ts
+│   ├── usage-tracking.ts       # Tracks free tier usage in localStorage
 │   └── hooks/useAnalysis.ts
 ├── types/index.ts
 └── .env.local
@@ -302,6 +312,9 @@ frugalscan/
 | Jan 30 | Parallel PDF parsing | 4-page chunks, pLimit(3), Haiku model |
 | Jan 30 | Amounts always positive | Parallel parser matches original format exactly |
 | Jan 30 | Foreign currency hint | Explicit skip instruction speeds up complex pages |
+| Feb 2025 | Pre-calculate insight metrics | Claude generates better insights when given specific data points to cite |
+| Feb 2025 | Minimal usage indicator | "Invisible until it matters" - subtle when quota available, prominent when low/exhausted |
+| Feb 2025 | Single-card Pro page | Focused, premium feel with email capture above the fold |
 
 ---
 
