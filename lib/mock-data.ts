@@ -139,7 +139,7 @@ const mockInsights: Insight[] = [
     description: 'While your top 10 merchants get the spotlight, 25 other merchants account for 31% of your spending—a reminder that small amounts add up.',
     severity: 'info',
     category: undefined,
-    amount: null,
+    amount: undefined,
   },
   {
     id: 'insight-4',
