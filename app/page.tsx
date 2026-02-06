@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Hero } from '@/components/sections/hero';
 import { HowItWorks } from '@/components/sections/how-it-works';
 import { UploadSection } from '@/components/sections/upload-section';
 import { ProcessingScreen } from '@/components/sections/processing-screen';
 import { ErrorMessage } from '@/components/ui/error-message';
+import { UpgradeModal } from '@/components/ui/upgrade-modal';
 import { useAnalysis } from '@/lib/hooks/useAnalysis';
 import { useAnalysisContext } from '@/contexts/AnalysisContext';
 import { mockAnalysisResult } from '@/lib/mock-data';
@@ -15,6 +16,7 @@ export default function Home() {
   const router = useRouter();
   const { status, progress, error, analyzeStatement, reset, limitReached } = useAnalysis();
   const { result, setResult } = useAnalysisContext();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Navigate to results when analysis is complete
   useEffect(() => {
@@ -22,6 +24,13 @@ export default function Home() {
       router.push('/results');
     }
   }, [status, result, router]);
+
+  // Show upgrade modal when limit is reached
+  useEffect(() => {
+    if (limitReached || (error && (error.toLowerCase().includes('limit') || error.toLowerCase().includes('upgrade')))) {
+      setShowUpgradeModal(true);
+    }
+  }, [error, limitReached]);
 
   const handleFileSelect = async (file: File) => {
     await analyzeStatement(file);
@@ -82,6 +91,13 @@ export default function Home() {
           </button>
         </div>
       )}
+      <UpgradeModal 
+        isOpen={showUpgradeModal} 
+        onClose={() => {
+          setShowUpgradeModal(false);
+          reset(); // Reset error state when closing modal
+        }} 
+      />
     </main>
   );
 }

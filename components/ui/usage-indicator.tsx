@@ -42,7 +42,11 @@ export function UsageIndicator() {
       <div className="flex items-center gap-2 text-xs">
         <span className="text-amber-600 font-medium">Last free analysis</span>
         <span className="text-[#86868b]">·</span>
-        <Link href="/pro" className="text-purple-600 hover:text-purple-700 font-medium">
+        <Link 
+          href="/pro" 
+          onClick={(e) => e.stopPropagation()}
+          className="text-purple-600 hover:text-purple-700 font-medium"
+        >
           Upgrade for unlimited
         </Link>
       </div>
@@ -54,7 +58,11 @@ export function UsageIndicator() {
     <div className="flex items-center gap-2 text-sm">
       <span className="text-[#1d1d1f] font-medium">Monthly limit reached</span>
       <span className="text-[#86868b]">·</span>
-      <Link href="/pro" className="text-purple-600 hover:text-purple-700 font-medium">
+      <Link 
+        href="/pro" 
+        onClick={(e) => e.stopPropagation()}
+        className="text-purple-600 hover:text-purple-700 font-medium"
+      >
         Upgrade to Pro →
       </Link>
     </div>
