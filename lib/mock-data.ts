@@ -115,46 +115,47 @@ function calculateTopMerchants(transactions: CategorizedTransaction[]): TopMerch
     .slice(0, 10);
 }
 
-// Mock insights
+// Mock insights - updated to reflect metrics-driven format
 const mockInsights: Insight[] = [
   {
     id: 'insight-1',
-    title: 'Coffee adds up fast',
-    description: 'You visited Starbucks 4 times this month, spending $26.00. That\'s $312/year on coffee runs alone.',
-    severity: 'warning',
+    title: 'The Small Purchase Effect',
+    description: 'Your 18 purchases under $10 added up to $127.43 this month. That\'s $1,529 per year—small swipes add up faster than you\'d think.',
+    severity: 'info',
+    category: null,
+    amount: 127.43,
+  },
+  {
+    id: 'insight-2',
+    title: 'Your Coffee Ritual',
+    description: 'You visited Starbucks 4 times this month, averaging $6.50 per visit. At $26/month, that\'s $312 annually—almost a nice dinner out every month.',
+    severity: 'info',
     category: 'food_dining',
     amount: 26.00,
   },
   {
-    id: 'insight-2',
-    title: 'Subscription creep detected',
-    description: 'Your 5 subscriptions total $116.96/month ($1,403/year). Adobe Creative Cloud at $54.99 is your biggest.',
-    severity: 'warning',
-    category: 'subscriptions',
-    amount: 116.96,
-  },
-  {
     id: 'insight-3',
-    title: 'Grocery store loyalty pays off',
-    description: 'HEB accounts for 33% of your grocery spending. Consider their loyalty program for additional savings.',
+    title: 'The Long Tail of Spending',
+    description: 'While your top 10 merchants get the spotlight, 25 other merchants account for 31% of your spending—a reminder that small amounts add up.',
     severity: 'info',
-    category: 'groceries',
+    category: null,
+    amount: null,
   },
   {
     id: 'insight-4',
-    title: 'Dining out rivals groceries',
-    description: 'You spent $185.70 on dining vs $667.01 on groceries. Eating out is 28% of your food budget.',
+    title: 'Dining Out vs Groceries',
+    description: 'You spend $185.70 on dining out versus $667.01 on groceries—that\'s 0.28x the grocery budget. Dining out is 22% of your total food spending.',
     severity: 'info',
     category: 'food_dining',
     amount: 185.70,
   },
   {
     id: 'insight-5',
-    title: 'Amazon is your top retailer',
-    description: 'Three Amazon orders totaling $136.71 this month. Consider if Prime ($14.99/mo) is worth it at this volume.',
-    severity: 'info',
-    category: 'shopping',
-    amount: 136.71,
+    title: 'Annual Subscription Cost',
+    description: 'Your 5 subscriptions total $116.96/month. Projected annually, that\'s $1,403.52—enough for a nice vacation or emergency fund boost.',
+    severity: 'warning',
+    category: 'subscriptions',
+    amount: 116.96,
   },
 ];
 

@@ -23,8 +23,14 @@ export async function generateInsights(
   transactions: CategorizedTransaction[]
 ): Promise<{ insights: Insight[]; tips: SavingsTip[] }> {
   
+  console.log('[claude-insights] Starting generateInsights...');
+  console.log(`[claude-insights] Transactions: ${transactions.length}, Period: ${summary.periodDays} days`);
+  
   // Calculate detailed metrics for better insights
   const metrics = calculateInsightMetrics(transactions, subscriptions, summary.periodDays);
+  console.log('=== INSIGHT METRICS ===');
+  console.log(JSON.stringify(metrics, null, 2));
+  console.log('=== END METRICS ===');
   
   // Build the context for Claude
   const categoryList = categoryBreakdown
@@ -141,6 +147,10 @@ TIP GUIDELINES:
 - Don't suggest extreme measures
 
 Respond with ONLY the JSON, no markdown, no explanation.`;
+
+  console.log('=== CLAUDE PROMPT (with metrics) ===');
+  console.log(userPrompt);
+  console.log('=== END PROMPT ===');
 
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',

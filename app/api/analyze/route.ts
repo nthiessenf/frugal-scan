@@ -4,6 +4,7 @@ import { calculateSummary, getCategoryBreakdown, getTopMerchants } from '@/lib/a
 import { generateInsights } from '@/lib/claude-insights';
 
 export async function POST(request: NextRequest) {
+  console.log('\n\n🚀 ===== ANALYZE API ROUTE CALLED =====');
   const timings: Record<string, number> = {};
   const startTotal = Date.now();
   
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest) {
     const startClaude = Date.now();
     
     try {
+      console.log('[analyze] About to call generateInsights...');
       const aiResponse = await generateInsights(
         summary,
         categoryBreakdown,
