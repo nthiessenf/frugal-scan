@@ -105,6 +105,8 @@ ${metricsSection}
 YOUR TASK:
 Review all the data points above. Surface the 5 most interesting, surprising, or actionable patterns you find. Each insight MUST cite specific numbers from the data. At least one should be positive (celebrate something good). Avoid obvious observations like "your biggest category was X" - the user can see that in the chart.
 
+CRITICAL: Include annual projections to help users see long-term impact. When mentioning monthly or period spending, ALWAYS include the annual equivalent (e.g., "That's $1,044 per year" or "annually that's $X"). Use the annual projections from the "Annualized Projections" section above.
+
 GOOD INSIGHT EXAMPLES:
 - "You stopped at ${metrics.mostFrequentMerchant.name} ${metrics.mostFrequentMerchant.visits} times this month, averaging $${(metrics.mostFrequentMerchant.total / metrics.mostFrequentMerchant.visits).toFixed(2)} per visit. These quick stops add up to $${(metrics.mostFrequentMerchant.total * 12).toFixed(2)} annually."
 - "Your ${metrics.smallPurchases.under10.count} purchases under $10 totaled $${metrics.smallPurchases.under10.total.toFixed(2)}—the 'it's just $5' effect is real. That's $${(metrics.smallPurchases.under10.total * (365 / summary.periodDays)).toFixed(2)} per year on small purchases."
@@ -121,7 +123,7 @@ RESPOND WITH VALID JSON ONLY:
     {
       "id": "insight-1",
       "title": "short catchy title (5-8 words)",
-      "description": "2-3 sentences with specific numbers from the data. Cite exact amounts, frequencies, or percentages. Use annual projections when relevant.",
+      "description": "2-3 sentences with specific numbers from the data. Cite exact amounts, frequencies, or percentages. ALWAYS include annual projections when mentioning monthly/period spending (e.g., 'That's $1,044 per year').",
       "severity": "info" | "warning" | "positive",
       "category": "category_name if applicable, otherwise null",
       "amount": number if applicable, otherwise null
