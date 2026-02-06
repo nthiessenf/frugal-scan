@@ -122,7 +122,7 @@ const mockInsights: Insight[] = [
     title: 'The Small Purchase Effect',
     description: 'Your 18 purchases under $10 added up to $127.43 this month. That\'s $1,529 per year—small swipes add up faster than you\'d think.',
     severity: 'info',
-    category: null,
+    category: undefined,
     amount: 127.43,
   },
   {
@@ -138,7 +138,7 @@ const mockInsights: Insight[] = [
     title: 'The Long Tail of Spending',
     description: 'While your top 10 merchants get the spotlight, 25 other merchants account for 31% of your spending—a reminder that small amounts add up.',
     severity: 'info',
-    category: null,
+    category: undefined,
     amount: null,
   },
   {
