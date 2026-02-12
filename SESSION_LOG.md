@@ -4,6 +4,58 @@
 
 ---
 
+## Session 14-15: February 12, 2025
+
+### ✅ What Was Completed
+
+**Session 14: Stripe Payment Links (Manual MVP)**
+- Integrated Stripe Payment Links into upgrade modal and `/pro` page
+- Added environment variables: `NEXT_PUBLIC_STRIPE_PRO_MONTHLY_LINK` and `NEXT_PUBLIC_STRIPE_PRO_ANNUAL_LINK`
+- Two payment buttons: "Pay Monthly with Stripe" and "Pay Yearly (Save 35%)"
+- Both buttons open Stripe checkout in new tab
+- Updated README with Stripe setup instructions
+- Manual activation flow documented (email customers codes after payment)
+
+**Session 15: Pro Tier State Management**
+- Created `lib/pro-status.ts` with localStorage-based Pro tracking:
+  - `isPro()` - check Pro status
+  - `setProStatus()` - activate Pro (manual/stripe/code)
+  - `activateProWithCode()` - activate with code (e.g., "PRO2025")
+  - Expiration date support for future subscription management
+- Updated `lib/usage-tracking.ts` to check Pro status and bypass free tier limits
+- Pro users get unlimited analyses (returns -1 for remaining)
+- Updated `useAnalysis` hook to respect Pro status
+- Updated `components/ui/usage-indicator.tsx` to show "Pro · Unlimited analyses" badge
+- Upgrade modal now hides if user is already Pro
+- Added Pro activation code input to `/pro` page
+- Pro success screen shows when user is already activated
+
+### 🎨 Design Decisions
+
+- Pro badge: Purple sparkle icon + "Pro" text (subtle but clear)
+- Activation code: Simple text input, uppercase, with error handling
+- Pro success screen: Centered card with gradient icon, clear CTA to start analyzing
+
+### 🔧 Technical Notes
+
+- Pro status stored in localStorage with key 'frugalscan_pro_status'
+- Circular dependency avoided by passing `isPro` function as parameter to `canAnalyze()` and `getRemainingAnalyses()`
+- Pro code system: Simple array of valid codes (currently "PRO2025" for dev/testing)
+- Future: Session 16 will replace manual codes with Stripe webhooks
+
+### 📋 Next Steps
+
+**v1.2 - Payments + Pro Tier Launch:**
+- Session 16: Stripe Checkout Integration (automated webhooks to replace manual codes)
+
+**v1.3 - Pro Features / Stickiness:**
+- Session 17: Budget Goals - Set & track spending limits (Pro-only)
+- Session 18: Multi-Statement Trends - Month-over-month (Pro-only)
+- Session 19: Transaction Editing - Let users correct categorization
+- Session 20: PDF Export (Pro-only)
+
+---
+
 ## Session 11-12: February [TODAY], 2025
 
 ### ✅ What Was Completed
