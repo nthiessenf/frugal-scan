@@ -201,7 +201,11 @@ Create a `.env.local` file:
 
 ```env
 ANTHROPIC_API_KEY=your_api_key_here
+NEXT_PUBLIC_STRIPE_PRO_MONTHLY_LINK=https://buy.stripe.com/your-monthly-link
+NEXT_PUBLIC_STRIPE_PRO_ANNUAL_LINK=https://buy.stripe.com/your-annual-link
 ```
+
+> Stripe Payment Links are public URLs (not secrets), but using env vars makes it easy to swap links between dev and production.
 
 ### Parallel Processing Settings
 
@@ -213,6 +217,20 @@ In `lib/parse-with-claude.ts`:
 ### Categorization Keywords
 
 Add merchant keywords in `lib/constants.ts` under `MERCHANT_KEYWORDS` to improve categorization accuracy.
+
+---
+
+## 💳 Payments (Manual MVP)
+
+FrugalScan currently uses **Stripe Payment Links** for a simple manual MVP:
+
+- The **Upgrade modal** and `/pro` page both link to:
+  - `NEXT_PUBLIC_STRIPE_PRO_MONTHLY_LINK`
+  - `NEXT_PUBLIC_STRIPE_PRO_ANNUAL_LINK`
+- Stripe handles checkout and sends the user a receipt email.
+- You manually enable Pro access for early customers (see `Claude/IMPLEMENTATION_PLAN.md` Session 14–16).
+
+This keeps the first version of payments low-code and easy to validate. Automated Stripe Checkout + webhooks will be added in the Pro tier launch sessions.
 
 ---
 

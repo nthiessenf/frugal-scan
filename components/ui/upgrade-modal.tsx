@@ -20,6 +20,9 @@ const PRO_FEATURES = [
 export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
   if (!isOpen) return null;
 
+  const monthlyLink = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_LINK || '/pro';
+  const annualLink = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_LINK || '/pro';
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
@@ -72,13 +75,39 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
             <span className="text-[#6e6e73]">/month</span>
             <p className="text-xs text-[#86868b] mt-1">or $39/year (save 35%)</p>
           </div>
-          
-          <Link href="/pro" onClick={(e) => e.stopPropagation()}>
-            <Button variant="primary" className="w-full justify-center">
-              Upgrade to Pro
-            </Button>
-          </Link>
-          
+
+          {/* Primary Stripe Payment Links */}
+          <div className="space-y-2">
+            <Link
+              href={monthlyLink}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Button variant="primary" className="w-full justify-center">
+                Pay Monthly with Stripe
+              </Button>
+            </Link>
+
+            <Link
+              href={annualLink}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Button
+                variant="secondary"
+                className="w-full justify-center text-xs sm:text-sm"
+              >
+                Pay Yearly (Save 35%)
+              </Button>
+            </Link>
+
+            <p className="text-[11px] text-[#86868b] text-center mt-1">
+              Payments handled securely by Stripe. We’ll manually enable Pro for early customers.
+            </p>
+          </div>
+
           <button 
             onClick={onClose}
             className="w-full mt-3 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors"
