@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Check, ArrowLeft, Sparkles, Zap, TrendingUp, Target, Download } from 'lucide-react';
+import { Check, ArrowLeft, Sparkles, Zap, TrendingUp, Target, Download, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { isPro, activateProWithCode, setProStatus } from '@/lib/pro-status';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { redirectToCheckout } from '@/lib/stripe-checkout';
 
 export default function ProPage() {
   const [email, setEmail] = useState('');
@@ -13,14 +14,41 @@ export default function ProPage() {
   const [codeError, setCodeError] = useState('');
   const [codeSuccess, setCodeSuccess] = useState(false);
   const [userIsPro, setUserIsPro] = useState(false);
+  const [loading, setLoading] = useState<'monthly' | 'annual' | null>(null);
+  const [checkoutError, setCheckoutError] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     setUserIsPro(isPro());
-  }, []);
+    
+    // Check if user was redirected after canceling
+    if (searchParams.get('canceled') === 'true') {
+      setCheckoutError('Payment was canceled. You can try again anytime.');
+    }
+  }, [searchParams]);
 
-  const monthlyLink = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_LINK || '#';
-  const annualLink = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_LINK || '#';
+  // Stripe Price IDs (get these from Stripe Dashboard > Products > Your Product > Pricing)
+  const monthlyPriceId = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID || '';
+  const annualPriceId = process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID || '';
+
+  const handleCheckout = async (priceId: string, type: 'monthly' | 'annual') => {
+    if (!priceId) {
+      setCheckoutError('Payment configuration error. Please contact support.');
+      return;
+    }
+
+    setLoading(type);
+    setCheckoutError('');
+
+    try {
+      await redirectToCheckout(priceId);
+    } catch (error: any) {
+      setLoading(null);
+      setCheckoutError(error.message || 'Failed to start checkout. Please try again.');
+      console.error('[ProPage] Checkout error:', error);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,30 +169,47 @@ export default function ProPage() {
 
             {/* Email form + Stripe payment links */}
             <div className="px-8 py-6 space-y-5">
-              {/* Stripe payment actions */}
+              {/* Stripe Checkout actions */}
               <div>
                 <p className="text-sm font-medium text-[#1d1d1f] mb-3 text-center">
                   Ready to upgrade?
                 </p>
+                {checkoutError && (
+                  <div className="mb-3 p-3 rounded-xl bg-red-50 border border-red-200">
+                    <p className="text-xs text-red-600 text-center">{checkoutError}</p>
+                  </div>
+                )}
                 <div className="space-y-2">
-                  <a
-                    href={monthlyLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block w-full py-3 rounded-xl bg-gradient-to-r from-blue-300 via-purple-300 to-pink-200 text-white font-semibold text-sm text-center shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+                  <button
+                    onClick={() => handleCheckout(monthlyPriceId, 'monthly')}
+                    disabled={loading !== null || !monthlyPriceId}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-300 via-purple-300 to-pink-200 text-white font-semibold text-sm text-center shadow-md hover:shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
                   >
-                    Pay Monthly with Stripe
-                  </a>
-                  <a
-                    href={annualLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block w-full py-3 rounded-xl bg-white border border-black/[0.08] text-[#1d1d1f] font-semibold text-sm text-center hover:bg-[#f5f5f7] transition-colors"
+                    {loading === 'monthly' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      'Subscribe Monthly - $4.99/mo'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleCheckout(annualPriceId, 'annual')}
+                    disabled={loading !== null || !annualPriceId}
+                    className="w-full py-3 rounded-xl bg-white border border-black/[0.08] text-[#1d1d1f] font-semibold text-sm text-center hover:bg-[#f5f5f7] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    Pay Yearly (Save 35%)
-                  </a>
+                    {loading === 'annual' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      'Subscribe Yearly - $39/yr (Save 35%)'
+                    )}
+                  </button>
                   <p className="text-xs text-[#86868b] text-center mt-2">
-                    Payments are processed securely by Stripe. We’ll manually enable Pro access for early customers.
+                    Payments are processed securely by Stripe. Pro access activates automatically after payment.
                   </p>
                 </div>
               </div>

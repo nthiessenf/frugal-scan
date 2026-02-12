@@ -200,12 +200,18 @@ See [CODE_ARCHITECTURE.md](CODE_ARCHITECTURE.md) for detailed architecture docum
 Create a `.env.local` file:
 
 ```env
+# Anthropic API Key (for PDF parsing and insights)
 ANTHROPIC_API_KEY=your_api_key_here
-NEXT_PUBLIC_STRIPE_PRO_MONTHLY_LINK=https://buy.stripe.com/your-monthly-link
-NEXT_PUBLIC_STRIPE_PRO_ANNUAL_LINK=https://buy.stripe.com/your-annual-link
-```
 
-> Stripe Payment Links are public URLs (not secrets), but using env vars makes it easy to swap links between dev and production.
+# Stripe Configuration (for payments)
+STRIPE_SECRET_KEY=sk_test_... # Get from Stripe Dashboard > Developers > API keys
+STRIPE_WEBHOOK_SECRET=whsec_... # Get from Stripe Dashboard > Developers > Webhooks
+NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID=price_... # Get from Stripe Dashboard > Products > Your Product
+NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID=price_... # Get from Stripe Dashboard > Products > Your Product
+
+# App URL (for Stripe redirects)
+NEXT_PUBLIC_APP_URL=http://localhost:3000 # Change to your production URL when deploying
+```
 
 ### Parallel Processing Settings
 
@@ -220,17 +226,48 @@ Add merchant keywords in `lib/constants.ts` under `MERCHANT_KEYWORDS` to improve
 
 ---
 
-## 💳 Payments (Manual MVP)
+## 💳 Payments (Stripe Checkout)
 
-FrugalScan currently uses **Stripe Payment Links** for a simple manual MVP:
+FrugalScan uses **Stripe Checkout** for subscription payments:
 
-- The **Upgrade modal** and `/pro` page both link to:
-  - `NEXT_PUBLIC_STRIPE_PRO_MONTHLY_LINK`
-  - `NEXT_PUBLIC_STRIPE_PRO_ANNUAL_LINK`
-- Stripe handles checkout and sends the user a receipt email.
-- You manually enable Pro access for early customers (see `Claude/IMPLEMENTATION_PLAN.md` Session 14–16).
+- **Checkout Flow:** Users click "Subscribe" → Stripe Checkout → Success page → Pro activated
+- **Webhook:** `/api/webhooks/stripe` handles payment events and activates Pro automatically
+- **Success Page:** `/pro/success` confirms payment and activates Pro status
 
-This keeps the first version of payments low-code and easy to validate. Automated Stripe Checkout + webhooks will be added in the Pro tier launch sessions.
+### Stripe Setup
+
+1. **Get your API keys** from [Stripe Dashboard](https://dashboard.stripe.com/apikeys):
+   - `STRIPE_SECRET_KEY` (starts with `sk_test_` or `sk_live_`)
+   - `STRIPE_WEBHOOK_SECRET` (get from Webhooks section)
+
+2. **Create Products & Prices** in Stripe Dashboard:
+   - Create "FrugalScan Pro Monthly" product → Add price: $4.99/month recurring
+   - Create "FrugalScan Pro Annual" product → Add price: $39/year recurring
+   - Copy the **Price IDs** (start with `price_...`) to your `.env.local`
+
+3. **Set up Webhook** in Stripe Dashboard:
+   - Go to Developers > Webhooks > Add endpoint
+   - URL: `https://yourdomain.com/api/webhooks/stripe` (or use Stripe CLI for local testing)
+   - Events to listen for:
+     - `checkout.session.completed`
+     - `customer.subscription.updated`
+     - `customer.subscription.deleted`
+   - Copy the **Webhook Signing Secret** to `STRIPE_WEBHOOK_SECRET`
+
+### Local Testing with Stripe CLI
+
+```bash
+# Install Stripe CLI
+brew install stripe/stripe-cli/stripe
+
+# Login
+stripe login
+
+# Forward webhooks to local server
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
+
+# Copy the webhook secret it gives you to STRIPE_WEBHOOK_SECRET
+```
 
 ---
 

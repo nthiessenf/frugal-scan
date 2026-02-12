@@ -1,10 +1,11 @@
 'use client';
 
-import { X, Zap, TrendingUp, PieChart, Download, Target } from 'lucide-react';
+import { X, Zap, TrendingUp, PieChart, Download, Target, Loader2 } from 'lucide-react';
 import { Button } from './button';
 import Link from 'next/link';
 import { isPro } from '@/lib/pro-status';
 import { useEffect, useState } from 'react';
+import { redirectToCheckout } from '@/lib/stripe-checkout';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ const PRO_FEATURES = [
 
 export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
   const [userIsPro, setUserIsPro] = useState(false);
+  const [loading, setLoading] = useState<'monthly' | 'annual' | null>(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setUserIsPro(isPro());
@@ -29,8 +32,26 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
   // Don't show modal if user is already Pro
   if (!isOpen || userIsPro) return null;
 
-  const monthlyLink = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_LINK || '/pro';
-  const annualLink = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_LINK || '/pro';
+  const monthlyPriceId = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID || '';
+  const annualPriceId = process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID || '';
+
+  const handleCheckout = async (priceId: string, type: 'monthly' | 'annual') => {
+    if (!priceId) {
+      setError('Payment configuration error. Please visit /pro to upgrade.');
+      return;
+    }
+
+    setLoading(type);
+    setError('');
+
+    try {
+      await redirectToCheckout(priceId);
+    } catch (err: any) {
+      setLoading(null);
+      setError(err.message || 'Failed to start checkout. Please try again.');
+      console.error('[UpgradeModal] Checkout error:', err);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -85,35 +106,46 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
             <p className="text-xs text-[#86868b] mt-1">or $39/year (save 35%)</p>
           </div>
 
-          {/* Primary Stripe Payment Links */}
+          {/* Stripe Checkout buttons */}
           <div className="space-y-2">
-            <Link
-              href={monthlyLink}
-              target="_blank"
-              rel="noreferrer"
-              onClick={(e) => e.stopPropagation()}
+            {error && (
+              <div className="mb-2 p-2 rounded-lg bg-red-50 border border-red-200">
+                <p className="text-[11px] text-red-600 text-center">{error}</p>
+              </div>
+            )}
+            
+            <button
+              onClick={() => handleCheckout(monthlyPriceId, 'monthly')}
+              disabled={loading !== null || !monthlyPriceId}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-300 via-purple-300 to-pink-200 text-white font-semibold text-sm text-center shadow-md hover:shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
             >
-              <Button variant="primary" className="w-full justify-center">
-                Pay Monthly with Stripe
-              </Button>
-            </Link>
+              {loading === 'monthly' ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Subscribe Monthly - $4.99/mo'
+              )}
+            </button>
 
-            <Link
-              href={annualLink}
-              target="_blank"
-              rel="noreferrer"
-              onClick={(e) => e.stopPropagation()}
+            <button
+              onClick={() => handleCheckout(annualPriceId, 'annual')}
+              disabled={loading !== null || !annualPriceId}
+              className="w-full py-3 rounded-xl bg-white border border-black/[0.08] text-[#1d1d1f] font-semibold text-sm text-center hover:bg-[#f5f5f7] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              <Button
-                variant="secondary"
-                className="w-full justify-center text-xs sm:text-sm"
-              >
-                Pay Yearly (Save 35%)
-              </Button>
-            </Link>
+              {loading === 'annual' ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Subscribe Yearly - $39/yr (Save 35%)'
+              )}
+            </button>
 
             <p className="text-[11px] text-[#86868b] text-center mt-1">
-              Payments handled securely by Stripe. We’ll manually enable Pro for early customers.
+              Payments handled securely by Stripe. Pro activates automatically after payment.
             </p>
           </div>
 
