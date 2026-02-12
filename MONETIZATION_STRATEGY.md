@@ -89,16 +89,21 @@
 - Automatic Pro tier activation
 - Subscription management
 
-### Phase 4: Pro Features
-- Budget tracking (Pro-only)
-- Month-over-month trends (Pro-only)
+### Phase 4: Pro Features (v1.3)
+- Budget goals - set & track spending limits (Pro-only)
+- Multi-statement trends - month-over-month (Pro-only)
+- Transaction editing - let users correct categorization
 - PDF export (Pro-only)
 
-### Phase 5: Power Tier (v2.0)
-- Supabase database
-- User accounts
+### Phase 5: Performance + Compatibility (v1.4)
+- Faster processing - optimize for <30 second analysis
+- More banks - test and optimize for more statement formats
+
+### Phase 6: Platform + Power Tier (v2.0)
+- Supabase database + user accounts (Auth)
+- History & saved analyses
 - Multi-account consolidation
-- Higher tier pricing
+- Power tier launch ($9.99/mo)
 
 ---
 

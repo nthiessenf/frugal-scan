@@ -3,7 +3,7 @@
 **Purpose:** Step-by-step Cursor prompts for building FrugalScan
 **How to use:** Complete sessions in order. Copy each prompt directly into Cursor.
 
-**Updated:** January 25, 2025
+**Updated:** February 12, 2026
 
 ---
 
@@ -25,43 +25,67 @@
 
 **🚀 Live at [frugalscan.com](https://frugalscan.com)**
 
-### Version 1.1 - Quick Wins + Monetization Foundation (8-10 hours)
-*Theme: Polish + free tier gates to enable conversion tracking*
+### Version 1.1 - Quick Wins + Monetization Foundation ✅ COMPLETE
 
 | Session | Task | Status | Time Est. |
 |---------|------|--------|-----------|
+| 10 | Category Drill-Down + Mock Data + Haiku Migration | ✅ Complete | 4-5 hrs |
 | 11 | Better AI Insights | ✅ Complete | 3-4 hrs |
 | 12 | Usage Tracking + Free Tier Limits | ✅ Complete | 2-3 hrs |
 | 13 | Upgrade Modal + Pro Teaser Page | ✅ Complete | 2-3 hrs |
-| 14 | Stripe Payment Links (Manual MVP) | 📋 Next | 2-3 hrs |
 
-### Version 1.2 - Pro Tier Launch (8-10 hours)
+### Version 1.2 - Payments + Pro Tier Launch (8-10 hours)
 *Theme: Start making money*
 
 | Session | Task | Status | Time Est. |
 |---------|------|--------|-----------|
-| 14 | Stripe Payment Links (Manual MVP) | 📋 Planned | 2-3 hrs |
+| 14 | Stripe Payment Links (Manual MVP) | 📋 Next | 2-3 hrs |
 | 15 | Pro Tier State Management | 📋 Planned | 2-3 hrs |
 | 16 | Stripe Checkout Integration | 📋 Planned | 4-5 hrs |
 
-### Version 1.3 - Pro Features / Stickiness (10-12 hours)
+### Version 1.3 - Pro Features / Stickiness (14-18 hours)
 *Theme: Features that make Pro worth keeping*
 
 | Session | Task | Status | Time Est. |
 |---------|------|--------|-----------|
-| 17 | Budget Targets (Pro-only) | 📋 Planned | 4-6 hrs |
-| 18 | Month-over-Month Trends (Pro-only) | 📋 Planned | 6-8 hrs |
-| 19 | PDF Export (Pro-only) | 📋 Planned | 2-3 hrs |
+| 17 | Budget Goals - Set & Track Spending Limits (Pro-only) | 📋 Planned | 4-6 hrs |
+| 18 | Multi-Statement Trends - Month-over-Month (Pro-only) | 📋 Planned | 6-8 hrs |
+| 19 | Transaction Editing - Let Users Correct Categorization | 📋 Planned | 3-4 hrs |
+| 20 | PDF Export (Pro-only) | 📋 Planned | 2-3 hrs |
 
-### Version 2.0 - Platform + Power Tier (20+ hours)
-*Theme: Database-backed features, scale*
+### Version 1.4 - Performance + Compatibility (8-12 hours)
+*Theme: Faster, works with more banks*
 
 | Session | Task | Status | Time Est. |
 |---------|------|--------|-----------|
-| 20+ | Supabase Integration | 📋 Planned | 6-8 hrs |
-| 21+ | User Accounts | 📋 Planned | 4-6 hrs |
-| 22+ | Multi-Account Consolidation (Power-only) | 📋 Planned | 8-10 hrs |
-| 23+ | Power Tier Launch ($9.99/mo) | 📋 Planned | 4-6 hrs |
+| 21 | Faster Processing - Optimize for <30s Analysis | 📋 Planned | 4-6 hrs |
+| 22 | More Banks - Test & Optimize for More Formats | 📋 Planned | 4-6 hrs |
+
+### Version 2.0 - Platform + Power Tier (20+ hours)
+*Theme: Database-backed features, user accounts, scale*
+
+| Session | Task | Status | Time Est. |
+|---------|------|--------|-----------|
+| 23 | Supabase Integration + User Accounts (Auth) | 📋 Planned | 8-10 hrs |
+| 24 | History & Saved Analyses (Supabase-backed) | 📋 Planned | 4-6 hrs |
+| 25 | Multi-Account Consolidation (Power-only) | 📋 Planned | 8-10 hrs |
+| 26 | Power Tier Launch ($9.99/mo) | 📋 Planned | 4-6 hrs |
+
+---
+
+## Feature Roadmap Summary
+
+All planned features mapped to their version:
+
+| # | Feature | Version | Status |
+|---|---------|---------|--------|
+| 1 | **Payments** - Stripe for payment processing | v1.2 | 📋 Next |
+| 2 | **Budget Goals** - Set and track spending limits | v1.3 | 📋 Planned |
+| 3 | **Multi-Statement Trends** - Compare month over month | v1.3 | 📋 Planned |
+| 4 | **Transaction Editing** - Let users correct categorization | v1.3 | 📋 Planned |
+| 5 | **Faster Processing** - Optimize for <30 second analysis | v1.4 | 📋 Planned |
+| 6 | **More Banks** - Test and optimize for more formats | v1.4 | 📋 Planned |
+| 7 | **User Accounts** - Supabase Auth for saving history | v2.0 | 📋 Planned |
 
 ---
 

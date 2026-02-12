@@ -51,9 +51,26 @@
 
 ### 📋 Next Steps
 
+**v1.2 - Payments + Pro Tier Launch:**
 - Session 14: Stripe Payment Links (manual MVP for first customers)
 - Session 15: Pro tier state management
 - Session 16: Stripe Checkout integration
+
+**v1.3 - Pro Features / Stickiness:**
+- Session 17: Budget Goals - Set & track spending limits (Pro-only)
+- Session 18: Multi-Statement Trends - Month-over-month (Pro-only)
+- Session 19: Transaction Editing - Let users correct categorization
+- Session 20: PDF Export (Pro-only)
+
+**v1.4 - Performance + Compatibility:**
+- Session 21: Faster Processing - Optimize for <30s analysis
+- Session 22: More Banks - Test & optimize for more formats
+
+**v2.0 - Platform + User Accounts:**
+- Session 23: Supabase Integration + User Accounts (Auth)
+- Session 24: History & Saved Analyses
+- Session 25: Multi-Account Consolidation (Power-only)
+- Session 26: Power Tier Launch ($9.99/mo)
 
 ---
 
