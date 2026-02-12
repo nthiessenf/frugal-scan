@@ -23,6 +23,12 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
   const monthlyLink = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_LINK || '/pro';
   const annualLink = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_LINK || '/pro';
 
+  // Debug: Log env vars (remove after confirming they work)
+  if (typeof window !== 'undefined') {
+    console.log('[UpgradeModal] Monthly link:', monthlyLink);
+    console.log('[UpgradeModal] Annual link:', annualLink);
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}

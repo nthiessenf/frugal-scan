@@ -11,6 +11,12 @@ export default function ProPage() {
   const monthlyLink = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_LINK || '#';
   const annualLink = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_LINK || '#';
 
+  // Debug: Log env vars (remove after confirming they work)
+  if (typeof window !== 'undefined') {
+    console.log('[ProPage] Monthly link:', monthlyLink);
+    console.log('[ProPage] Annual link:', annualLink);
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Pro waitlist signup:', email);
