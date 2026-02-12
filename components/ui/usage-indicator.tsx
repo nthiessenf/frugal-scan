@@ -2,18 +2,35 @@
 
 import { useEffect, useState } from 'react';
 import { getRemainingAnalyses } from '@/lib/usage-tracking';
+import { isPro } from '@/lib/pro-status';
 import Link from 'next/link';
+import { Sparkles } from 'lucide-react';
 
 export function UsageIndicator() {
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [pro, setPro] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    setRemaining(getRemainingAnalyses());
+    const proStatus = isPro();
+    setPro(proStatus);
+    setRemaining(getRemainingAnalyses(() => proStatus));
   }, []);
 
   if (!mounted || remaining === null) return null;
+
+  // Pro users - show Pro badge
+  if (pro || remaining === -1) {
+    return (
+      <div className="flex items-center gap-1.5 text-xs">
+        <Sparkles className="w-3 h-3 text-purple-500" />
+        <span className="text-purple-600 font-medium">Pro</span>
+        <span className="text-[#86868b]">·</span>
+        <span className="text-[#86868b]">Unlimited analyses</span>
+      </div>
+    );
+  }
 
   const total = 3;
   const used = total - remaining;

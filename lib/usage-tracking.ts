@@ -106,16 +106,30 @@ export function incrementUsage(): UsageData {
 
 /**
  * Check if user can perform another analysis
+ * Pro users have unlimited analyses
+ * Note: Import isPro from pro-status.ts in calling code to avoid circular deps
  */
-export function canAnalyze(): boolean {
+export function canAnalyze(checkPro?: () => boolean): boolean {
+  // Check Pro status if provided
+  if (checkPro && checkPro()) {
+    return true; // Pro users have unlimited
+  }
+  
   const usage = getUsageData();
   return usage.analysisCount < FREE_TIER_LIMIT;
 }
 
 /**
  * Get number of remaining free analyses
+ * Returns -1 for Pro users (unlimited)
+ * Note: Import isPro from pro-status.ts in calling code to avoid circular deps
  */
-export function getRemainingAnalyses(): number {
+export function getRemainingAnalyses(checkPro?: () => boolean): number {
+  // Check Pro status if provided
+  if (checkPro && checkPro()) {
+    return -1; // -1 means unlimited (Pro)
+  }
+  
   const usage = getUsageData();
   return Math.max(0, FREE_TIER_LIMIT - usage.analysisCount);
 }

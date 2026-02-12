@@ -1,27 +1,83 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check, ArrowLeft, Sparkles, Zap, TrendingUp, Target, Download } from 'lucide-react';
 import Link from 'next/link';
+import { isPro, activateProWithCode, setProStatus } from '@/lib/pro-status';
+import { useRouter } from 'next/navigation';
 
 export default function ProPage() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [proCode, setProCode] = useState('');
+  const [codeError, setCodeError] = useState('');
+  const [codeSuccess, setCodeSuccess] = useState(false);
+  const [userIsPro, setUserIsPro] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    setUserIsPro(isPro());
+  }, []);
 
   const monthlyLink = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_LINK || '#';
   const annualLink = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_LINK || '#';
-
-  // Debug: Log env vars (remove after confirming they work)
-  if (typeof window !== 'undefined') {
-    console.log('[ProPage] Monthly link:', monthlyLink);
-    console.log('[ProPage] Annual link:', annualLink);
-  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Pro waitlist signup:', email);
     setSubmitted(true);
   };
+
+  const handleProCodeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCodeError('');
+    setCodeSuccess(false);
+
+    if (activateProWithCode(proCode)) {
+      setCodeSuccess(true);
+      setUserIsPro(true);
+      setProCode('');
+      // Refresh page to show Pro status
+      setTimeout(() => router.refresh(), 500);
+    } else {
+      setCodeError('Invalid code. Check your email for your Pro activation code.');
+    }
+  };
+
+  // If user is already Pro, show success state
+  if (userIsPro) {
+    return (
+      <main className="min-h-screen bg-[#f5f5f7] flex flex-col">
+        <div className="w-full max-w-md mx-auto px-5 pt-6">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Link>
+        </div>
+        <div className="flex-1 flex items-center justify-center px-5 py-8">
+          <div className="w-full max-w-md">
+            <div className="bg-white rounded-3xl border border-black/[0.08] shadow-lg p-8 text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-300 via-purple-300 to-pink-300 flex items-center justify-center">
+                <Sparkles className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold text-[#1d1d1f] mb-2">You're Pro!</h1>
+              <p className="text-sm text-[#6e6e73] mb-6">
+                Enjoy unlimited analyses and all Pro features.
+              </p>
+              <Link href="/">
+                <button className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-300 via-purple-300 to-pink-200 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all">
+                  Start Analyzing
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#f5f5f7] flex flex-col">
@@ -113,6 +169,49 @@ export default function ProPage() {
                 </div>
               </div>
 
+              {/* Pro activation code (for manual activation after payment) */}
+              <div className="border-t border-black/[0.06] pt-5">
+                <label className="block text-sm font-medium text-[#1d1d1f] mb-3 text-center">
+                  Already paid? Enter your Pro code
+                </label>
+                {codeSuccess ? (
+                  <div className="text-center py-2">
+                    <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-50 flex items-center justify-center">
+                      <Check className="w-6 h-6 text-green-500" />
+                    </div>
+                    <p className="font-semibold text-[#1d1d1f]">Pro activated!</p>
+                    <p className="text-sm text-[#6e6e73] mt-1">
+                      You now have unlimited analyses.
+                    </p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleProCodeSubmit} className="space-y-3">
+                    <input
+                      type="text"
+                      value={proCode}
+                      onChange={(e) => {
+                        setProCode(e.target.value);
+                        setCodeError('');
+                      }}
+                      placeholder="Enter Pro code"
+                      className="w-full px-4 py-3 rounded-xl border border-black/[0.08] bg-[#f5f5f7] focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-300 text-[#1d1d1f] text-center transition-colors uppercase"
+                    />
+                    {codeError && (
+                      <p className="text-xs text-red-600 text-center">{codeError}</p>
+                    )}
+                    <button
+                      type="submit"
+                      className="w-full py-3 rounded-xl bg-[#1d1d1f] text-white font-semibold text-sm shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+                    >
+                      Activate Pro
+                    </button>
+                  </form>
+                )}
+                <p className="text-xs text-[#86868b] text-center mt-3">
+                  Check your email after payment for your activation code.
+                </p>
+              </div>
+
               {/* Email capture for manual verification / updates */}
               <div className="border-t border-black/[0.06] pt-5">
                 {submitted ? (
@@ -122,13 +221,13 @@ export default function ProPage() {
                     </div>
                     <p className="font-semibold text-[#1d1d1f]">You're on the list!</p>
                     <p className="text-sm text-[#6e6e73] mt-1">
-                      If you pay via Stripe, reply to your receipt email and we’ll enable Pro.
+                      We'll email you when Pro launches.
                     </p>
                   </div>
                 ) : (
                   <>
                     <label className="block text-sm font-medium text-[#1d1d1f] mb-3 text-center">
-                      Share your email for Pro updates
+                      Get notified about Pro updates
                     </label>
                     <form onSubmit={handleSubmit} className="space-y-3">
                       <input
@@ -147,7 +246,7 @@ export default function ProPage() {
                       </button>
                     </form>
                     <p className="text-xs text-[#86868b] text-center mt-3">
-                      No spam. We’ll only contact you about your Pro access.
+                      No spam. We'll only contact you about Pro updates.
                     </p>
                   </>
                 )}

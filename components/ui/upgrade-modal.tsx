@@ -3,6 +3,8 @@
 import { X, Zap, TrendingUp, PieChart, Download, Target } from 'lucide-react';
 import { Button } from './button';
 import Link from 'next/link';
+import { isPro } from '@/lib/pro-status';
+import { useEffect, useState } from 'react';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -18,16 +20,17 @@ const PRO_FEATURES = [
 ];
 
 export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
-  if (!isOpen) return null;
+  const [userIsPro, setUserIsPro] = useState(false);
+
+  useEffect(() => {
+    setUserIsPro(isPro());
+  }, [isOpen]);
+
+  // Don't show modal if user is already Pro
+  if (!isOpen || userIsPro) return null;
 
   const monthlyLink = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_LINK || '/pro';
   const annualLink = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_LINK || '/pro';
-
-  // Debug: Log env vars (remove after confirming they work)
-  if (typeof window !== 'undefined') {
-    console.log('[UpgradeModal] Monthly link:', monthlyLink);
-    console.log('[UpgradeModal] Annual link:', annualLink);
-  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

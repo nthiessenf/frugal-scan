@@ -6,6 +6,7 @@ import { categorizeAll, detectSubscriptions } from '@/lib/categorize';
 import { calculateSummary, getCategoryBreakdown, getTopMerchants } from '@/lib/analysis';
 import { CategorizedTransaction, AnalysisResult } from '@/types';
 import { canAnalyze, incrementUsage } from '@/lib/usage-tracking';
+import { isPro } from '@/lib/pro-status';
 
 type AnalysisStatus = 'idle' | 'uploading' | 'parsing' | 'categorizing' | 'analyzing' | 'complete' | 'error';
 
@@ -29,8 +30,8 @@ export function useAnalysis() {
       setNeedsReview([]);
       setLimitReached(false);
       
-      // Check usage limit BEFORE starting analysis
-      if (!canAnalyze()) {
+      // Check usage limit BEFORE starting analysis (Pro users bypass)
+      if (!canAnalyze(isPro)) {
         setLimitReached(true);
         setError('You\'ve used all 3 free analyses this month. Upgrade to Pro for unlimited analyses.');
         setStatus('error');
