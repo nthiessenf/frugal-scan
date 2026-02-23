@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-// Use the Stripe client's default API version (matches installed SDK)
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+// Lazily initialize Stripe so build doesn't fail if env vars are missing
+let stripe: Stripe | null = null;
+
+function getStripeClient(): Stripe {
+  if (!stripe) {
+    const apiKey = process.env.STRIPE_SECRET_KEY;
+    if (!apiKey) {
+      throw new Error('STRIPE_SECRET_KEY is not set');
+    }
+    stripe = new Stripe(apiKey);
+  }
+  return stripe;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,8 +26,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const client = getStripeClient();
+
     // Create Checkout Session
-    const session = await stripe.checkout.sessions.create({
+    const session = await client.checkout.sessions.create({
       mode: mode as 'subscription', // 'subscription' for recurring
       line_items: [
         {
