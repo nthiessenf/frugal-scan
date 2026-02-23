@@ -4,6 +4,44 @@
 
 ---
 
+## Session 16: February 12, 2025
+
+### ✅ What Was Completed
+
+**Stripe Checkout Integration**
+- Created `app/api/create-checkout/route.ts` - Creates Stripe Checkout sessions for subscriptions
+- Created `app/api/webhooks/stripe/route.ts` - Handles payment events (checkout.session.completed, subscription updates/deletions)
+- Created `lib/stripe-checkout.ts` - Helper functions for creating checkout sessions
+- Updated `/pro` page to use Stripe Checkout buttons instead of Payment Links
+- Updated upgrade modal to use Stripe Checkout with loading states
+- Created `/pro/success` page - Shows success confirmation and activates Pro immediately
+- Fixed build-time Stripe initialization issue (lazy initialization pattern)
+- Updated README with complete Stripe setup instructions
+
+### 🎨 Design Decisions
+
+- Checkout buttons show loading states during session creation
+- Success page activates Pro immediately (webhook handles it server-side too)
+- Error handling shows user-friendly messages if checkout fails
+
+### 🔧 Technical Notes
+
+- Stripe client is lazy-initialized to avoid build-time errors when env vars aren't set
+- Webhook currently logs subscription events (ready for database integration in Session 23)
+- Success page activates Pro client-side immediately, webhook handles it server-side
+- All Stripe Price IDs are public (NEXT_PUBLIC_ prefix) - safe to expose
+- Secret keys (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET) stay server-side only
+
+### 📋 Next Steps
+
+**v1.3 - Pro Features / Stickiness:**
+- Session 17: Budget Goals - Set & track spending limits (Pro-only)
+- Session 18: Multi-Statement Trends - Month-over-month (Pro-only)
+- Session 19: Transaction Editing - Let users correct categorization
+- Session 20: PDF Export (Pro-only)
+
+---
+
 ## Session 14-15: February 12, 2025
 
 ### ✅ What Was Completed
