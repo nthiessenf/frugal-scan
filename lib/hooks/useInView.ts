@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
  * Triggers once when the element enters the viewport.
  * Respects prefers-reduced-motion: when set, isVisible becomes true immediately.
  */
-export function useInView(threshold = 0.15): { ref: React.RefObject<HTMLDivElement | null>; isVisible: boolean } {
+export function useInView(threshold = 0.15): { ref: React.RefObject<HTMLDivElement>; isVisible: boolean } {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
