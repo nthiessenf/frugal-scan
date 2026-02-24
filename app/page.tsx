@@ -8,9 +8,10 @@ import { UploadSection } from '@/components/sections/upload-section';
 import { ProcessingScreen } from '@/components/sections/processing-screen';
 import { ErrorMessage } from '@/components/ui/error-message';
 import { UpgradeModal } from '@/components/ui/upgrade-modal';
+import { Button } from '@/components/ui/button';
 import { useAnalysis } from '@/lib/hooks/useAnalysis';
 import { useAnalysisContext } from '@/contexts/AnalysisContext';
-import { mockAnalysisResult } from '@/lib/mock-data';
+import { getDemoAnalysisResult } from '@/lib/mock-data';
 
 export default function Home() {
   const router = useRouter();
@@ -35,10 +36,12 @@ export default function Home() {
   const handleFileSelect = async (file: File) => {
     await analyzeStatement(file);
   };
-
-  const handleLoadMockData = () => {
-    setResult(mockAnalysisResult as any);
-    router.push('/results');
+  
+  const handleLoadDemo = () => {
+    // Load demo analysis result directly into context (no API calls, no usage tracking)
+    const demoResult = getDemoAnalysisResult();
+    setResult(demoResult);
+    router.push('/results?demo=true');
   };
 
   // Map status to stage for ProcessingScreen
@@ -81,16 +84,20 @@ export default function Home() {
         onFileSelect={handleFileSelect}
         usageKey={`usage-${status}-${result ? 'complete' : 'idle'}`}
       />
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-6 text-center">
-          <button
-            onClick={handleLoadMockData}
-            className="px-4 py-2 text-sm text-[#6e6e73] hover:text-[#1d1d1f] underline transition-colors"
-          >
-            ⚡ Load Mock Data (Dev Only)
-          </button>
-        </div>
-      )}
+      {/* Demo CTA - lets visitors see value without uploading */}
+      <div className="mt-6 flex flex-col items-center gap-1 px-5 text-center">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleLoadDemo}
+          className="text-sm text-[#1d1d1f] hover:text-[#111827] hover:bg-gradient-to-r hover:from-blue-50 hover:via-purple-50 hover:to-pink-50"
+        >
+          Try with sample data →
+        </Button>
+        <p className="text-xs text-[#6e6e73]">
+          See what FrugalScan reveals — no upload needed.
+        </p>
+      </div>
       <UpgradeModal 
         isOpen={showUpgradeModal} 
         onClose={() => {

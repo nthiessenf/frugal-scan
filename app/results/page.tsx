@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAnalysisContext } from '@/contexts/AnalysisContext';
 import { SummaryHeader } from '@/components/sections/summary-header';
 import { SpendingChart } from '@/components/charts/spending-chart';
@@ -12,13 +12,27 @@ import { TipsSection } from '@/components/sections/tips-section';
 import { FilterBanner } from '@/components/ui/filter-banner';
 import { Button } from '@/components/ui/button';
 import { CATEGORIES } from '@/lib/constants';
+import { X } from 'lucide-react';
 
+// Wrapper to keep page inside Suspense when using useSearchParams
 export default function ResultsPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResultsPageInner />
+    </Suspense>
+  );
+}
+
+function ResultsPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { result, clearAll } = useAnalysisContext();
+
+  const isDemo = searchParams.get('demo') === 'true';
 
   // Category drill-down state
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [showDemoBanner, setShowDemoBanner] = useState(true);
 
   // Get merchants for a selected category
   const getMerchantsForCategory = (categoryName: string) => {
@@ -112,9 +126,49 @@ export default function ResultsPage() {
     router.push('/');
   };
 
+  const handleGoToUpload = () => {
+    clearAll();
+    router.push('/');
+  };
+
   return (
     <main className="min-h-screen bg-[#f5f5f7] py-10 px-5">
       <div className="mx-auto max-w-6xl">
+        {/* Demo mode banner */}
+        {isDemo && showDemoBanner && (
+          <div className="mb-6 rounded-2xl bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border border-black/[0.06] px-4 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-2">
+              <span className="text-lg sm:text-xl">📊</span>
+              <div>
+                <p className="text-sm sm:text-base font-medium text-[#1d1d1f]">
+                  You&apos;re viewing a sample analysis
+                </p>
+                <p className="mt-0.5 text-xs sm:text-sm text-[#6e6e73]">
+                  This is an example month for a typical 30-year-old professional. Upload your own statement to see your real numbers.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end w-full sm:w-auto">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleGoToUpload}
+                className="whitespace-nowrap"
+              >
+                Analyze your own statement →
+              </Button>
+              <button
+                type="button"
+                onClick={() => setShowDemoBanner(false)}
+                className="p-1 rounded-full hover:bg-black/5 transition-colors"
+                aria-label="Dismiss sample analysis banner"
+              >
+                <X className="w-4 h-4 text-[#86868b]" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-6 sm:mb-8 text-center">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#1d1d1f]">
@@ -123,6 +177,11 @@ export default function ResultsPage() {
           <p className="mt-2 text-sm sm:text-base text-[#6e6e73]">
             Based on {result.summary.transactionCount} transactions
           </p>
+          {isDemo && (
+            <p className="mt-1 text-xs sm:text-sm text-[#6e6e73]">
+              Sample: January 2025 statement
+            </p>
+          )}
         </div>
 
         {/* Summary Stats */}
@@ -198,6 +257,38 @@ export default function ResultsPage() {
             Analyze Another Statement
           </Button>
         </div>
+
+        {/* Demo CTA card at bottom */}
+        {isDemo && (
+          <div className="mt-10">
+            <div className="rounded-3xl bg-white/70 backdrop-blur-xl border border-black/[0.08] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_10px_20px_rgba(0,0,0,0.03)] p-6 sm:p-8 text-center">
+              <h2 className="text-xl sm:text-2xl font-semibold text-[#1d1d1f] mb-2">
+                Ready to see your real spending?
+              </h2>
+              <p className="text-sm text-[#6e6e73] mb-6">
+                Upload your bank statement for a personalized analysis — it usually takes less than 60 seconds.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={handleGoToUpload}
+                  className="w-full sm:w-auto"
+                >
+                  Upload My Statement
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  onClick={() => router.push('/#privacy')}
+                  className="w-full sm:w-auto text-sm text-[#4b5563]"
+                >
+                  Learn about privacy
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Generated timestamp */}
         <p className="mt-8 text-center text-xs text-[#86868b]">
