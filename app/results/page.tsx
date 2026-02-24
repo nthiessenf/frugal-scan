@@ -1,8 +1,11 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAnalysisContext } from '@/contexts/AnalysisContext';
+import { useAnalysis } from '@/lib/hooks/useAnalysis';
+import { canAnalyze } from '@/lib/usage-tracking';
+import { isPro } from '@/lib/pro-status';
 import { SummaryHeader } from '@/components/sections/summary-header';
 import { SpendingChart } from '@/components/charts/spending-chart';
 import { MerchantChart } from '@/components/charts/merchant-chart';
@@ -11,6 +14,8 @@ import { SubscriptionsList } from '@/components/sections/subscriptions-list';
 import { TipsSection } from '@/components/sections/tips-section';
 import { FilterBanner } from '@/components/ui/filter-banner';
 import { Button } from '@/components/ui/button';
+import { ProcessingScreen } from '@/components/sections/processing-screen';
+import { UpgradeModal } from '@/components/ui/upgrade-modal';
 import { CATEGORIES } from '@/lib/constants';
 import { X } from 'lucide-react';
 
@@ -27,12 +32,14 @@ function ResultsPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { result, clearAll } = useAnalysisContext();
+  const { status, error, analyzeStatement, reset, limitReached } = useAnalysis();
 
   const isDemo = searchParams.get('demo') === 'true';
 
-  // Category drill-down state
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showDemoBanner, setShowDemoBanner] = useState(true);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Get merchants for a selected category
   const getMerchantsForCategory = (categoryName: string) => {
@@ -117,8 +124,54 @@ function ResultsPageInner() {
     }
   }, [result, router]);
 
+  // When analysis completes from demo, drop ?demo=true from URL
+  useEffect(() => {
+    if (status === 'complete' && result && isDemo) {
+      router.replace('/results');
+    }
+  }, [status, result, isDemo, router]);
+
+  // Show upgrade modal when limit reached or limit-related error
+  useEffect(() => {
+    if (limitReached || (error && (error.toLowerCase().includes('limit') || error.toLowerCase().includes('upgrade')))) {
+      setShowUpgradeModal(true);
+    }
+  }, [error, limitReached]);
+
+  const getStage = (): 'uploading' | 'parsing' | 'analyzing' | 'complete' => {
+    switch (status) {
+      case 'uploading': return 'uploading';
+      case 'parsing':
+      case 'categorizing': return 'parsing';
+      case 'analyzing': return 'analyzing';
+      case 'complete': return 'complete';
+      default: return 'parsing';
+    }
+  };
+
+  const handleUploadClick = () => {
+    if (status !== 'idle' && status !== 'complete') return;
+    if (!canAnalyze(isPro)) {
+      setShowUpgradeModal(true);
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await analyzeStatement(file);
+    e.target.value = '';
+  };
+
   if (!result) {
     return null; // Will redirect
+  }
+
+  // While analyzing from results page, show processing screen
+  if (status !== 'idle' && status !== 'error' && status !== 'complete') {
+    return <ProcessingScreen stage={getStage()} />;
   }
 
   const handleStartOver = () => {
@@ -126,14 +179,18 @@ function ResultsPageInner() {
     router.push('/');
   };
 
-  const handleGoToUpload = () => {
-    clearAll();
-    router.push('/');
-  };
-
   return (
     <main className="min-h-screen bg-[#f5f5f7] py-10 px-5">
       <div className="mx-auto max-w-6xl">
+        {/* Hidden file input — always in DOM so ref is valid when buttons call click() */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+
         {/* Demo mode banner */}
         {isDemo && showDemoBanner && (
           <div className="mb-6 rounded-2xl bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border border-black/[0.06] px-4 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -152,8 +209,9 @@ function ResultsPageInner() {
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={handleGoToUpload}
+                onClick={handleUploadClick}
                 className="whitespace-nowrap"
+                disabled={status !== 'idle' && status !== 'complete'}
               >
                 Analyze your own statement →
               </Button>
@@ -272,8 +330,9 @@ function ResultsPageInner() {
                 <Button
                   variant="primary"
                   size="lg"
-                  onClick={handleGoToUpload}
+                  onClick={handleUploadClick}
                   className="w-full sm:w-auto"
+                  disabled={status !== 'idle' && status !== 'complete'}
                 >
                   Upload My Statement
                 </Button>
@@ -294,6 +353,21 @@ function ResultsPageInner() {
         <p className="mt-8 text-center text-xs text-[#86868b]">
           Analysis generated on {new Date(result.generatedAt).toLocaleDateString()}
         </p>
+
+        {/* Inline error when upload/analysis failed — keep demo data visible */}
+        {status === 'error' && error && (
+          <div className="mt-6 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-center">
+            <p className="text-sm text-red-800">{error}</p>
+            <Button variant="secondary" size="sm" className="mt-2" onClick={() => reset()}>
+              Try again
+            </Button>
+          </div>
+        )}
+
+        <UpgradeModal
+          isOpen={showUpgradeModal}
+          onClose={() => setShowUpgradeModal(false)}
+        />
       </div>
     </main>
   );
