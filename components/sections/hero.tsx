@@ -3,7 +3,12 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 
-export function Hero() {
+interface HeroProps {
+  onTryDemo?: () => void;
+  isDemoLoading?: boolean;
+}
+
+export function Hero({ onTryDemo, isDemoLoading }: HeroProps) {
   const handleScrollToUpload = () => {
     const uploadSection = document.getElementById("upload");
     if (uploadSection) {
@@ -29,15 +34,31 @@ export function Hero() {
         </h1>
 
         {/* Subheadline */}
-        <p className="text-lg md:text-xl text-[#6e6e73] max-w-2xl mx-auto mb-10">
+        <p className="text-lg md:text-xl text-[#6e6e73] max-w-2xl mx-auto mb-8">
           Upload your bank statement and get AI-powered spending insights in 60
           seconds. No account linking. No subscriptions. Just clarity.
         </p>
 
-        {/* CTA Button */}
-        <Button size="lg" onClick={handleScrollToUpload}>
-          Upload Your Statement →
-        </Button>
+        {/* Two CTAs: primary + secondary */}
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4">
+          <Button
+            size="lg"
+            onClick={handleScrollToUpload}
+            className="w-full sm:w-auto"
+          >
+            Upload Your Statement →
+          </Button>
+          {onTryDemo && (
+            <button
+              type="button"
+              onClick={onTryDemo}
+              disabled={isDemoLoading}
+              className="w-full sm:w-auto rounded-xl font-semibold text-base px-8 py-4 border border-[#d1d1d6] bg-transparent text-[#1d1d1f] hover:bg-black/[0.04] hover:border-[#a1a1a6] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
+            >
+              See Sample Analysis →
+            </button>
+          )}
+        </div>
 
         {/* Trust Indicators */}
         <div className="mt-8 flex justify-center gap-6 flex-wrap">

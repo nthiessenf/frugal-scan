@@ -8,7 +8,6 @@ import { UploadSection } from '@/components/sections/upload-section';
 import { ProcessingScreen } from '@/components/sections/processing-screen';
 import { ErrorMessage } from '@/components/ui/error-message';
 import { UpgradeModal } from '@/components/ui/upgrade-modal';
-import { Button } from '@/components/ui/button';
 import { useAnalysis } from '@/lib/hooks/useAnalysis';
 import { useAnalysisContext } from '@/contexts/AnalysisContext';
 import { getDemoAnalysisResult } from '@/lib/mock-data';
@@ -94,27 +93,12 @@ export default function Home() {
   // Default landing page
   return (
     <main>
-      <Hero />
+      <Hero onTryDemo={handleLoadDemo} isDemoLoading={isDemoLoading} />
       <HowItWorks />
       <UploadSection 
         onFileSelect={handleFileSelect}
         usageKey={`usage-${status}-${result ? 'complete' : 'idle'}`}
       />
-      {/* Demo CTA - lets visitors see value without uploading */}
-      <div className="mt-6 flex flex-col items-center gap-1 px-5 text-center">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleLoadDemo}
-          disabled={isDemoLoading}
-          className="text-sm text-[#1d1d1f] hover:text-[#111827] hover:bg-gradient-to-r hover:from-blue-50 hover:via-purple-50 hover:to-pink-50 disabled:opacity-50 disabled:pointer-events-none"
-        >
-          Try with sample data →
-        </Button>
-        <p className="text-xs text-[#6e6e73]">
-          See what FrugalScan reveals — no upload needed.
-        </p>
-      </div>
       <UpgradeModal 
         isOpen={showUpgradeModal} 
         onClose={() => {
