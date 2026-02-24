@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Hero } from '@/components/sections/hero';
 import { HowItWorks } from '@/components/sections/how-it-works';
@@ -18,6 +18,12 @@ export default function Home() {
   const { status, progress, error, analyzeStatement, reset, limitReached } = useAnalysis();
   const { result, setResult } = useAnalysisContext();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
+  const demoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (demoTimeoutRef.current) clearTimeout(demoTimeoutRef.current);
+  }, []);
 
   // Navigate to results when analysis is complete
   useEffect(() => {
@@ -38,10 +44,15 @@ export default function Home() {
   };
   
   const handleLoadDemo = () => {
-    // Load demo analysis result directly into context (no API calls, no usage tracking)
-    const demoResult = getDemoAnalysisResult();
-    setResult(demoResult);
-    router.push('/results?demo=true');
+    if (isDemoLoading) return;
+    setIsDemoLoading(true);
+    demoTimeoutRef.current = setTimeout(() => {
+      const demoResult = getDemoAnalysisResult();
+      setResult(demoResult);
+      router.push('/results?demo=true');
+      setIsDemoLoading(false);
+      demoTimeoutRef.current = null;
+    }, 2500);
   };
 
   // Map status to stage for ProcessingScreen
@@ -56,9 +67,14 @@ export default function Home() {
     }
   };
 
-  // Show processing screen during analysis
+  // Show processing screen during real analysis
   if (status !== 'idle' && status !== 'error' && status !== 'complete') {
     return <ProcessingScreen stage={getStage()} />;
+  }
+
+  // Show processing screen during demo flow (2–3s anticipation)
+  if (isDemoLoading) {
+    return <ProcessingScreen isDemo />;
   }
 
   // Show error screen
@@ -90,7 +106,8 @@ export default function Home() {
           variant="ghost"
           size="sm"
           onClick={handleLoadDemo}
-          className="text-sm text-[#1d1d1f] hover:text-[#111827] hover:bg-gradient-to-r hover:from-blue-50 hover:via-purple-50 hover:to-pink-50"
+          disabled={isDemoLoading}
+          className="text-sm text-[#1d1d1f] hover:text-[#111827] hover:bg-gradient-to-r hover:from-blue-50 hover:via-purple-50 hover:to-pink-50 disabled:opacity-50 disabled:pointer-events-none"
         >
           Try with sample data →
         </Button>

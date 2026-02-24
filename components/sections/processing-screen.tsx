@@ -6,6 +6,8 @@ import { Utensils, ShoppingBag, Car, Tv, Zap, Heart, Plane, CreditCard, PieChart
 interface ProcessingScreenProps {
   status?: 'uploading' | 'parsing' | 'categorizing' | 'analyzing' | 'complete';
   stage?: 'uploading' | 'parsing' | 'analyzing' | 'complete';
+  /** When true, shows "Loading sample analysis..." and hides the 60-90s footer (for demo flow). */
+  isDemo?: boolean;
 }
 
 const CATEGORY_ICONS = [
@@ -47,7 +49,7 @@ const generatePieSegments = () => {
 const generateBars = () => 
   Array.from({ length: 6 }, () => 20 + Math.random() * 80);
 
-export function ProcessingScreen({ status, stage }: ProcessingScreenProps) {
+export function ProcessingScreen({ status, stage, isDemo }: ProcessingScreenProps) {
   // Map status to stage (backward compatibility)
   const currentStage = stage || (status === 'categorizing' ? 'parsing' : status) || 'parsing';
   const [animationMode, setAnimationMode] = useState(0); // 0: scan, 1: categorize, 2: chart, 3: insights
@@ -124,6 +126,7 @@ export function ProcessingScreen({ status, stage }: ProcessingScreenProps) {
   }, [animationMode]);
 
   const getModeTitle = () => {
+    if (isDemo) return 'Loading sample analysis...';
     switch (animationMode) {
       case 0: return 'Reading your statement';
       case 1: return 'Categorizing transactions';
@@ -255,10 +258,17 @@ export function ProcessingScreen({ status, stage }: ProcessingScreenProps) {
         )}
       </div>
 
-      {/* Footer */}
-      <p className="mt-8 text-sm text-[#86868b]">
-        Usually takes 60-90 seconds
-      </p>
+      {/* Footer - hide long time estimate in demo mode */}
+      {!isDemo && (
+        <p className="mt-8 text-sm text-[#86868b]">
+          Usually takes 60-90 seconds
+        </p>
+      )}
+      {isDemo && (
+        <p className="mt-8 text-sm text-[#86868b]">
+          Almost there...
+        </p>
+      )}
     </div>
   );
 }
