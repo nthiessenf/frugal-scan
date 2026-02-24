@@ -34,42 +34,45 @@
 | 12 | Usage Tracking + Free Tier Limits | ✅ Complete | 2-3 hrs |
 | 13 | Upgrade Modal + Pro Teaser Page | ✅ Complete | 2-3 hrs |
 
-### Version 1.2 - Payments + Pro Tier Launch (8-10 hours)
-*Theme: Start making money*
+### Version 1.2 - Payments + Pro Tier Launch ✅ COMPLETE
 
 | Session | Task | Status | Time Est. |
 |---------|------|--------|-----------|
-| 14 | Stripe Payment Links (Manual MVP) | 📋 Next | 2-3 hrs |
-| 15 | Pro Tier State Management | 📋 Planned | 2-3 hrs |
-| 16 | Stripe Checkout Integration | 📋 Planned | 4-5 hrs |
+| 14 | Stripe Payment Links (Manual MVP) | ✅ Complete | 2-3 hrs |
+| 15 | Pro Tier State Management | ✅ Complete | 2-3 hrs |
+| 16 | Stripe Checkout Integration | ✅ Complete | 4-5 hrs |
 
-### Version 1.3 - Pro Features / Stickiness (14-18 hours)
-*Theme: Features that make Pro worth keeping*
+### Version 1.3 - Demonstrate Value + Polish (22-29 hours)
+*Theme: Help new visitors experience value instantly before building retention features.*
 
 | Session | Task | Status | Time Est. |
 |---------|------|--------|-----------|
-| 17 | Budget Goals - Set & Track Spending Limits (Pro-only) | 📋 Planned | 4-6 hrs |
-| 18 | Multi-Statement Trends - Month-over-Month (Pro-only) | 📋 Planned | 6-8 hrs |
-| 19 | Transaction Editing - Let Users Correct Categorization | 📋 Planned | 3-4 hrs |
-| 20 | PDF Export (Pro-only) | 📋 Planned | 2-3 hrs |
+| 17 | Interactive Demo / Sample Analysis | 📋 Next | 3-4 hrs |
+| 18 | Landing Page Glow-Up | 📋 Planned | 3-4 hrs |
+| 19 | PDF Export (Pro-only) | 📋 Planned | 2-3 hrs |
+| 20 | Transaction Editing | 📋 Planned | 3-4 hrs |
+| 21 | Budget Targets (Pro-only) | 📋 Planned | 4-6 hrs |
+| 22 | Month-over-Month Trends (Pro-only) | 📋 Planned | 6-8 hrs |
+
+**Rationale:** We're prioritizing features that let visitors experience value without uploading (demo, refreshed landing, screenshots, comparison table). Retention features (budgets, trends, export) follow once the top of funnel is stronger.
 
 ### Version 1.4 - Performance + Compatibility (8-12 hours)
 *Theme: Faster, works with more banks*
 
 | Session | Task | Status | Time Est. |
 |---------|------|--------|-----------|
-| 21 | Faster Processing - Optimize for <30s Analysis | 📋 Planned | 4-6 hrs |
-| 22 | More Banks - Test & Optimize for More Formats | 📋 Planned | 4-6 hrs |
+| 23 | Faster Processing - Optimize for <30s Analysis | 📋 Planned | 4-6 hrs |
+| 24 | More Banks - Test & Optimize for More Formats | 📋 Planned | 4-6 hrs |
 
 ### Version 2.0 - Platform + Power Tier (20+ hours)
 *Theme: Database-backed features, user accounts, scale*
 
 | Session | Task | Status | Time Est. |
 |---------|------|--------|-----------|
-| 23 | Supabase Integration + User Accounts (Auth) | 📋 Planned | 8-10 hrs |
-| 24 | History & Saved Analyses (Supabase-backed) | 📋 Planned | 4-6 hrs |
-| 25 | Multi-Account Consolidation (Power-only) | 📋 Planned | 8-10 hrs |
-| 26 | Power Tier Launch ($9.99/mo) | 📋 Planned | 4-6 hrs |
+| 25 | Supabase Integration + User Accounts (Auth) | 📋 Planned | 8-10 hrs |
+| 26 | History & Saved Analyses (Supabase-backed) | 📋 Planned | 4-6 hrs |
+| 27 | Multi-Account Consolidation (Power-only) | 📋 Planned | 8-10 hrs |
+| 28 | Power Tier Launch ($9.99/mo) | 📋 Planned | 4-6 hrs |
 
 ---
 
@@ -79,13 +82,16 @@ All planned features mapped to their version:
 
 | # | Feature | Version | Status |
 |---|---------|---------|--------|
-| 1 | **Payments** - Stripe for payment processing | v1.2 | 📋 Next |
-| 2 | **Budget Goals** - Set and track spending limits | v1.3 | 📋 Planned |
-| 3 | **Multi-Statement Trends** - Compare month over month | v1.3 | 📋 Planned |
-| 4 | **Transaction Editing** - Let users correct categorization | v1.3 | 📋 Planned |
-| 5 | **Faster Processing** - Optimize for <30 second analysis | v1.4 | 📋 Planned |
-| 6 | **More Banks** - Test and optimize for more formats | v1.4 | 📋 Planned |
-| 7 | **User Accounts** - Supabase Auth for saving history | v2.0 | 📋 Planned |
+| 1 | **Payments** - Stripe for payment processing | v1.2 | ✅ Complete |
+| 2 | **Interactive Demo** - Try sample analysis without uploading | v1.3 | 📋 Next |
+| 3 | **Landing Page Glow-Up** - Hero, demo CTA, screenshots, comparison table | v1.3 | 📋 Planned |
+| 4 | **PDF Export** - Export reports (Pro-only) | v1.3 | 📋 Planned |
+| 5 | **Transaction Editing** - Correct categorization | v1.3 | 📋 Planned |
+| 6 | **Budget Targets** - Set and track spending limits (Pro-only) | v1.3 | 📋 Planned |
+| 7 | **Month-over-Month Trends** - Compare statements (Pro-only) | v1.3 | 📋 Planned |
+| 8 | **Faster Processing** - Optimize for <30 second analysis | v1.4 | 📋 Planned |
+| 9 | **More Banks** - Test and optimize for more formats | v1.4 | 📋 Planned |
+| 10 | **User Accounts** - Supabase Auth for saving history | v2.0 | 📋 Planned |
 
 ---
 

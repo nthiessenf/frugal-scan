@@ -34,11 +34,14 @@
 
 ### 📋 Next Steps
 
-**v1.3 - Pro Features / Stickiness:**
-- Session 17: Budget Goals - Set & track spending limits (Pro-only)
-- Session 18: Multi-Statement Trends - Month-over-month (Pro-only)
-- Session 19: Transaction Editing - Let users correct categorization
-- Session 20: PDF Export (Pro-only)
+**v1.3 - Demonstrate Value + Polish** *(prioritizing features that help new visitors experience value instantly before retention features)*
+
+- **Session 17:** Interactive Demo / Sample Analysis (~3-4 hrs) — "Try a sample analysis" on landing → results dashboard with realistic mock data
+- **Session 18:** Landing Page Glow-Up (~3-4 hrs) — Refresh hero, demo CTA, product screenshots/preview, comparison table (privacy angle)
+- **Session 19:** PDF Export (Pro-only) (~2-3 hrs)
+- **Session 20:** Transaction Editing (~3-4 hrs)
+- **Session 21:** Budget Targets (Pro-only) (~4-6 hrs)
+- **Session 22:** Month-over-Month Trends (Pro-only) (~6-8 hrs)
 
 ---
 
@@ -83,14 +86,9 @@
 
 ### 📋 Next Steps
 
-**v1.2 - Payments + Pro Tier Launch:**
-- Session 16: Stripe Checkout Integration (automated webhooks to replace manual codes)
+**v1.2 - Payments + Pro Tier Launch:** ✅ Session 16 complete
 
-**v1.3 - Pro Features / Stickiness:**
-- Session 17: Budget Goals - Set & track spending limits (Pro-only)
-- Session 18: Multi-Statement Trends - Month-over-month (Pro-only)
-- Session 19: Transaction Editing - Let users correct categorization
-- Session 20: PDF Export (Pro-only)
+**v1.3 - Demonstrate Value + Polish:** Session 17 (Interactive Demo) next — see Session 16 log above for full order.
 
 ---
 
