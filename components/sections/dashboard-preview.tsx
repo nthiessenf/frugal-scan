@@ -44,7 +44,7 @@ export function DashboardPreview({ onTryDemo, isDemoLoading }: DashboardPreviewP
     .sort((a, b) => b.value - a.value);
 
   const previewInsights = insights.slice(0, 3);
-  const previewMerchants = topMerchants.slice(0, 4);
+  const previewMerchants = topMerchants.slice(0, 6);
 
   const chartTotal = chartData.reduce((s, d) => s + d.value, 0);
   const maxMerchantAmount = previewMerchants[0]?.amount ?? 1;
@@ -82,9 +82,9 @@ export function DashboardPreview({ onTryDemo, isDemoLoading }: DashboardPreviewP
             aria-label={onTryDemo ? 'Preview sample analysis' : undefined}
           >
             {/* Dashboard content */}
-            <div className="p-4 sm:p-6 bg-[#fafafa] min-h-[320px]">
+            <div className="p-4 sm:p-5 bg-[#fafafa] min-h-[320px]">
               {/* Summary stats row — stagger entrance */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-3">
                 {[
                   {
                     label: 'Total Spending',
@@ -94,23 +94,29 @@ export function DashboardPreview({ onTryDemo, isDemoLoading }: DashboardPreviewP
                   { label: 'Transactions', value: summary.transactionCount.toString(), highlight: false },
                   { label: 'Subscriptions', value: demo.subscriptions.length.toString(), highlight: false },
                   { label: 'Est. savings', value: `$${potentialSavings}/mo`, highlight: true },
-                ].map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="stagger-item rounded-xl bg-white border border-black/[0.06] p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-                  >
-                    <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-[#86868b] truncate">
-                      {stat.label}
-                    </p>
-                    <p
-                      className={`text-lg sm:text-xl font-bold mt-0.5 truncate ${
-                        stat.highlight ? 'text-emerald-600' : 'text-[#1d1d1f]'
-                      }`}
+                ].map((stat) => {
+                  const isSubscriptions = stat.label === 'Subscriptions';
+                  const subscriptionsHigh = isSubscriptions && demo.subscriptions.length >= 5;
+                  const valueClassNames = `text-lg sm:text-xl font-bold mt-0.5 truncate ${
+                    stat.highlight
+                      ? 'text-emerald-600'
+                      : subscriptionsHigh
+                      ? 'text-amber-600'
+                      : 'text-[#1d1d1f]'
+                  }`;
+
+                  return (
+                    <div
+                      key={stat.label}
+                      className="stagger-item rounded-xl bg-white border border-black/[0.06] p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
                     >
-                      {stat.value}
-                    </p>
-                  </div>
-                ))}
+                      <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-[#86868b]">
+                        {stat.label}
+                      </p>
+                      <p className={valueClassNames}>{stat.value}</p>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Pie chart + Top merchants side by side */}
@@ -152,7 +158,7 @@ export function DashboardPreview({ onTryDemo, isDemoLoading }: DashboardPreviewP
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-x-3 gap-y-1 justify-center mt-2">
-                    {chartData.slice(0, 5).map((item) => (
+                    {chartData.slice(0, 4).map((item) => (
                       <div key={item.name} className="flex items-center gap-1.5">
                         <span
                           className="w-2 h-2 rounded-full flex-shrink-0"
@@ -163,6 +169,11 @@ export function DashboardPreview({ onTryDemo, isDemoLoading }: DashboardPreviewP
                         </span>
                       </div>
                     ))}
+                    {chartData.length > 4 && (
+                      <span className="text-[10px] sm:text-xs text-[#a1a1aa]">
+                        + {chartData.length - 4} more
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -172,15 +183,16 @@ export function DashboardPreview({ onTryDemo, isDemoLoading }: DashboardPreviewP
                   <div className="space-y-2.5">
                     {previewMerchants.map((m) => {
                       const pct = Math.min(100, (m.amount / maxMerchantAmount) * 100);
+                      const barColor = COLORS[m.category] || '#64748b';
                       return (
                         <div key={m.name} className="flex items-center gap-3">
                           <span className="text-xs text-[#1d1d1f] font-medium w-24 sm:w-28 truncate">
                             {m.name}
                           </span>
-                          <div className="flex-1 h-2 rounded-full bg-black/[0.06] overflow-hidden">
+                          <div className="flex-1 h-2.5 rounded-full bg-black/[0.06] overflow-hidden">
                             <div
-                              className="h-full rounded-full bg-gradient-to-r from-[#93c5fd] via-[#c4b5fd] to-[#fbcfe8] transition-all duration-500"
-                              style={{ width: `${pct}%` }}
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{ width: `${pct}%`, backgroundColor: barColor }}
                             />
                           </div>
                           <span className="text-xs text-[#6e6e73] tabular-nums w-12 text-right">
