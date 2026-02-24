@@ -1,6 +1,7 @@
 import { AnalysisResult, CategorizedTransaction, CategoryBreakdown, Insight, SavingsTip, Subscription, Category, TopMerchant, SpendingSummary } from '@/types';
 
-// Realistic mock transactions (mimics a real bank statement)
+// Base mock transactions used by the existing \"Load Mock Data\" dev button
+// (kept for backwards compatibility)
 const mockTransactions: CategorizedTransaction[] = [
   // Dining Out
   { date: '2025-01-03', description: 'CHIPOTLE 1234', amount: 12.45, type: 'debit', category: 'food_dining', merchant: 'Chipotle', confidence: 0.95, isRecurring: false, needsReview: false },
@@ -231,9 +232,8 @@ function calculateSummary(transactions: CategorizedTransaction[]): SpendingSumma
   };
 }
 
-// Main export: complete mock analysis result
-// Note: transactions field is added for drill-down feature, extending the base AnalysisResult type
-export const mockAnalysisResult: AnalysisResult & { transactions: CategorizedTransaction[] } = {
+// Main export: complete mock analysis result (existing dev mock)
+export const mockAnalysisResult: AnalysisResult = {
   summary: calculateSummary(mockTransactions),
   categoryBreakdown: calculateCategoryBreakdown(mockTransactions),
   topMerchants: calculateTopMerchants(mockTransactions),
@@ -243,4 +243,224 @@ export const mockAnalysisResult: AnalysisResult & { transactions: CategorizedTra
   generatedAt: new Date().toISOString(),
   transactions: mockTransactions,
 };
+
+// Also export the base arrays for anyone already importing them
+export const MOCK_TRANSACTIONS = mockTransactions;
+export const MOCK_SUBSCRIPTIONS = mockSubscriptions;
+
+// ---------------------------------------------------------------------------
+// Demo-specific dataset for interactive demo / sample analysis
+// ---------------------------------------------------------------------------
+
+// Rich, realistic demo dataset for a 30-year-old professional
+// All dates are within January 2025
+export const DEMO_TRANSACTIONS: CategorizedTransaction[] = [
+  // Dining out - heavy spending
+  { date: '2025-01-02', description: 'STARBUCKS STORE 1024 AUSTIN TX', amount: 5.45, type: 'debit', category: 'food_dining', merchant: 'Starbucks', confidence: 0.99, isRecurring: true, needsReview: false },
+  { date: '2025-01-03', description: 'CHIPOTLE 1234 AUSTIN TX', amount: 13.85, type: 'debit', category: 'food_dining', merchant: 'Chipotle', confidence: 0.98, isRecurring: false, needsReview: false },
+  { date: '2025-01-04', description: 'DOORDASH *THAI KITCHEN', amount: 32.40, type: 'debit', category: 'food_dining', merchant: 'DoorDash - Thai Kitchen', confidence: 0.99, isRecurring: false, needsReview: false },
+  { date: '2025-01-05', description: 'STARBUCKS STORE 1024 AUSTIN TX', amount: 4.95, type: 'debit', category: 'food_dining', merchant: 'Starbucks', confidence: 0.99, isRecurring: true, needsReview: false },
+  { date: '2025-01-06', description: 'LAUNDERETTE AUSTIN TX', amount: 48.60, type: 'debit', category: 'food_dining', merchant: 'Launderette', confidence: 0.97, isRecurring: false, needsReview: false },
+  { date: '2025-01-07', description: 'UBER EATS *PIZZA JONES', amount: 27.80, type: 'debit', category: 'food_dining', merchant: 'Uber Eats - Pizza Jones', confidence: 0.99, isRecurring: false, needsReview: false },
+  { date: '2025-01-08', description: 'STARBUCKS STORE 1024 AUSTIN TX', amount: 6.15, type: 'debit', category: 'food_dining', merchant: 'Starbucks', confidence: 0.99, isRecurring: true, needsReview: false },
+  { date: '2025-01-09', description: 'CHIPOTLE 1234 AUSTIN TX', amount: 14.25, type: 'debit', category: 'food_dining', merchant: 'Chipotle', confidence: 0.98, isRecurring: false, needsReview: false },
+  { date: '2025-01-10', description: 'DOORDASH *RAMEN TATSU-YA', amount: 29.90, type: 'debit', category: 'food_dining', merchant: 'DoorDash - Ramen Tatsu-Ya', confidence: 0.99, isRecurring: false, needsReview: false },
+  { date: '2025-01-11', description: 'STARBUCKS STORE 1024 AUSTIN TX', amount: 5.85, type: 'debit', category: 'food_dining', merchant: 'Starbucks', confidence: 0.99, isRecurring: true, needsReview: false },
+  { date: '2025-01-12', description: 'EL CARMELO TACOS AUSTIN TX', amount: 24.10, type: 'debit', category: 'food_dining', merchant: 'El Carmelo Tacos', confidence: 0.97, isRecurring: false, needsReview: false },
+  { date: '2025-01-14', description: 'UBER EATS *SUSHI HOUSE', amount: 38.75, type: 'debit', category: 'food_dining', merchant: 'Uber Eats - Sushi House', confidence: 0.99, isRecurring: false, needsReview: false },
+  { date: '2025-01-16', description: 'STARBUCKS STORE 1024 AUSTIN TX', amount: 5.65, type: 'debit', category: 'food_dining', merchant: 'Starbucks', confidence: 0.99, isRecurring: true, needsReview: false },
+  { date: '2025-01-18', description: 'CHIPOTLE 1234 AUSTIN TX', amount: 12.95, type: 'debit', category: 'food_dining', merchant: 'Chipotle', confidence: 0.98, isRecurring: false, needsReview: false },
+  { date: '2025-01-20', description: 'STARBUCKS STORE 1024 AUSTIN TX', amount: 6.25, type: 'debit', category: 'food_dining', merchant: 'Starbucks', confidence: 0.99, isRecurring: true, needsReview: false },
+  { date: '2025-01-22', description: 'DOORDASH *BURGER JOINT', amount: 31.60, type: 'debit', category: 'food_dining', merchant: 'DoorDash - Burger Joint', confidence: 0.99, isRecurring: false, needsReview: false },
+  { date: '2025-01-24', description: 'STARBUCKS STORE 1024 AUSTIN TX', amount: 5.75, type: 'debit', category: 'food_dining', merchant: 'Starbucks', confidence: 0.99, isRecurring: true, needsReview: false },
+  { date: '2025-01-26', description: 'DATE NIGHT *ITALIAN PLACE', amount: 86.40, type: 'debit', category: 'food_dining', merchant: 'Vespaio', confidence: 0.96, isRecurring: false, needsReview: false },
+  { date: '2025-01-29', description: 'STARBUCKS STORE 1024 AUSTIN TX', amount: 7.22, type: 'debit', category: 'food_dining', merchant: 'Starbucks', confidence: 0.99, isRecurring: true, needsReview: false },
+
+  // Groceries - 2–3 main stores
+  { date: '2025-01-03', description: 'WHOLE FOODS MKT AUSTIN TX', amount: 128.45, type: 'debit', category: 'groceries', merchant: 'Whole Foods', confidence: 0.99, isRecurring: false, needsReview: false },
+  { date: '2025-01-09', description: 'HEB GROCERY #234 AUSTIN TX', amount: 92.30, type: 'debit', category: 'groceries', merchant: 'HEB', confidence: 0.99, isRecurring: false, needsReview: false },
+  { date: '2025-01-15', description: 'TRADER JOES #567 AUSTIN TX', amount: 84.12, type: 'debit', category: 'groceries', merchant: 'Trader Joe\'s', confidence: 0.98, isRecurring: false, needsReview: false },
+  { date: '2025-01-21', description: 'HEB GROCERY #234 AUSTIN TX', amount: 103.77, type: 'debit', category: 'groceries', merchant: 'HEB', confidence: 0.99, isRecurring: false, needsReview: false },
+  { date: '2025-01-28', description: 'WHOLE FOODS MKT AUSTIN TX', amount: 74.88, type: 'debit', category: 'groceries', merchant: 'Whole Foods', confidence: 0.99, isRecurring: false, needsReview: false },
+
+  // Amazon / shopping
+  { date: '2025-01-05', description: 'AMAZON.COM*1A2B3C', amount: 62.49, type: 'debit', category: 'shopping', merchant: 'Amazon', confidence: 0.99, isRecurring: false, needsReview: false },
+  { date: '2025-01-12', description: 'AMAZON.COM*4D5E6F', amount: 47.35, type: 'debit', category: 'shopping', merchant: 'Amazon', confidence: 0.99, isRecurring: false, needsReview: false },
+  { date: '2025-01-19', description: 'AMAZON.COM*7G8H9I', amount: 89.90, type: 'debit', category: 'shopping', merchant: 'Amazon', confidence: 0.99, isRecurring: false, needsReview: false },
+  { date: '2025-01-23', description: 'TARGET 00012345 AUSTIN TX', amount: 68.24, type: 'debit', category: 'shopping', merchant: 'Target', confidence: 0.98, isRecurring: false, needsReview: false },
+
+  // Gas / transportation
+  { date: '2025-01-04', description: 'SHELL OIL 12345678 AUSTIN TX', amount: 46.30, type: 'debit', category: 'transportation', merchant: 'Shell', confidence: 0.98, isRecurring: false, needsReview: false },
+  { date: '2025-01-13', description: 'EXXONMOBIL 00098765 AUSTIN TX', amount: 52.85, type: 'debit', category: 'transportation', merchant: 'Exxon', confidence: 0.98, isRecurring: false, needsReview: false },
+  { date: '2025-01-22', description: 'SHELL OIL 12345678 AUSTIN TX', amount: 51.90, type: 'debit', category: 'transportation', merchant: 'Shell', confidence: 0.98, isRecurring: false, needsReview: false },
+
+  // Misc purchases
+  { date: '2025-01-06', description: 'CVS PHARMACY 03124 AUSTIN TX', amount: 23.17, type: 'debit', category: 'health_fitness', merchant: 'CVS Pharmacy', confidence: 0.97, isRecurring: false, needsReview: false },
+  { date: '2025-01-17', description: 'WALGREENS #1234 AUSTIN TX', amount: 18.92, type: 'debit', category: 'health_fitness', merchant: 'Walgreens', confidence: 0.97, isRecurring: false, needsReview: false },
+  { date: '2025-01-20', description: 'TARGET 00012345 AUSTIN TX', amount: 42.60, type: 'debit', category: 'shopping', merchant: 'Target', confidence: 0.98, isRecurring: false, needsReview: false },
+
+  // Entertainment
+  { date: '2025-01-11', description: 'ALAMO DRAFTHOUSE AUSTIN TX', amount: 38.50, type: 'debit', category: 'entertainment', merchant: 'Alamo Drafthouse', confidence: 0.98, isRecurring: false, needsReview: false },
+  { date: '2025-01-25', description: 'STUBHUB *CONCERT TICKETS', amount: 124.00, type: 'debit', category: 'entertainment', merchant: 'StubHub', confidence: 0.99, isRecurring: false, needsReview: false },
+
+  // Bills & utilities (for realism, though not core to the demo story)
+  { date: '2025-01-05', description: 'AUSTIN ENERGY', amount: 132.41, type: 'debit', category: 'bills_utilities', merchant: 'Austin Energy', confidence: 0.99, isRecurring: true, needsReview: false },
+  { date: '2025-01-09', description: 'XFINITY MOBILE PAYMENT', amount: 72.84, type: 'debit', category: 'bills_utilities', merchant: 'Xfinity', confidence: 0.98, isRecurring: true, needsReview: false },
+
+  // Subscriptions that add up
+  { date: '2025-01-01', description: 'NETFLIX.COM', amount: 15.99, type: 'debit', category: 'subscriptions', merchant: 'Netflix', confidence: 0.99, isRecurring: true, needsReview: false },
+  { date: '2025-01-01', description: 'SPOTIFY USA', amount: 10.99, type: 'debit', category: 'subscriptions', merchant: 'Spotify', confidence: 0.99, isRecurring: true, needsReview: false },
+  { date: '2025-01-02', description: 'APPLE.COM/BILL *ICLOUD', amount: 2.99, type: 'debit', category: 'subscriptions', merchant: 'iCloud', confidence: 0.99, isRecurring: true, needsReview: false },
+  { date: '2025-01-03', description: 'NYTIMES SUBSCRIPTION', amount: 19.99, type: 'debit', category: 'subscriptions', merchant: 'New York Times', confidence: 0.99, isRecurring: true, needsReview: false },
+  { date: '2025-01-04', description: 'ADOBE *CREATIVE CLOUD', amount: 54.99, type: 'debit', category: 'subscriptions', merchant: 'Adobe Creative Cloud', confidence: 0.99, isRecurring: true, needsReview: false },
+  { date: '2025-01-04', description: 'EQUINOX MEMBERSHIP', amount: 135.00, type: 'debit', category: 'health_fitness', merchant: 'Equinox', confidence: 0.99, isRecurring: true, needsReview: false },
+
+  // No income in this demo (credit card view) – but include one small refund for realism
+  { date: '2025-01-27', description: 'UBER EATS *REFUND', amount: 18.00, type: 'credit', category: 'income', merchant: 'Uber Eats', confidence: 0.96, isRecurring: false, needsReview: false },
+];
+
+// Demo subscriptions derived from DEMO_TRANSACTIONS
+export const DEMO_SUBSCRIPTIONS: Subscription[] = [
+  { name: 'Netflix', amount: 15.99, frequency: 'monthly', lastCharge: '2025-01-01', category: 'streaming', confidence: 0.99 },
+  { name: 'Spotify', amount: 10.99, frequency: 'monthly', lastCharge: '2025-01-01', category: 'streaming', confidence: 0.99 },
+  { name: 'iCloud', amount: 2.99, frequency: 'monthly', lastCharge: '2025-01-02', category: 'software', confidence: 0.99 },
+  { name: 'New York Times', amount: 19.99, frequency: 'monthly', lastCharge: '2025-01-03', category: 'news', confidence: 0.99 },
+  { name: 'Adobe Creative Cloud', amount: 54.99, frequency: 'monthly', lastCharge: '2025-01-04', category: 'software', confidence: 0.99 },
+  { name: 'Equinox Membership', amount: 135.00, frequency: 'monthly', lastCharge: '2025-01-04', category: 'fitness', confidence: 0.99 },
+];
+
+// Demo insights that tell a compelling spending story
+const demoInsights: Insight[] = [
+  {
+    id: 'demo-insight-1',
+    title: 'Your Coffee Ritual Adds Up',
+    description: 'You visited Starbucks 8 times this month, spending $47.92 in total. That\'s about $575 per year on coffee runs—roughly the cost of a weekend getaway.',
+    severity: 'info',
+    category: 'food_dining',
+    amount: 47.92,
+  },
+  {
+    id: 'demo-insight-2',
+    title: 'Delivery Habit vs Groceries',
+    description: 'You spent $163.65 on delivery (DoorDash & Uber Eats) across 4 orders, compared to $483.52 at grocery stores. Delivery is 25% of your total food spending for the month.',
+    severity: 'warning',
+    category: 'food_dining',
+    amount: 163.65,
+  },
+  {
+    id: 'demo-insight-3',
+    title: 'Subscriptions: A Hidden $2400/Year',
+    description: 'Your 6 subscriptions total $239.95 this month. Projected annually, that\'s $2,879—more than a full mortgage payment in many US cities.',
+    severity: 'warning',
+    category: 'subscriptions',
+    amount: 239.95,
+  },
+  {
+    id: 'demo-insight-4',
+    title: 'Weekend Spending Spike',
+    description: 'Weekend dining and entertainment (Friday–Sunday) totaled $612.47 this month—nearly 40% of your total spending—even though weekends are only 30% of the days.',
+    severity: 'info',
+    category: 'entertainment',
+    amount: 612.47,
+  },
+  {
+    id: 'demo-insight-5',
+    title: 'Equinox Is a Top 3 Expense',
+    description: 'Your Equinox membership at $135/month is one of your top three recurring charges, larger than your electricity and phone bills combined this month.',
+    severity: 'info',
+    category: 'health_fitness',
+    amount: 135.0,
+  },
+];
+
+// Demo savings tips tied to the actual merchants
+const demoTips: SavingsTip[] = [
+  {
+    id: 'demo-tip-1',
+    title: 'Swap 2 Delivery Nights for Groceries',
+    description: 'Replacing two DoorDash/Uber Eats orders ($80–$90) with an extra grocery run could save you about $50/month—or $600/year—without giving up eating out entirely.',
+    potentialSavings: 50,
+    difficulty: 'medium',
+    timeframe: 'monthly',
+  },
+  {
+    id: 'demo-tip-2',
+    title: 'Audit Your Creative + News Subscriptions',
+    description: 'Adobe Creative Cloud ($54.99) and New York Times ($19.99) together cost $75/month. If you use them less than weekly, consider switching to a cheaper Adobe plan and pausing NYT for 3–6 months.',
+    potentialSavings: 40,
+    difficulty: 'medium',
+    timeframe: 'monthly',
+  },
+  {
+    id: 'demo-tip-3',
+    title: 'Right-Size Equinox',
+    description: 'If you visit Equinox fewer than 8 times a month, dropping to a cheaper gym at half the price could save ~$70/month—over $800/year—while still keeping you active.',
+    potentialSavings: 70,
+    difficulty: 'hard',
+    timeframe: 'monthly',
+  },
+  {
+    id: 'demo-tip-4',
+    title: 'Set a Starbucks Budget',
+    description: 'Capping Starbucks at $30/month (about 5 drinks) would reduce your coffee spend by ~$18/month compared to this statement—enough to cover your iCloud and Spotify subscriptions.',
+    potentialSavings: 18,
+    difficulty: 'easy',
+    timeframe: 'monthly',
+  },
+];
+
+function calculateDemoSummary(transactions: CategorizedTransaction[], subscriptions: Subscription[]): SpendingSummary {
+  const debits = transactions.filter(t => t.type === 'debit' && t.category !== 'income' && t.category !== 'transfer');
+  const credits = transactions.filter(t => t.type === 'credit' || t.category === 'income');
+
+  const totalSpent = debits.reduce((sum, t) => sum + t.amount, 0);
+  const totalIncome = credits.reduce((sum, t) => sum + t.amount, 0);
+  const netCashFlow = totalIncome - totalSpent;
+  const averageTransaction = debits.length > 0 ? totalSpent / debits.length : 0;
+
+  const categoryBreakdown = calculateCategoryBreakdown(transactions);
+  const topCategory = categoryBreakdown[0]?.category || 'other';
+  const topCategoryAmount = categoryBreakdown[0]?.amount || 0;
+
+  const subscriptionTotal = subscriptions.reduce((sum, s) => sum + s.amount, 0);
+
+  // Period: full calendar month of January 2025
+  const periodDays = 31;
+
+  return {
+    totalSpent,
+    totalIncome,
+    netCashFlow,
+    transactionCount: transactions.length,
+    averageTransaction,
+    topCategory,
+    topCategoryAmount,
+    subscriptionTotal,
+    periodDays,
+  };
+}
+
+function buildDemoAnalysisResult(): AnalysisResult {
+  const summary = calculateDemoSummary(DEMO_TRANSACTIONS, DEMO_SUBSCRIPTIONS);
+  const categoryBreakdown = calculateCategoryBreakdown(DEMO_TRANSACTIONS);
+  const topMerchants = calculateTopMerchants(DEMO_TRANSACTIONS);
+
+  return {
+    summary,
+    categoryBreakdown,
+    topMerchants,
+    subscriptions: DEMO_SUBSCRIPTIONS,
+    insights: demoInsights,
+    tips: demoTips,
+    generatedAt: '2025-02-01T12:00:00.000Z',
+    transactions: DEMO_TRANSACTIONS,
+  };
+}
+
+export const DEMO_ANALYSIS_RESULT: AnalysisResult = buildDemoAnalysisResult();
+
+export function getDemoAnalysisResult(): AnalysisResult {
+  return DEMO_ANALYSIS_RESULT;
+}
+
 
