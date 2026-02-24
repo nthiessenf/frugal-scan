@@ -28,7 +28,7 @@ export function HowItWorks() {
   ];
 
   return (
-    <section className="py-20 px-5">
+    <section id="how-it-works" className="py-20 px-5">
       <div className="max-w-6xl mx-auto">
         {/* Section Title */}
         <h2 className="text-3xl md:text-4xl font-bold tracking-[-0.03em] text-center text-[#1d1d1f] mb-16">

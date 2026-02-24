@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Hero } from '@/components/sections/hero';
 import { HowItWorks } from '@/components/sections/how-it-works';
+import { DashboardPreview } from '@/components/sections/dashboard-preview';
 import { UploadSection } from '@/components/sections/upload-section';
+import { PrivacyComparison } from '@/components/sections/privacy-comparison';
 import { ProcessingScreen } from '@/components/sections/processing-screen';
 import { ErrorMessage } from '@/components/ui/error-message';
 import { UpgradeModal } from '@/components/ui/upgrade-modal';
@@ -94,7 +96,9 @@ export default function Home() {
   return (
     <main>
       <Hero onTryDemo={handleLoadDemo} isDemoLoading={isDemoLoading} />
+      <DashboardPreview onTryDemo={handleLoadDemo} isDemoLoading={isDemoLoading} />
       <HowItWorks />
+      <PrivacyComparison />
       <UploadSection 
         onFileSelect={handleFileSelect}
         usageKey={`usage-${status}-${result ? 'complete' : 'idle'}`}
