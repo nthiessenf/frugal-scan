@@ -55,7 +55,7 @@ export function Hero({ onTryDemo, isDemoLoading }: HeroProps) {
               disabled={isDemoLoading}
               className="w-full sm:w-auto rounded-xl font-semibold text-base px-8 py-4 border border-[#d1d1d6] bg-transparent text-[#1d1d1f] hover:bg-black/[0.04] hover:border-[#a1a1a6] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
             >
-              See Sample Analysis →
+              See Demo Sample →
             </button>
           )}
         </div>
