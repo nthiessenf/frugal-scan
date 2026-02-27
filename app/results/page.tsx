@@ -299,12 +299,12 @@ function ResultsPageInner() {
         {/* Action Buttons */}
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center no-print">
           <Button 
-            variant="primary" 
+            variant="secondary" 
             size="lg"
             onClick={() => window.print()}
             className="no-print"
           >
-            Download Report
+            Print
           </Button>
           <Button 
             variant="secondary" 
