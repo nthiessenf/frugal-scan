@@ -1,16 +1,185 @@
 'use client';
 
 import { useState } from 'react';
-import { SavingsTip } from '@/types';
-import { Lightbulb, ChevronDown, ChevronUp, Zap, Clock, TrendingDown } from 'lucide-react';
+import { SavingsTip, TieredTip } from '@/types';
+import { Target, ChevronDown, ChevronUp, Lightbulb, Zap, Clock, TrendingDown } from 'lucide-react';
+import { GlassCard } from '@/components/ui/card';
 
 interface TipsSectionProps {
   tips: SavingsTip[];
+  enhancedTips?: {
+    quickWins: TieredTip[];
+    worthTheEffort: TieredTip[];
+    bigMoves: TieredTip[];
+    totalMonthlySavings: number;
+    totalAnnualSavings: number;
+  };
 }
 
-export function TipsSection({ tips }: TipsSectionProps) {
+function TierRow({
+  tip,
+  badgeColor,
+}: {
+  tip: TieredTip;
+  badgeColor: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = tip.description.length > 120;
+
+  return (
+    <div className="py-3 border-b border-black/5 last:border-0">
+      <button
+        onClick={() => isLong && setExpanded(!expanded)}
+        className={`w-full text-left ${isLong ? 'cursor-pointer' : ''}`}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <h4 className="text-sm font-semibold text-[#1d1d1f]">{tip.title}</h4>
+            <p
+              className={`text-xs text-[#6e6e73] mt-0.5 leading-relaxed ${
+                !expanded && isLong ? 'line-clamp-2' : ''
+              }`}
+            >
+              {tip.description}
+            </p>
+            <span className={`inline-flex items-center mt-2 px-2 py-0.5 rounded-md text-xs font-medium ${badgeColor}`}>
+              Save ~${tip.potentialMonthlySavings}/mo (${tip.potentialAnnualSavings}/yr)
+            </span>
+          </div>
+          {isLong && (
+            <div className="flex-shrink-0 p-1 rounded-lg bg-gray-50/80">
+              {expanded ? (
+                <ChevronUp className="w-3.5 h-3.5 text-[#86868b]" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5 text-[#86868b]" />
+              )}
+            </div>
+          )}
+        </div>
+      </button>
+    </div>
+  );
+}
+
+function TierSection({
+  title,
+  subtitle,
+  tips,
+  theme,
+  defaultExpanded = true,
+}: {
+  title: string;
+  subtitle: string;
+  tips: TieredTip[];
+  theme: 'emerald' | 'amber' | 'rose';
+  defaultExpanded?: boolean;
+}) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
+  const tierTotal = tips.reduce((s, t) => s + t.potentialMonthlySavings, 0);
+
+  const styles = {
+    emerald: {
+      header: 'bg-emerald-100/80',
+      text: 'text-emerald-700',
+      badge: 'bg-emerald-50/80 text-emerald-700',
+    },
+    amber: {
+      header: 'bg-amber-100/80',
+      text: 'text-amber-700',
+      badge: 'bg-amber-50/80 text-amber-700',
+    },
+    rose: {
+      header: 'bg-rose-100/80',
+      text: 'text-rose-700',
+      badge: 'bg-rose-50/80 text-rose-700',
+    },
+  }[theme];
+
+  return (
+    <div className="rounded-xl border border-black/[0.04] overflow-hidden mb-4 last:mb-0">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className={`w-full flex items-center justify-between px-4 py-3 ${styles.header} transition-colors hover:opacity-90`}
+      >
+        <div className="flex items-center gap-2">
+          <span className={`text-sm font-semibold ${styles.text}`}>{title}</span>
+          <span className="text-xs text-[#6e6e73] hidden sm:inline">— {subtitle}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={`text-xs font-medium ${styles.text}`}>
+            ~${tierTotal}/mo
+          </span>
+          {expanded ? (
+            <ChevronUp className="w-4 h-4 text-[#86868b]" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-[#86868b]" />
+          )}
+        </div>
+      </button>
+      {expanded && (
+        <div className="px-4 py-2 bg-white/30">
+          {tips.map((tip) => (
+            <TierRow key={tip.id} tip={tip} badgeColor={styles.badge} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function TipsSection({ tips, enhancedTips }: TipsSectionProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  const hasEnhancedTips =
+    enhancedTips &&
+    (enhancedTips.quickWins?.length > 0 ||
+      enhancedTips.worthTheEffort?.length > 0 ||
+      enhancedTips.bigMoves?.length > 0);
+
+  if (hasEnhancedTips && enhancedTips) {
+    return (
+      <GlassCard className="p-6" hover={false}>
+        <div className="flex items-center gap-2 mb-4">
+          <Target className="w-5 h-5 text-[#c4b5fd]" />
+          <h3 className="text-lg font-semibold text-[#1d1d1f]">Savings Roadmap</h3>
+        </div>
+
+        {enhancedTips.quickWins?.length > 0 && (
+          <TierSection
+            title="Quick Wins"
+            subtitle="Painless changes you won't miss"
+            tips={enhancedTips.quickWins}
+            theme="emerald"
+          />
+        )}
+        {enhancedTips.worthTheEffort?.length > 0 && (
+          <TierSection
+            title="Worth the Effort"
+            subtitle="Small behavior changes with real impact"
+            tips={enhancedTips.worthTheEffort}
+            theme="amber"
+          />
+        )}
+        {enhancedTips.bigMoves?.length > 0 && (
+          <TierSection
+            title="Big Moves"
+            subtitle="Major changes for maximum savings"
+            tips={enhancedTips.bigMoves}
+            theme="rose"
+          />
+        )}
+
+        {(enhancedTips.totalMonthlySavings > 0 || enhancedTips.totalAnnualSavings > 0) && (
+          <p className="mt-4 pt-4 border-t border-black/5 text-sm font-medium text-[#1d1d1f]">
+            Total potential savings: ${enhancedTips.totalMonthlySavings.toFixed(0)}/month (
+            ${enhancedTips.totalAnnualSavings.toLocaleString('en-US', { maximumFractionDigits: 0 })}/year)
+          </p>
+        )}
+      </GlassCard>
+    );
+  }
+
+  // Fallback: original flat tips layout
   const getDifficultyStyles = (difficulty: SavingsTip['difficulty']) => {
     switch (difficulty) {
       case 'easy':
@@ -34,7 +203,7 @@ export function TipsSection({ tips }: TipsSectionProps) {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl p-6 bg-white/60 backdrop-blur-xl border border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.04),0_16px_32px_rgba(0,0,0,0.02)]">
+    <GlassCard className="p-6" hover={false}>
       <div className="flex items-center gap-2 mb-5">
         <Lightbulb className="w-5 h-5 text-[#fbcfe8]" />
         <h3 className="text-lg font-semibold text-[#1d1d1f]">Ways to Save</h3>
@@ -53,7 +222,7 @@ export function TipsSection({ tips }: TipsSectionProps) {
           {tips.map((tip) => {
             const isExpanded = expandedId === tip.id;
             const TimeframeIcon = getTimeframeIcon(tip.timeframe);
-            
+
             return (
               <div
                 key={tip.id}
@@ -92,7 +261,7 @@ export function TipsSection({ tips }: TipsSectionProps) {
                     )}
                   </div>
                 </button>
-                
+
                 {isExpanded && (
                   <div className="px-4 pb-4">
                     <div className="pt-3 border-t border-black/[0.04]">
@@ -107,7 +276,6 @@ export function TipsSection({ tips }: TipsSectionProps) {
           })}
         </div>
       )}
-    </div>
+    </GlassCard>
   );
 }
-

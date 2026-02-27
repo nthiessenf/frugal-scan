@@ -10,6 +10,8 @@ import { SummaryHeader } from '@/components/sections/summary-header';
 import { SpendingChart } from '@/components/charts/spending-chart';
 import { MerchantChart } from '@/components/charts/merchant-chart';
 import { InsightsGrid } from '@/components/sections/insights-grid';
+import { SavingsBanner } from '@/components/sections/savings-banner';
+import { MoneyLeaksSection } from '@/components/sections/money-leaks';
 import { SubscriptionsList } from '@/components/sections/subscriptions-list';
 import { TipsSection } from '@/components/sections/tips-section';
 import { FilterBanner } from '@/components/ui/filter-banner';
@@ -179,12 +181,6 @@ function ResultsPageInner() {
     router.push('/');
   };
 
-  // Debug: verify insights flow from API to UI
-  console.log('[results] Insights count:', result?.insights?.length);
-  console.log('[results] First insight:', result?.insights?.[0]?.title);
-  console.log('[results] Tips count:', result?.tips?.length);
-  console.log('[results] Enhanced tips:', result?.enhancedTips ? 'present' : 'missing');
-
   return (
     <main className="min-h-screen bg-[#f5f5f7] py-10 px-5">
       <div className="mx-auto max-w-6xl">
@@ -281,6 +277,20 @@ function ResultsPageInner() {
           />
         </div>
 
+        {/* Savings Potential Banner */}
+        {result.enhancedTips &&
+          result.enhancedTips.totalAnnualSavings > 0 && (
+            <div className="mt-8">
+              <SavingsBanner
+                totalMonthlySavings={result.enhancedTips.totalMonthlySavings}
+                totalAnnualSavings={result.enhancedTips.totalAnnualSavings}
+                quickWinsCount={result.enhancedTips.quickWins?.length ?? 0}
+                worthTheEffortCount={result.enhancedTips.worthTheEffort?.length ?? 0}
+                bigMovesCount={result.enhancedTips.bigMoves?.length ?? 0}
+              />
+            </div>
+          )}
+
         {/* Insights */}
         {result.insights.length > 0 && (
           <div className="mt-8">
@@ -292,13 +302,32 @@ function ResultsPageInner() {
         )}
 
         {/* Bottom Row */}
-        <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <div
+          className={`mt-8 grid grid-cols-1 gap-5 ${
+            result.moneyLeaks && result.moneyLeaks.length > 0
+              ? 'lg:grid-cols-3'
+              : 'lg:grid-cols-2'
+          }`}
+        >
+          {result.moneyLeaks && result.moneyLeaks.length > 0 && (
+            <MoneyLeaksSection
+              leaks={result.moneyLeaks}
+              projectedAnnual={result.moneyLeaks.reduce(
+                (sum, l) => sum + l.annualProjection,
+                0
+              )}
+            />
+          )}
           <SubscriptionsList 
             subscriptions={result.subscriptions} 
-            total={result.summary.subscriptionTotal} 
+            total={result.summary.subscriptionTotal}
+            subscriptionAudit={result.subscriptionAudit}
           />
           {result.tips.length > 0 && (
-            <TipsSection tips={result.tips} />
+            <TipsSection
+              tips={result.tips}
+              enhancedTips={result.enhancedTips}
+            />
           )}
         </div>
 
