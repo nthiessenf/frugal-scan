@@ -3,7 +3,7 @@
 **Purpose:** Step-by-step Cursor prompts for building FrugalScan
 **How to use:** Complete sessions in order. Copy each prompt directly into Cursor.
 
-**Updated:** February 12, 2026
+**Updated:** February 23, 2025
 
 ---
 
@@ -47,14 +47,14 @@
 
 | Session | Task | Status | Time Est. |
 |---------|------|--------|-----------|
-| 17 | Interactive Demo / Sample Analysis | 📋 Next | 3-4 hrs |
-| 18 | Landing Page Glow-Up | 📋 Planned | 3-4 hrs |
-| 19 | PDF Export (Pro-only) | 📋 Planned | 2-3 hrs |
+| 17 | Interactive Demo / Sample Analysis | ✅ Complete | 3-4 hrs |
+| 18 | Landing Page Glow-Up | ✅ Complete | 3-4 hrs |
+| 19 | PDF Export (Pro-only) | 📋 Next | 2-3 hrs |
 | 20 | Transaction Editing | 📋 Planned | 3-4 hrs |
 | 21 | Budget Targets (Pro-only) | 📋 Planned | 4-6 hrs |
 | 22 | Month-over-Month Trends (Pro-only) | 📋 Planned | 6-8 hrs |
 
-**Rationale:** We're prioritizing features that let visitors experience value without uploading (demo, refreshed landing, screenshots, comparison table). Retention features (budgets, trends, export) follow once the top of funnel is stronger.
+**Sessions 17–18 delivered:** Demo flow (hero button → processing → results), demo dataset, results-page upload-from-demo, dashboard preview card with fade-out and click-to-demo, privacy comparison table, scroll-triggered animations, Apple-like polish.
 
 ### Version 1.4 - Performance + Compatibility (8-12 hours)
 *Theme: Faster, works with more banks*
@@ -83,8 +83,8 @@ All planned features mapped to their version:
 | # | Feature | Version | Status |
 |---|---------|---------|--------|
 | 1 | **Payments** - Stripe for payment processing | v1.2 | ✅ Complete |
-| 2 | **Interactive Demo** - Try sample analysis without uploading | v1.3 | 📋 Next |
-| 3 | **Landing Page Glow-Up** - Hero, demo CTA, screenshots, comparison table | v1.3 | 📋 Planned |
+| 2 | **Interactive Demo** - Try sample analysis without uploading | v1.3 | ✅ Complete |
+| 3 | **Landing Page Glow-Up** - Hero, demo CTA, dashboard preview, comparison table | v1.3 | ✅ Complete |
 | 4 | **PDF Export** - Export reports (Pro-only) | v1.3 | 📋 Planned |
 | 5 | **Transaction Editing** - Correct categorization | v1.3 | 📋 Planned |
 | 6 | **Budget Targets** - Set and track spending limits (Pro-only) | v1.3 | 📋 Planned |

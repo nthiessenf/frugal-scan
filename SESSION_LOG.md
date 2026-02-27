@@ -1,6 +1,55 @@
-# SpendSense - Development Session Log
+# FrugalScan - Development Session Log
 
 **Purpose:** Track progress, issues, and learnings across development sessions.
+
+---
+
+## Session 17–18: February 2025 (Landing Page & Demo)
+
+### ✅ What Was Completed
+
+**Session 17: Interactive Demo / Sample Analysis**
+- Rich demo dataset in `lib/mock-data.ts`: DEMO_TRANSACTIONS (60–80 txns), DEMO_ANALYSIS_RESULT, getDemoAnalysisResult()
+- "See Sample Analysis" button in hero (two-button layout)
+- Processing animation (~2.5s) before navigating to /results?demo=true
+- Demo mode on results page: banner ("You're viewing a sample analysis"), bottom CTA card
+- "Sample:" prefix in summary header when in demo
+- File upload on results page: "Analyze your own statement" opens file picker, processes PDF, replaces demo with real results (no navigation away)
+- Demo does not count against free tier; real upload from results page does
+
+**Session 18: Landing Page Glow-Up**
+- Hero: two-button layout (Upload Your Statement + See Sample Analysis), tight bottom padding (pb-12 md:pb-16)
+- Removed "See how it works" scroll indicator
+- Dashboard Preview section: premium product mockup
+  - Subtle caption above: "Find patterns, subscriptions, and habits you'd never spot on your own"
+  - Card layout: stats row → pie chart | merchants side by side → insights row (partially visible with fade-out)
+  - Gradient glow behind card, layered shadow, rounded-3xl
+  - Card is clickable as demo trigger; hover lift effect
+  - "See the full analysis →" link below
+- Privacy Comparison section: FrugalScan vs Traditional Apps comparison table (6 rows)
+- Section order: Hero → Dashboard Preview → How It Works → Privacy Comparison → Upload Section
+- Scroll-triggered entrance animations (useInView hook, scroll-reveal CSS, prefers-reduced-motion support)
+- Polish: merchant bars by category color, pie legend "top 4 + X more", subscriptions amber hint when 5+, stat card refinements
+
+### 🎨 Design Decisions
+
+- Apple-like aesthetic: generous whitespace, clean sections, subtle gradient glow
+- Dashboard preview as curiosity driver: fade-out at bottom implies more content, card click = demo CTA
+- Narrative bridge line replaced with section-style heading, then simplified to caption to avoid competing with hero
+
+### 🔧 Technical Notes
+
+- useInView hook: RefObject<HTMLDivElement> return type to satisfy strict ref typing
+- Fixed dashboard-preview JSX structure (extra </div> caused syntax error)
+
+### 📋 Next Steps
+
+**v1.3 - Demonstrate Value + Polish** *(remaining)*
+
+- **Session 19:** PDF Export (Pro-only) (~2-3 hrs)
+- **Session 20:** Transaction Editing (~3-4 hrs)
+- **Session 21:** Budget Targets (Pro-only) (~4-6 hrs)
+- **Session 22:** Month-over-Month Trends (Pro-only) (~6-8 hrs)
 
 ---
 
@@ -34,11 +83,9 @@
 
 ### 📋 Next Steps
 
-**v1.3 - Demonstrate Value + Polish** *(prioritizing features that help new visitors experience value instantly before retention features)*
+**v1.3 - Demonstrate Value + Polish** *(Sessions 17–18 complete)*
 
-- **Session 17:** Interactive Demo / Sample Analysis (~3-4 hrs) — "Try a sample analysis" on landing → results dashboard with realistic mock data
-- **Session 18:** Landing Page Glow-Up (~3-4 hrs) — Refresh hero, demo CTA, product screenshots/preview, comparison table (privacy angle)
-- **Session 19:** PDF Export (Pro-only) (~2-3 hrs)
+- **Session 19:** PDF Export (Pro-only) (~2-3 hrs) — Next
 - **Session 20:** Transaction Editing (~3-4 hrs)
 - **Session 21:** Budget Targets (Pro-only) (~4-6 hrs)
 - **Session 22:** Month-over-Month Trends (Pro-only) (~6-8 hrs)
@@ -576,4 +623,4 @@ git push
 
 ---
 
-*Last updated: January 26, 2025*
+*Last updated: February 23, 2025*
