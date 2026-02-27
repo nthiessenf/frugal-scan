@@ -377,3 +377,52 @@ export const MERCHANT_KEYWORDS: Record<string, Category> = {
   'paypal': 'transfer',
 };
 
+export const MONEY_LEAK_KEYWORDS: { pattern: string; type: string; label: string }[] = [
+  // Bank fees
+  { pattern: 'overdraft', type: 'bank_fee', label: 'Overdraft Fee' },
+  { pattern: 'nsf fee', type: 'bank_fee', label: 'NSF Fee' },
+  { pattern: 'insufficient funds', type: 'bank_fee', label: 'Insufficient Funds Fee' },
+  { pattern: 'monthly fee', type: 'bank_fee', label: 'Monthly Account Fee' },
+  { pattern: 'maintenance fee', type: 'bank_fee', label: 'Account Maintenance Fee' },
+  { pattern: 'service fee', type: 'bank_fee', label: 'Service Fee' },
+  { pattern: 'service charge', type: 'bank_fee', label: 'Service Charge' },
+  { pattern: 'account fee', type: 'bank_fee', label: 'Account Fee' },
+  { pattern: 'wire fee', type: 'bank_fee', label: 'Wire Transfer Fee' },
+  { pattern: 'paper statement', type: 'bank_fee', label: 'Paper Statement Fee' },
+
+  // ATM fees
+  { pattern: 'atm fee', type: 'atm_fee', label: 'ATM Fee' },
+  { pattern: 'atm surcharge', type: 'atm_fee', label: 'ATM Surcharge' },
+  { pattern: 'non-network atm', type: 'atm_fee', label: 'Out-of-Network ATM' },
+  { pattern: 'atm withdraw', type: 'atm_fee', label: 'ATM Withdrawal Fee' },
+  { pattern: 'out of network', type: 'atm_fee', label: 'Out-of-Network Fee' },
+
+  // Interest charges
+  { pattern: 'interest charge', type: 'interest', label: 'Interest Charge' },
+  { pattern: 'finance charge', type: 'interest', label: 'Finance Charge' },
+  { pattern: 'interest payment', type: 'interest', label: 'Interest Payment' },
+  { pattern: 'purchase interest', type: 'interest', label: 'Purchase Interest' },
+  { pattern: 'cash advance interest', type: 'interest', label: 'Cash Advance Interest' },
+  { pattern: 'minimum interest', type: 'interest', label: 'Minimum Interest Charge' },
+
+  // Late fees
+  { pattern: 'late fee', type: 'late_fee', label: 'Late Fee' },
+  { pattern: 'late charge', type: 'late_fee', label: 'Late Charge' },
+  { pattern: 'late payment', type: 'late_fee', label: 'Late Payment Fee' },
+  { pattern: 'past due', type: 'late_fee', label: 'Past Due Fee' },
+  { pattern: 'penalty fee', type: 'late_fee', label: 'Penalty Fee' },
+
+  // Convenience fees
+  { pattern: 'convenience fee', type: 'convenience_fee', label: 'Convenience Fee' },
+  { pattern: 'processing fee', type: 'convenience_fee', label: 'Processing Fee' },
+  { pattern: 'delivery fee', type: 'convenience_fee', label: 'Delivery Fee' },
+  { pattern: 'rush fee', type: 'convenience_fee', label: 'Rush Fee' },
+  { pattern: 'expedite', type: 'convenience_fee', label: 'Expedite Fee' },
+
+  // Foreign transaction fees
+  { pattern: 'foreign transaction', type: 'foreign_fee', label: 'Foreign Transaction Fee' },
+  { pattern: 'currency conversion', type: 'foreign_fee', label: 'Currency Conversion Fee' },
+  { pattern: 'intl fee', type: 'foreign_fee', label: 'International Fee' },
+  { pattern: 'exchange fee', type: 'foreign_fee', label: 'Exchange Fee' },
+];
+

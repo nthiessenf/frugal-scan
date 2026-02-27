@@ -6,6 +6,8 @@ import {
   Subscription,
   Insight,
   SavingsTip,
+  TieredTip,
+  MoneyLeak,
   CategorizedTransaction
 } from '@/types';
 import { getCategoryLabel } from './analysis';
@@ -21,7 +23,18 @@ export async function generateInsights(
   topMerchants: TopMerchant[],
   subscriptions: Subscription[],
   transactions: CategorizedTransaction[]
-): Promise<{ insights: Insight[]; tips: SavingsTip[] }> {
+): Promise<{ 
+  insights: Insight[]; 
+  tips: SavingsTip[]; 
+  enhancedTips: {
+    quickWins: TieredTip[];
+    worthTheEffort: TieredTip[];
+    bigMoves: TieredTip[];
+    totalMonthlySavings: number;
+    totalAnnualSavings: number;
+  };
+  moneyLeaks: MoneyLeak[];
+}> {
   
   console.log('[claude-insights] Starting generateInsights...');
   console.log(`[claude-insights] Transactions: ${transactions.length}, Period: ${summary.periodDays} days`);
@@ -77,7 +90,34 @@ Transaction Patterns:
 Annualized Projections:
 - Projected annual spending: $${metrics.projectedAnnual.totalSpending.toFixed(2)}
 - Annual subscriptions: $${metrics.projectedAnnual.subscriptions.toFixed(2)}
-- Top category (${metrics.projectedAnnual.topCategory.name}) projected annual: $${metrics.projectedAnnual.topCategory.annual.toFixed(2)}`;
+- Top category (${metrics.projectedAnnual.topCategory.name}) projected annual: $${metrics.projectedAnnual.topCategory.annual.toFixed(2)}
+
+MONEY LEAKS DETECTED:
+${metrics.moneyLeaks.items.length > 0
+  ? metrics.moneyLeaks.items.map(i => `- ${i.merchant}: $${i.amount.toFixed(2)} (${i.label})`).join('\n') + `\n- Total: $${metrics.moneyLeaks.totalAmount.toFixed(2)} | Projected annual: $${metrics.moneyLeaks.projectedAnnual.toFixed(2)}`
+  : 'No fee-type charges detected in this statement'}
+
+DAY-OF-WEEK SPENDING PATTERNS:
+${metrics.dayOfWeek.breakdown.map(d => `- ${d.day}: $${d.total.toFixed(2)} (${d.count} transactions)`).join('\n')}
+- Highest spending day: ${metrics.dayOfWeek.highestDay.day} ($${metrics.dayOfWeek.highestDay.total.toFixed(2)})
+- Lowest spending day: ${metrics.dayOfWeek.lowestDay.day} ($${metrics.dayOfWeek.lowestDay.total.toFixed(2)})
+- Weekend total: $${metrics.dayOfWeek.weekendTotal.toFixed(2)} | Weekday total: $${metrics.dayOfWeek.weekdayTotal.toFixed(2)}${metrics.dayOfWeek.weekendVsWeekdayRatio !== null ? ` | Weekend vs weekday ratio: ${metrics.dayOfWeek.weekendVsWeekdayRatio.toFixed(2)}x` : ''}
+
+TOP 10 LARGEST INDIVIDUAL PURCHASES:
+${metrics.topLargestTransactions.map(t => `- ${t.merchant}: $${t.amount.toFixed(2)} (${t.date}, ${t.category})`).join('\n')}
+
+SUBSCRIPTION ANNUAL COST AUDIT:
+${subscriptions.length > 0
+  ? subscriptions.map(s => {
+      const monthly = s.frequency === 'yearly' ? s.amount / 12 : s.frequency === 'weekly' ? s.amount * 4 : s.amount;
+      const annual = s.frequency === 'yearly' ? s.amount : s.frequency === 'weekly' ? s.amount * 52 : s.amount * 12;
+      return `- ${s.name}: $${monthly.toFixed(2)}/mo = $${annual.toFixed(2)}/yr`;
+    }).join('\n') + `\n- Total annual subscription cost: $${subscriptions.reduce((sum, s) => {
+      const annual = s.frequency === 'yearly' ? s.amount : s.frequency === 'weekly' ? s.amount * 52 : s.amount * 12;
+      return sum + annual;
+    }, 0).toFixed(2)}`
+  : 'No subscriptions detected'}
+Note: Ask yourself - am I actively using all of these?`;
 
   const userPrompt = `Here is someone's spending data for the past ${summary.periodDays} days:
 
@@ -129,24 +169,52 @@ RESPOND WITH VALID JSON ONLY:
       "amount": number if applicable, otherwise null
     }
   ],
-  "tips": [
+  "quickWins": [
     {
-      "id": "tip-1",
-      "title": "actionable title (5-8 words)",
-      "description": "specific advice referencing their actual spending data and numbers",
-      "potentialSavings": estimated monthly savings as number,
-      "difficulty": "easy" | "medium" | "hard",
-      "timeframe": "immediate" | "monthly" | "yearly"
+      "id": "qw-1",
+      "title": "action-oriented title (5-8 words)",
+      "description": "specific advice with numbers. Reference actual merchants/amounts.",
+      "potentialMonthlySavings": number,
+      "potentialAnnualSavings": number
     }
-  ]
+  ],
+  "worthTheEffort": [
+    {
+      "id": "we-1",
+      "title": "action-oriented title (5-8 words)",
+      "description": "specific advice with numbers. Reference actual merchants/amounts.",
+      "potentialMonthlySavings": number,
+      "potentialAnnualSavings": number
+    }
+  ],
+  "bigMoves": [
+    {
+      "id": "bm-1",
+      "title": "action-oriented title (5-8 words)",
+      "description": "specific advice with numbers. Reference actual merchants/amounts.",
+      "potentialMonthlySavings": number,
+      "potentialAnnualSavings": number
+    }
+  ],
+  "totalPotentialMonthlySavings": number,
+  "totalPotentialAnnualSavings": number
 }
 
-TIP GUIDELINES:
-- Make tips actionable and specific to their data
-- At least one easy tip
-- Base potential savings on actual spending patterns
-- Reference specific merchants or amounts when relevant
-- Don't suggest extreme measures
+TIERED SAVINGS ROADMAP:
+
+"quickWins" (2-3 items): Painless cuts the user won't even notice. Examples: canceling a forgotten subscription, switching to a free checking account to avoid fees, making coffee at home one more day per week. Monthly savings should be realistic and modest ($5-$50 range per item).
+
+"worthTheEffort" (2-3 items): Small behavior changes that require some adjustment but aren't drastic. Examples: meal prepping lunches twice a week instead of ordering delivery, switching from premium to standard subscriptions, batching errands to reduce impulse stops. Monthly savings in $20-$150 range per item.
+
+"bigMoves" (1-2 items): Significant lifestyle changes with major impact. Examples: cooking at home instead of eating out most nights, cutting discretionary spending by 20%, downgrading a car or housing situation. Monthly savings in $100-$500+ range per item. Note that these require real commitment.
+
+CRITICAL RULES FOR TIPS:
+- Every tip MUST reference specific merchants, amounts, or categories from the user's actual data
+- potentialAnnualSavings MUST equal potentialMonthlySavings * 12
+- totalPotentialMonthlySavings MUST equal the sum of ALL tips across all three tiers
+- totalPotentialAnnualSavings MUST equal totalPotentialMonthlySavings * 12
+- Be realistic — don't suggest saving more than the user actually spends in that area
+- Be encouraging, not shaming
 
 Respond with ONLY the JSON, no markdown, no explanation.`;
 
@@ -186,15 +254,84 @@ Respond with ONLY the JSON, no markdown, no explanation.`;
     if (jsonText.endsWith('```')) {
       jsonText = jsonText.slice(0, -3);
     }
+    // Debug: log raw response before parsing
+    console.log('[claude-insights] Raw Claude response text (first 500 chars):', textBlock.text.substring(0, 500));
+    console.log('[claude-insights] Raw Claude response text (last 200 chars):', textBlock.text.substring(Math.max(0, textBlock.text.length - 200)));
     parsed = JSON.parse(jsonText.trim());
+    // Debug: log parsed structure
+    console.log('[claude-insights] Parsed response keys:', Object.keys(parsed));
+    console.log('[claude-insights] Has quickWins:', !!parsed.quickWins);
+    console.log('[claude-insights] Has tips:', !!parsed.tips);
+    console.log('[claude-insights] Has insights:', !!parsed.insights);
   } catch (e) {
-    console.error('Failed to parse Claude insights response:', textBlock.text);
+    console.error('[claude-insights] Failed to parse Claude insights response:', textBlock.text);
+    console.error('[claude-insights] Parse error:', e);
     throw new Error('Invalid JSON response from Claude');
   }
 
+  // Map tiered tips to legacy SavingsTip format for backward compatibility
+  // Support BOTH new format (quickWins, worthTheEffort, bigMoves) and old format (tips)
+  const quickWins = parsed.quickWins || [];
+  const worthTheEffort = parsed.worthTheEffort || [];
+  const bigMoves = parsed.bigMoves || [];
+  const hasTieredFormat = quickWins.length > 0 || worthTheEffort.length > 0 || bigMoves.length > 0;
+  const tips: SavingsTip[] = hasTieredFormat ? [
+    ...quickWins.map((t: TieredTip) => ({
+      id: t.id,
+      title: t.title,
+      description: t.description,
+      potentialSavings: t.potentialMonthlySavings,
+      difficulty: 'easy' as const,
+      timeframe: 'immediate' as const,
+    })),
+    ...worthTheEffort.map((t: TieredTip) => ({
+      id: t.id,
+      title: t.title,
+      description: t.description,
+      potentialSavings: t.potentialMonthlySavings,
+      difficulty: 'medium' as const,
+      timeframe: 'monthly' as const,
+    })),
+    ...bigMoves.map((t: TieredTip) => ({
+      id: t.id,
+      title: t.title,
+      description: t.description,
+      potentialSavings: t.potentialMonthlySavings,
+      difficulty: 'hard' as const,
+      timeframe: 'yearly' as const,
+    })),
+  ] : (parsed.tips || []).map((t: { id: string; title: string; description: string; potentialSavings: number; difficulty?: string; timeframe?: string }) => ({
+    id: t.id,
+    title: t.title,
+    description: t.description,
+    potentialSavings: t.potentialSavings,
+    difficulty: (t.difficulty === 'medium' || t.difficulty === 'hard' ? t.difficulty : 'easy') as 'easy' | 'medium' | 'hard',
+    timeframe: (t.timeframe === 'monthly' || t.timeframe === 'yearly' ? t.timeframe : 'immediate') as 'immediate' | 'monthly' | 'yearly',
+  }));
+
+  // Transform metrics moneyLeaks to MoneyLeak format with id and annualProjection
+  const periodMultiplier = 365 / summary.periodDays;
+  const moneyLeaks: MoneyLeak[] = metrics.moneyLeaks.items.map((item, i) => ({
+    id: `leak-${i + 1}`,
+    merchant: item.merchant,
+    amount: item.amount,
+    type: item.type,
+    label: item.label,
+    date: item.date,
+    annualProjection: item.amount * periodMultiplier,
+  }));
+
   return {
     insights: parsed.insights || [],
-    tips: parsed.tips || [],
+    tips,
+    enhancedTips: {
+      quickWins,
+      worthTheEffort,
+      bigMoves,
+      totalMonthlySavings: parsed.totalPotentialMonthlySavings || 0,
+      totalAnnualSavings: parsed.totalPotentialAnnualSavings || 0,
+    },
+    moneyLeaks,
   };
 }
 

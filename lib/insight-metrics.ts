@@ -1,5 +1,5 @@
 import { CategorizedTransaction, Category, Subscription } from '@/types';
-import { CATEGORIES } from './constants';
+import { CATEGORIES, MONEY_LEAK_KEYWORDS } from './constants';
 
 export interface InsightMetrics {
   // Frequency analysis
@@ -36,6 +36,26 @@ export interface InsightMetrics {
     subscriptions: number;
     topCategory: { name: string; annual: number };
   };
+
+  // Money leaks (fee-type transactions regardless of category)
+  moneyLeaks: {
+    items: { merchant: string; amount: number; type: string; label: string; date: string }[];
+    totalAmount: number;
+    projectedAnnual: number;
+  };
+
+  // Spending by day of week
+  dayOfWeek: {
+    breakdown: { day: string; total: number; count: number; average: number }[];
+    highestDay: { day: string; total: number };
+    lowestDay: { day: string; total: number };
+    weekendTotal: number;
+    weekdayTotal: number;
+    weekendVsWeekdayRatio: number | null;
+  };
+
+  // Top 10 largest individual debits
+  topLargestTransactions: { merchant: string; amount: number; date: string; category: string }[];
 }
 
 // Categories considered "essential" vs "discretionary"
@@ -176,7 +196,83 @@ export function calculateInsightMetrics(
       annual: (topCategoryEntry?.[1] || 0) * periodMultiplier,
     },
   };
-  
+
+  // Money leaks - scan debit descriptions for fee-type keywords
+  const moneyLeakItems: { merchant: string; amount: number; type: string; label: string; date: string }[] = [];
+  debits.forEach(t => {
+    const searchText = `${t.description} ${t.merchant}`.toLowerCase();
+    const match = MONEY_LEAK_KEYWORDS.find(kw => searchText.includes(kw.pattern.toLowerCase()));
+    if (match) {
+      moneyLeakItems.push({
+        merchant: t.merchant,
+        amount: t.amount,
+        type: match.type,
+        label: match.label,
+        date: t.date,
+      });
+    }
+  });
+  const moneyLeaksTotal = moneyLeakItems.reduce((sum, i) => sum + i.amount, 0);
+  const moneyLeaks = {
+    items: moneyLeakItems.sort((a, b) => b.amount - a.amount),
+    totalAmount: moneyLeaksTotal,
+    projectedAnnual: moneyLeaksTotal * periodMultiplier,
+  };
+
+  // Day of week - spending by day
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const dayTotals = new Map<number, { total: number; count: number }>();
+  for (let i = 0; i < 7; i++) {
+    dayTotals.set(i, { total: 0, count: 0 });
+  }
+  debits.forEach(t => {
+    const date = new Date(t.date);
+    const dayOfWeek = date.getDay();
+    const current = dayTotals.get(dayOfWeek)!;
+    dayTotals.set(dayOfWeek, {
+      total: current.total + t.amount,
+      count: current.count + 1,
+    });
+  });
+  const breakdown = dayNames.map((day, i) => {
+    const data = dayTotals.get(i)!;
+    return {
+      day,
+      total: data.total,
+      count: data.count,
+      average: data.count > 0 ? data.total / data.count : 0,
+    };
+  });
+  const sortedByTotal = [...breakdown].sort((a, b) => b.total - a.total);
+  const weekendTotal = (dayTotals.get(0)?.total || 0) + (dayTotals.get(6)?.total || 0);
+  const weekdayTotal = [1, 2, 3, 4, 5].reduce((sum, d) => sum + (dayTotals.get(d)?.total || 0), 0);
+  const weekendDays = 2;
+  const weekdayDays = 5;
+  const weekendAvgPerDay = weekendDays > 0 ? weekendTotal / weekendDays : 0;
+  const weekdayAvgPerDay = weekdayDays > 0 ? weekdayTotal / weekdayDays : 0;
+  const dayOfWeek = {
+    breakdown,
+    highestDay: { day: sortedByTotal[0]?.day || 'Sunday', total: sortedByTotal[0]?.total ?? 0 },
+    lowestDay: { day: sortedByTotal[6]?.day || 'Saturday', total: sortedByTotal[6]?.total ?? 0 },
+    weekendTotal,
+    weekdayTotal,
+    weekendVsWeekdayRatio: weekdayAvgPerDay > 0 ? weekendAvgPerDay / weekdayAvgPerDay : null,
+  };
+
+  // Top 10 largest transactions
+  const topLargestTransactions = [...debits]
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 10)
+    .map(t => {
+      const categoryInfo = CATEGORIES.find(c => c.id === t.category);
+      return {
+        merchant: t.merchant,
+        amount: t.amount,
+        date: t.date,
+        category: categoryInfo?.label || 'Other',
+      };
+    });
+
   return {
     merchantFrequency: merchantFrequency.slice(0, 20), // Top 20 for context
     mostFrequentMerchant,
@@ -193,5 +289,8 @@ export function calculateInsightMetrics(
     largestTransaction: largestTxn,
     averageTransactionByCategory,
     projectedAnnual,
+    moneyLeaks,
+    dayOfWeek,
+    topLargestTransactions,
   };
 }

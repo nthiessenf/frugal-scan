@@ -107,6 +107,44 @@ export interface SavingsTip {
   timeframe: 'immediate' | 'monthly' | 'yearly';
 }
 
+// Money leak identified in spending
+export interface MoneyLeak {
+  id: string;
+  merchant: string;
+  amount: number;
+  type: string;         // 'bank_fee' | 'atm_fee' | 'interest' | 'late_fee' | 'convenience_fee' | 'foreign_fee'
+  label: string;        // Human-readable label like "Overdraft Fee"
+  date: string;
+  annualProjection: number;
+}
+
+// Enhanced subscription with audit info
+export interface SubscriptionAudit {
+  name: string;
+  monthlyAmount: number;
+  annualCost: number;
+  category: string;
+}
+
+// Tiered savings tip
+export interface TieredTip {
+  id: string;
+  title: string;
+  description: string;
+  potentialMonthlySavings: number;
+  potentialAnnualSavings: number;
+}
+
+// The full enhanced analysis result from Claude
+export interface EnhancedInsights {
+  insights: Insight[];
+  quickWins: TieredTip[];
+  worthTheEffort: TieredTip[];
+  bigMoves: TieredTip[];
+  totalPotentialMonthlySavings: number;
+  totalPotentialAnnualSavings: number;
+}
+
 // Spending summary statistics
 export interface SpendingSummary {
   totalSpent: number;
@@ -146,4 +184,14 @@ export interface AnalysisResult {
   tips: SavingsTip[];
   generatedAt: string;
   transactions: CategorizedTransaction[];
+  // Enhanced optional fields (backward compatible)
+  moneyLeaks?: MoneyLeak[];
+  subscriptionAudit?: SubscriptionAudit[];
+  enhancedTips?: {
+    quickWins: TieredTip[];
+    worthTheEffort: TieredTip[];
+    bigMoves: TieredTip[];
+    totalMonthlySavings: number;
+    totalAnnualSavings: number;
+  };
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { CategorizedTransaction, Subscription, AnalysisResult, ApiResponse, Insight, SavingsTip } from '@/types';
+import { CategorizedTransaction, Subscription, AnalysisResult, ApiResponse, Insight, SavingsTip, MoneyLeak, SubscriptionAudit } from '@/types';
 import { calculateSummary, getCategoryBreakdown, getTopMerchants } from '@/lib/analysis';
 import { generateInsights } from '@/lib/claude-insights';
 
@@ -49,6 +49,9 @@ export async function POST(request: NextRequest) {
     // Generate AI insights
     let insights: Insight[] = [];
     let tips: SavingsTip[] = [];
+    let moneyLeaks: MoneyLeak[] = [];
+    let subscriptionAudit: SubscriptionAudit[] = [];
+    let enhancedTips: AnalysisResult['enhancedTips'];
     
     // Log: Start Claude insights call
     const startClaude = Date.now();
@@ -64,9 +67,20 @@ export async function POST(request: NextRequest) {
       );
       insights = aiResponse.insights;
       tips = aiResponse.tips;
+      moneyLeaks = aiResponse.moneyLeaks;
+      enhancedTips = {
+        quickWins: aiResponse.enhancedTips.quickWins,
+        worthTheEffort: aiResponse.enhancedTips.worthTheEffort,
+        bigMoves: aiResponse.enhancedTips.bigMoves,
+        totalMonthlySavings: aiResponse.enhancedTips.totalMonthlySavings,
+        totalAnnualSavings: aiResponse.enhancedTips.totalAnnualSavings,
+      };
+      console.log('[analyze] generateInsights succeeded');
       console.log(`[analyze] Generated ${insights.length} insights and ${tips.length} tips`);
     } catch (error) {
-      console.error('[analyze] Failed to generate insights:', error);
+      console.error('[analyze] generateInsights FAILED:', error);
+      console.error('[analyze] Error message:', error instanceof Error ? error.message : String(error));
+      console.error('[analyze] Error stack:', error instanceof Error ? error.stack : 'N/A');
       // Continue without insights - still return the data
       insights = [{
         id: 'fallback-1',
@@ -75,9 +89,29 @@ export async function POST(request: NextRequest) {
         severity: 'info' as const,
       }];
       tips = [];
+      enhancedTips = {
+        quickWins: [],
+        worthTheEffort: [],
+        bigMoves: [],
+        totalMonthlySavings: 0,
+        totalAnnualSavings: 0,
+      };
+      moneyLeaks = [];
     }
     
     timings['3_claude_insights_call'] = Date.now() - startClaude;
+
+    // Calculate subscription audit (monthly and annual costs) - always run
+    subscriptionAudit = (subscriptions || []).map(s => {
+      const monthlyAmount = s.frequency === 'yearly' ? s.amount / 12 : s.frequency === 'weekly' ? s.amount * 4 : s.amount;
+      const annualCost = s.frequency === 'yearly' ? s.amount : s.frequency === 'weekly' ? s.amount * 52 : s.amount * 12;
+      return {
+        name: s.name,
+        monthlyAmount,
+        annualCost,
+        category: s.category,
+      };
+    });
     
     // Log: Start response formatting
     const startFormat = Date.now();
@@ -91,7 +125,21 @@ export async function POST(request: NextRequest) {
       tips,
       generatedAt: new Date().toISOString(),
       transactions,
+      moneyLeaks,
+      subscriptionAudit,
+      enhancedTips,
     };
+
+    console.log('[analyze] Enhanced fields:', {
+      hasMoneyLeaks: !!moneyLeaks?.length,
+      moneyLeaksCount: moneyLeaks?.length || 0,
+      hasEnhancedTips: !!enhancedTips,
+      quickWinsCount: enhancedTips?.quickWins?.length || 0,
+      worthTheEffortCount: enhancedTips?.worthTheEffort?.length || 0,
+      bigMovesCount: enhancedTips?.bigMoves?.length || 0,
+      totalAnnualSavings: enhancedTips?.totalAnnualSavings || 0,
+      subscriptionAuditCount: subscriptionAudit?.length || 0,
+    });
     
     timings['4_response_formatting'] = Date.now() - startFormat;
     

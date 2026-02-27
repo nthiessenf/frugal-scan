@@ -179,6 +179,12 @@ function ResultsPageInner() {
     router.push('/');
   };
 
+  // Debug: verify insights flow from API to UI
+  console.log('[results] Insights count:', result?.insights?.length);
+  console.log('[results] First insight:', result?.insights?.[0]?.title);
+  console.log('[results] Tips count:', result?.tips?.length);
+  console.log('[results] Enhanced tips:', result?.enhancedTips ? 'present' : 'missing');
+
   return (
     <main className="min-h-screen bg-[#f5f5f7] py-10 px-5">
       <div className="mx-auto max-w-6xl">

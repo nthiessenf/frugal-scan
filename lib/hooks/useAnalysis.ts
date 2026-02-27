@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { useAnalysisContext } from '@/contexts/AnalysisContext';
 import { categorizeAll, detectSubscriptions } from '@/lib/categorize';
 import { calculateSummary, getCategoryBreakdown, getTopMerchants } from '@/lib/analysis';
-import { CategorizedTransaction, AnalysisResult } from '@/types';
+import { CategorizedTransaction, AnalysisResult, ParsedStatement, ValidationResult } from '@/types';
 import { canAnalyze, incrementUsage } from '@/lib/usage-tracking';
 import { isPro } from '@/lib/pro-status';
 
@@ -58,17 +58,36 @@ export function useAnalysis() {
         body: formData,
       });
 
-      const parseData = await parseResponse.json();
+      // Defensive: response.json() can throw in Safari when body is not valid JSON
+      let parseData: { success: boolean; data?: ParsedStatement; error?: string; validation?: ValidationResult };
+      try {
+        const responseText = await parseResponse.text();
+        if (!responseText || responseText.trim().length === 0) {
+          throw new Error('Empty response from parse API');
+        }
+        if (responseText.trim().substring(0, 50) !== '{') {
+          console.error('[useAnalysis] Parse response does not look like JSON. First 200 chars:', responseText.substring(0, 200));
+        }
+        parseData = JSON.parse(responseText);
+      } catch (parseErr) {
+        console.error('[useAnalysis] Failed to parse parse-statement API response:', parseErr);
+        console.error('[useAnalysis] Response status:', parseResponse.status);
+        throw new Error(
+          parseResponse.ok
+            ? 'Invalid response format from server'
+            : `Failed to parse statement: ${parseResponse.status} ${parseResponse.statusText}`
+        );
+      }
 
       // After parse-statement returns
       console.log(`PDF parse complete: ${Date.now() - parseStart}ms`);
 
-      if (!parseData.success) {
+      if (!parseData.success || !parseData.data) {
         throw new Error(parseData.error || 'Failed to parse statement');
       }
 
       setParsedStatement(parseData.data);
-      setValidationResult(parseData.validation);
+      setValidationResult(parseData.validation ?? null);
 
       // Step 3: Categorize transactions
       setStatus('categorizing');
@@ -97,7 +116,28 @@ export function useAnalysis() {
         body: JSON.stringify({ transactions: categorized, subscriptions }),
       });
 
-      const analyzeData = await analyzeResponse.json();
+      // Defensive: response.json() can throw "The string did not match the expected pattern"
+      // in Safari when the response body is not valid JSON (e.g. HTML error page)
+      let analyzeData: { success: boolean; data?: AnalysisResult; error?: string };
+      try {
+        const responseText = await analyzeResponse.text();
+        if (!responseText || responseText.trim().length === 0) {
+          throw new Error('Empty response from analyze API');
+        }
+        // Log first/last chars to help debug JSON parse failures
+        if (responseText.trim().substring(0, 50) !== '{') {
+          console.error('[useAnalysis] Analyze response does not look like JSON. First 200 chars:', responseText.substring(0, 200));
+        }
+        analyzeData = JSON.parse(responseText);
+      } catch (parseErr) {
+        console.error('[useAnalysis] Failed to parse analyze API response:', parseErr);
+        console.error('[useAnalysis] Response status:', analyzeResponse.status);
+        throw new Error(
+          analyzeResponse.ok
+            ? 'Invalid response format from server'
+            : `Analysis failed: ${analyzeResponse.status} ${analyzeResponse.statusText}`
+        );
+      }
 
       // After analyze returns
       console.log(`Analysis complete: ${Date.now() - analyzeStart}ms`);
@@ -114,16 +154,19 @@ export function useAnalysis() {
       const categoryBreakdown = getCategoryBreakdown(categorized);
       const topMerchants = getTopMerchants(categorized, 10);
 
-      const fullResult: AnalysisResult = {
-        summary,
-        categoryBreakdown,
-        topMerchants,
-        subscriptions,
-        insights: analyzeData.data?.insights || [],
-        tips: analyzeData.data?.tips || [],
-        generatedAt: new Date().toISOString(),
-        transactions: categorized,
-      };
+      // Prefer full API response to avoid manual field mapping errors; fallback to local compute
+      const fullResult: AnalysisResult = analyzeData.data
+        ? { ...analyzeData.data, transactions: categorized }
+        : {
+            summary,
+            categoryBreakdown,
+            topMerchants,
+            subscriptions,
+            insights: [],
+            tips: [],
+            generatedAt: new Date().toISOString(),
+            transactions: categorized,
+          };
 
       setResult(fullResult);
       setStatus('complete');
