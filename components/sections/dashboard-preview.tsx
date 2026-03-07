@@ -236,19 +236,15 @@ export function DashboardPreview({ onTryDemo, isDemoLoading }: DashboardPreviewP
           </div>
         </div>
 
-      {/* Below frame */}
-      <p className="mt-6 text-center text-sm text-[#6e6e73]">
-        Real insights from real spending data
-      </p>
       {onTryDemo && (
-        <p className="mt-2 text-center">
+        <p className="mt-6 text-center">
           <button
             type="button"
             onClick={onTryDemo}
             disabled={isDemoLoading}
             className="text-sm font-medium text-[#1d1d1f] hover:bg-gradient-to-r hover:from-[#93c5fd] hover:via-[#c4b5fd] hover:to-[#fbcfe8] hover:bg-clip-text hover:text-transparent transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
           >
-            See the full analysis →
+            See demo analysis →
           </button>
         </p>
       )}
