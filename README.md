@@ -202,6 +202,8 @@ Create a `.env.local` file:
 ```env
 # Anthropic API Key (for PDF parsing and insights)
 ANTHROPIC_API_KEY=your_api_key_here
+# Optional: override insights model (defaults to latest Opus fallback)
+ANTHROPIC_INSIGHTS_MODEL=claude-opus-4-1-20250805
 
 # Stripe Configuration (for payments)
 STRIPE_SECRET_KEY=sk_test_... # Get from Stripe Dashboard > Developers > API keys

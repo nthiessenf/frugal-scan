@@ -17,6 +17,8 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+const DEFAULT_INSIGHTS_MODEL = 'claude-opus-4-1-20250805';
+
 export async function generateInsights(
   summary: SpendingSummary,
   categoryBreakdown: CategoryBreakdown[],
@@ -222,8 +224,11 @@ Respond with ONLY the JSON, no markdown, no explanation.`;
   console.log(userPrompt);
   console.log('=== END PROMPT ===');
 
+  const insightsModel = process.env.ANTHROPIC_INSIGHTS_MODEL || DEFAULT_INSIGHTS_MODEL;
+  console.log(`[claude-insights] Using model: ${insightsModel}`);
+
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: insightsModel,
     max_tokens: 2000,
     messages: [
       {
