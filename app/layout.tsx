@@ -27,6 +27,17 @@ export const metadata: Metadata = {
   },
 };
 
+function JsonLd({ data }: { data: Record<string, unknown> }) {
+  // Escape < so a string value can never break out of the script tag
+  const json = JSON.stringify(data).replace(/</g, '\\u003c');
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: json }}
+    />
+  );
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -34,6 +45,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <JsonLd data={organizationSchema} />
+        <JsonLd data={softwareApplicationSchema} />
+        <JsonLd data={faqSchema} />
+      </head>
       <body
         style={{
           fontFamily:
@@ -47,13 +63,6 @@ export default function RootLayout({
           minHeight: "100vh",
         }}
       >
-        {/* JSON-LD structured data - temporarily disabled to fix runtime error */}
-        {/* <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify([organizationSchema, softwareApplicationSchema, faqSchema], null, 0),
-          }}
-        /> */}
         <AnalysisProvider>
           {children}
         </AnalysisProvider>
@@ -61,4 +70,3 @@ export default function RootLayout({
     </html>
   );
 }
-
