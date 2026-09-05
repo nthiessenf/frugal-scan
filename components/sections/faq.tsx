@@ -17,7 +17,7 @@ export function Faq() {
 
         <div className="space-y-4">
           {FAQ_ITEMS.map((item) => (
-            <GlassCard key={item.question} padding="lg">
+            <GlassCard key={item.question} padding="lg" hover={false}>
               <h3 className="text-lg font-semibold text-[#1d1d1f] mb-2">
                 {item.question}
               </h3>
