@@ -23,14 +23,14 @@ export function UploadZone({
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB (matches server cap)
 
   const validateFile = (file: File): string | null => {
     if (file.type !== "application/pdf") {
       return "Please upload a PDF file only.";
     }
     if (file.size > MAX_FILE_SIZE) {
-      return "File size must be less than 10MB.";
+      return "File size must be less than 5MB.";
     }
     return null;
   };
@@ -129,7 +129,7 @@ export function UploadZone({
           Drop your bank statement here
         </p>
         <p className="text-sm text-[#6e6e73]">
-          or click to browse (PDF only, max 10MB)
+          or click to browse (PDF only, max 5MB, 30 pages)
         </p>
       </div>
 
