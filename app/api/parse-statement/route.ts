@@ -49,11 +49,19 @@ export async function POST(request: NextRequest) {
     const startBase64 = Date.now();
     
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    // file.type is client-controlled; verify the actual PDF magic bytes.
+    if (buffer.subarray(0, 5).toString('latin1') !== '%PDF-') {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: 'Invalid file type. Please upload a PDF.' },
+        { status: 400 }
+      );
+    }
     const base64 = buffer.toString('base64');
     
     timings['2_base64_conversion'] = Date.now() - startBase64;
     
-    console.log(`[parse-statement] Processing file: ${file.name}, size: ${file.size} bytes`);
+    console.log(`[parse-statement] Processing file, size: ${file.size} bytes`);
     
     // Log: Start Claude API call
     const startClaude = Date.now();
