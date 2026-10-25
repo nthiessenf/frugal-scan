@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { CategorizedTransaction, Subscription, AnalysisResult, ApiResponse, Insight, SavingsTip, MoneyLeak, SubscriptionAudit } from '@/types';
 import { calculateSummary, getCategoryBreakdown, getTopMerchants } from '@/lib/analysis';
 import { generateInsights } from '@/lib/claude-insights';
+import { enforceRateLimit } from '@/lib/rate-limit';
+import { getProFromRequest } from '@/lib/pro-session';
+
+export const runtime = 'nodejs';
+
+const MAX_BODY_BYTES = 1.5 * 1024 * 1024;
+const MAX_TEXT = 200; // per-field cap for text that is sent to Claude
+
+const clip = (v: unknown, n: number) => (typeof v === 'string' ? v.slice(0, n) : '');
 
 export async function POST(request: NextRequest) {
   console.log('\n\n🚀 ===== ANALYZE API ROUTE CALLED =====');
@@ -12,7 +21,18 @@ export async function POST(request: NextRequest) {
     // Log: Start request parsing
     const startParse = Date.now();
     
-    const body = await request.json();
+    const pro = await getProFromRequest(request);
+    const limited = await enforceRateLimit(request, 'analyze', { proSubscriptionId: pro.isPro ? pro.payload?.s : null });
+    if (limited) return limited;
+
+    const raw = await request.text();
+    if (raw.length > MAX_BODY_BYTES) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: 'Too much data to analyze' },
+        { status: 413 }
+      );
+    }
+    const body = JSON.parse(raw);
     const { transactions, subscriptions } = body as {
       transactions: CategorizedTransaction[];
       subscriptions: Subscription[];
@@ -27,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Bound payload size so a single request can't run up Claude costs or exhaust memory.
-    const MAX_TRANSACTIONS = 5000;
+    const MAX_TRANSACTIONS = 2000;
     if (transactions.length > MAX_TRANSACTIONS) {
       return NextResponse.json<ApiResponse<null>>(
         { success: false, error: 'Too many transactions to analyze' },
@@ -35,7 +55,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (subscriptions !== undefined && (!Array.isArray(subscriptions) || subscriptions.length > 500)) {
+    if (subscriptions !== undefined && (!Array.isArray(subscriptions) || subscriptions.length > 200)) {
       return NextResponse.json<ApiResponse<null>>(
         { success: false, error: 'Invalid subscription data' },
         { status: 400 }
@@ -47,6 +67,26 @@ export async function POST(request: NextRequest) {
         { success: false, error: 'No transactions to analyze' },
         { status: 400 }
       );
+    }
+
+    // Clamp free-text fields (they reach the Claude prompt) and drop malformed rows.
+    for (const t of transactions) {
+      t.description = clip(t.description, MAX_TEXT);
+      t.merchant = clip(t.merchant, 100);
+    }
+    const cleanTransactions = transactions.filter(
+      (t) => t && typeof t.amount === 'number' && Number.isFinite(t.amount) && typeof t.date === 'string' && t.date.length <= 20
+    );
+    if (cleanTransactions.length === 0) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: 'No valid transactions to analyze' },
+        { status: 400 }
+      );
+    }
+    transactions.length = 0;
+    transactions.push(...cleanTransactions);
+    for (const s of subscriptions || []) {
+      s.name = clip(s.name, 100);
     }
     
     timings['1_request_parsing'] = Date.now() - startParse;
