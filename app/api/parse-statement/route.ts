@@ -8,7 +8,7 @@ import { getProFromRequest } from '@/lib/pro-session';
 
 export const runtime = 'nodejs';
 
-const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5MB; real statements are typically well under 2MB
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024; // 4MB (under Vercel's 4.5MB request limit); real statements are typically well under 2MB
 const MAX_PAGES = 30; // ~8 Claude chunk calls at 4 pages/chunk
 
 export async function POST(request: NextRequest) {
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     const declared = Number(request.headers.get('content-length') || 0);
     if (declared > MAX_UPLOAD_BYTES + 64 * 1024) {
       return NextResponse.json<ApiResponse<null>>(
-        { success: false, error: 'File too large. Maximum size is 5MB.' },
+        { success: false, error: 'File too large. Maximum size is 4MB.' },
         { status: 413 }
       );
     }
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     
     if (file.size > MAX_UPLOAD_BYTES) {
       return NextResponse.json<ApiResponse<null>>(
-        { success: false, error: 'File too large. Maximum size is 5MB.' },
+        { success: false, error: 'File too large. Maximum size is 4MB.' },
         { status: 413 }
       );
     }
