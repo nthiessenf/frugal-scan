@@ -29,20 +29,22 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error('[webhook] STRIPE_WEBHOOK_SECRET is not set');
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
+  }
+
   let event: Stripe.Event;
 
   try {
     const client = getStripeClient();
 
-    event = client.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
+    event = client.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
     console.error('[webhook] Signature verification failed:', err.message);
     return NextResponse.json(
-      { error: `Webhook signature verification failed: ${err.message}` },
+      { error: 'Webhook signature verification failed' },
       { status: 400 }
     );
   }
@@ -57,8 +59,9 @@ export async function POST(request: NextRequest) {
         const customerEmail = session.customer_details?.email;
         const subscriptionId = session.subscription as string;
 
+        // Avoid logging customer PII (email) to Vercel logs.
         console.log('[webhook] Subscription activated:', {
-          email: customerEmail,
+          hasEmail: !!customerEmail,
           subscriptionId,
           sessionId: session.id,
         });
