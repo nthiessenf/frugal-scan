@@ -17,11 +17,17 @@ function getStripeClient(): Stripe {
 
 export async function POST(request: NextRequest) {
   try {
-    const { priceId, mode } = await request.json();
+    const { priceId } = await request.json();
 
-    if (!priceId || !mode) {
+    // Only allow our own configured prices; never trust a client-supplied price/mode.
+    const allowedPrices = [
+      process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID,
+      process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID,
+    ].filter(Boolean);
+
+    if (typeof priceId !== 'string' || !allowedPrices.includes(priceId)) {
       return NextResponse.json(
-        { error: 'Missing priceId or mode' },
+        { error: 'Invalid price' },
         { status: 400 }
       );
     }
@@ -30,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     // Create Checkout Session
     const session = await client.checkout.sessions.create({
-      mode: mode as 'subscription', // 'subscription' for recurring
+      mode: 'subscription',
       line_items: [
         {
           price: priceId,
@@ -48,8 +54,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ sessionId: session.id, url: session.url });
   } catch (error: any) {
     console.error('[create-checkout] Error:', error);
+    // Don't leak Stripe/internal error details to the client.
     return NextResponse.json(
-      { error: error.message || 'Failed to create checkout session' },
+      { error: 'Failed to create checkout session' },
       { status: 500 }
     );
   }
