@@ -3,7 +3,7 @@
 import { X, Zap, TrendingUp, PieChart, Download, Target, Loader2 } from 'lucide-react';
 import { Button } from './button';
 import Link from 'next/link';
-import { isPro } from '@/lib/pro-status';
+import { refreshProStatus } from '@/lib/pro-status';
 import { useEffect, useState } from 'react';
 import { redirectToCheckout } from '@/lib/stripe-checkout';
 
@@ -26,7 +26,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    setUserIsPro(isPro());
+    if (isOpen) refreshProStatus().then(setUserIsPro);
   }, [isOpen]);
 
   // Don't show modal if user is already Pro
