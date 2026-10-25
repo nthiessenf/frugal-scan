@@ -1,6 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { refreshProStatus } from '@/lib/pro-status';
 import { AnalysisResult, ParsedStatement, ValidationResult } from '@/types';
 
 interface AnalysisContextType {
@@ -16,6 +17,11 @@ interface AnalysisContextType {
 const AnalysisContext = createContext<AnalysisContextType | undefined>(undefined);
 
 export function AnalysisProvider({ children }: { children: ReactNode }) {
+  // Load server-verified Pro status once so isPro() checks in hooks are accurate.
+  useEffect(() => {
+    refreshProStatus();
+  }, []);
+
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [parsedStatement, setParsedStatement] = useState<ParsedStatement | null>(null);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);

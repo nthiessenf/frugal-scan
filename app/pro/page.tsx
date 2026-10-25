@@ -3,24 +3,20 @@
 import { useState, useEffect } from 'react';
 import { Check, ArrowLeft, Sparkles, Zap, TrendingUp, Target, Download, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { isPro, activateProWithCode, setProStatus } from '@/lib/pro-status';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { refreshProStatus } from '@/lib/pro-status';
+import { useSearchParams } from 'next/navigation';
 import { redirectToCheckout } from '@/lib/stripe-checkout';
 
 export default function ProPage() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [proCode, setProCode] = useState('');
-  const [codeError, setCodeError] = useState('');
-  const [codeSuccess, setCodeSuccess] = useState(false);
   const [userIsPro, setUserIsPro] = useState(false);
   const [loading, setLoading] = useState<'monthly' | 'annual' | null>(null);
   const [checkoutError, setCheckoutError] = useState('');
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    setUserIsPro(isPro());
+    refreshProStatus().then(setUserIsPro);
     
     // Check if user was redirected after canceling
     if (searchParams.get('canceled') === 'true') {
@@ -54,22 +50,6 @@ export default function ProPage() {
     e.preventDefault();
     console.log('Pro waitlist signup:', email);
     setSubmitted(true);
-  };
-
-  const handleProCodeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCodeError('');
-    setCodeSuccess(false);
-
-    if (activateProWithCode(proCode)) {
-      setCodeSuccess(true);
-      setUserIsPro(true);
-      setProCode('');
-      // Refresh page to show Pro status
-      setTimeout(() => router.refresh(), 500);
-    } else {
-      setCodeError('Invalid code. Check your email for your Pro activation code.');
-    }
   };
 
   // If user is already Pro, show success state
@@ -214,46 +194,10 @@ export default function ProPage() {
                 </div>
               </div>
 
-              {/* Pro activation code (for manual activation after payment) */}
+              {/* Restore Pro on another device */}
               <div className="border-t border-black/[0.06] pt-5">
-                <label className="block text-sm font-medium text-[#1d1d1f] mb-3 text-center">
-                  Already paid? Enter your Pro code
-                </label>
-                {codeSuccess ? (
-                  <div className="text-center py-2">
-                    <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-50 flex items-center justify-center">
-                      <Check className="w-6 h-6 text-green-500" />
-                    </div>
-                    <p className="font-semibold text-[#1d1d1f]">Pro activated!</p>
-                    <p className="text-sm text-[#6e6e73] mt-1">
-                      You now have unlimited analyses.
-                    </p>
-                  </div>
-                ) : (
-                  <form onSubmit={handleProCodeSubmit} className="space-y-3">
-                    <input
-                      type="text"
-                      value={proCode}
-                      onChange={(e) => {
-                        setProCode(e.target.value);
-                        setCodeError('');
-                      }}
-                      placeholder="Enter Pro code"
-                      className="w-full px-4 py-3 rounded-xl border border-black/[0.08] bg-[#f5f5f7] focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-300 text-[#1d1d1f] text-center transition-colors uppercase"
-                    />
-                    {codeError && (
-                      <p className="text-xs text-red-600 text-center">{codeError}</p>
-                    )}
-                    <button
-                      type="submit"
-                      className="w-full py-3 rounded-xl bg-[#1d1d1f] text-white font-semibold text-sm shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
-                    >
-                      Activate Pro
-                    </button>
-                  </form>
-                )}
-                <p className="text-xs text-[#86868b] text-center mt-3">
-                  Check your email after payment for your activation code.
+                <p className="text-xs text-[#86868b] text-center">
+                  Already subscribed on another device? Email support with the address you paid with and we&apos;ll restore your access.
                 </p>
               </div>
 
