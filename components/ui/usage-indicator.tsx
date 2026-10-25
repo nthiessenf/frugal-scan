@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getRemainingAnalyses } from '@/lib/usage-tracking';
-import { isPro } from '@/lib/pro-status';
+import { refreshProStatus } from '@/lib/pro-status';
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 
@@ -13,9 +13,10 @@ export function UsageIndicator() {
 
   useEffect(() => {
     setMounted(true);
-    const proStatus = isPro();
-    setPro(proStatus);
-    setRemaining(getRemainingAnalyses(() => proStatus));
+    refreshProStatus().then((proStatus) => {
+      setPro(proStatus);
+      setRemaining(getRemainingAnalyses(() => proStatus));
+    });
   }, []);
 
   if (!mounted || remaining === null) return null;
