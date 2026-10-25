@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Check, Sparkles, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { isPro, setProStatus } from '@/lib/pro-status';
+import { verifyCheckoutSession } from '@/lib/pro-status';
 
 export default function ProSuccessPage() {
   const searchParams = useSearchParams();
@@ -26,19 +26,12 @@ export default function ProSuccessPage() {
 
   const verifySession = async (sessionId: string) => {
     try {
-      // In a real app, you'd verify the session with Stripe
-      // For now, we'll activate Pro immediately (webhook will handle it properly)
-      // But we can also verify here for immediate feedback
-      
-      // Check if user is already Pro (webhook might have activated it)
-      if (isPro()) {
-        setVerified(true);
+      // Verified server-side with Stripe; on success the server sets a signed httpOnly cookie.
+      const { isPro, error } = await verifyCheckoutSession(sessionId);
+      if (!isPro) {
+        setError(error || 'We could not verify your payment yet. Please contact support with your session ID.');
         return;
       }
-
-      // For now, activate Pro locally (webhook will handle it server-side)
-      // In production, you'd verify the session with Stripe API first
-      setProStatus('stripe');
       setVerified(true);
       
       // Refresh to show Pro status
