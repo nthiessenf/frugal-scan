@@ -26,6 +26,22 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // Bound payload size so a single request can't run up Claude costs or exhaust memory.
+    const MAX_TRANSACTIONS = 5000;
+    if (transactions.length > MAX_TRANSACTIONS) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: 'Too many transactions to analyze' },
+        { status: 413 }
+      );
+    }
+
+    if (subscriptions !== undefined && (!Array.isArray(subscriptions) || subscriptions.length > 500)) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: 'Invalid subscription data' },
+        { status: 400 }
+      );
+    }
+
     if (transactions.length === 0) {
       return NextResponse.json<ApiResponse<null>>(
         { success: false, error: 'No transactions to analyze' },
