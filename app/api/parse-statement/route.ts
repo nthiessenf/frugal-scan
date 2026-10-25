@@ -2,12 +2,34 @@ import { NextRequest, NextResponse } from 'next/server';
 import { parseStatementWithClaude } from '@/lib/parse-with-claude';
 import { validateParsedStatement, validateTransactionSchema } from '@/lib/validate-transactions';
 import { ApiResponse, ParsedStatement } from '@/types';
+import { getPdfPageCount } from '@/lib/pdf-chunker';
+import { enforceRateLimit } from '@/lib/rate-limit';
+import { getProFromRequest } from '@/lib/pro-session';
+
+export const runtime = 'nodejs';
+
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5MB; real statements are typically well under 2MB
+const MAX_PAGES = 30; // ~8 Claude chunk calls at 4 pages/chunk
 
 export async function POST(request: NextRequest) {
   const timings: Record<string, number> = {};
   const startTotal = Date.now();
   
   try {
+    // Rate limit before reading the body (per verified Pro subscription, else per IP).
+    const pro = await getProFromRequest(request);
+    const limited = await enforceRateLimit(request, 'parse', { proSubscriptionId: pro.isPro ? pro.payload?.s : null });
+    if (limited) return limited;
+
+    // Reject oversized bodies early when the client declares a length.
+    const declared = Number(request.headers.get('content-length') || 0);
+    if (declared > MAX_UPLOAD_BYTES + 64 * 1024) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: 'File too large. Maximum size is 5MB.' },
+        { status: 413 }
+      );
+    }
+
     // Log: Start file processing
     const startFileProcess = Date.now();
     
@@ -28,11 +50,10 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const maxSize = 10 * 1024 * 1024;
-    if (file.size > maxSize) {
+    if (file.size > MAX_UPLOAD_BYTES) {
       return NextResponse.json<ApiResponse<null>>(
-        { success: false, error: 'File too large. Maximum size is 10MB.' },
-        { status: 400 }
+        { success: false, error: 'File too large. Maximum size is 5MB.' },
+        { status: 413 }
       );
     }
     
@@ -55,6 +76,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json<ApiResponse<null>>(
         { success: false, error: 'Invalid file type. Please upload a PDF.' },
         { status: 400 }
+      );
+    }
+
+    // Page cap before any Claude call (each 4 pages = one Claude request).
+    let pageCount: number;
+    try {
+      pageCount = await getPdfPageCount(buffer.toString('base64'));
+    } catch {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: 'Could not read PDF. Please ensure it\'s a valid bank statement.' },
+        { status: 400 }
+      );
+    }
+    if (pageCount > MAX_PAGES) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: `Statement too long. Maximum is ${MAX_PAGES} pages.` },
+        { status: 413 }
       );
     }
     const base64 = buffer.toString('base64');
