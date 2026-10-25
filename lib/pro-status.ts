@@ -1,122 +1,60 @@
-const PRO_STATUS_KEY = 'frugalscan_pro_status';
-
-export interface ProStatus {
-  isPro: boolean;
-  activatedAt: string | null; // ISO date string
-  expiresAt: string | null; // ISO date string (null = lifetime)
-  source: 'manual' | 'stripe' | 'code'; // How they got Pro
-}
-
 /**
- * Get current Pro status from localStorage
- * Returns default (not Pro) if none exists or on SSR
+ * Client-side view of Pro status.
+ *
+ * Pro is now verified on the server (signed httpOnly cookie set by /api/pro/verify-session,
+ * see lib/pro-session.ts). The browser can't read or forge that cookie, so the client asks
+ * /api/pro/status and caches the answer for UI purposes only. Server routes must use
+ * getProFromRequest() for any real gating.
  */
-export function getProStatus(): ProStatus {
-  if (typeof window === 'undefined') {
-    return {
-      isPro: false,
-      activatedAt: null,
-      expiresAt: null,
-      source: 'manual',
-    };
-  }
 
-  try {
-    const stored = localStorage.getItem(PRO_STATUS_KEY);
-    if (!stored) {
-      return {
-        isPro: false,
-        activatedAt: null,
-        expiresAt: null,
-        source: 'manual',
-      };
-    }
+const LEGACY_KEY = 'frugalscan_pro_status';
 
-    const data: ProStatus = JSON.parse(stored);
-    
-    // Check if Pro has expired (if expiresAt is set)
-    if (data.isPro && data.expiresAt) {
-      const now = new Date();
-      const expires = new Date(data.expiresAt);
-      if (now > expires) {
-        // Pro expired - clear it
-        clearProStatus();
-        return {
-          isPro: false,
-          activatedAt: null,
-          expiresAt: null,
-          source: 'manual',
-        };
-      }
-    }
+let cached: boolean | null = null;
+let inflight: Promise<boolean> | null = null;
 
-    return data;
-  } catch (error) {
-    console.error('[pro-status] Error reading Pro status:', error);
-    return {
-      isPro: false,
-      activatedAt: null,
-      expiresAt: null,
-      source: 'manual',
-    };
-  }
-}
-
-/**
- * Check if user currently has Pro status
- */
+/** Last known Pro status (false until refreshProStatus() has resolved). */
 export function isPro(): boolean {
-  return getProStatus().isPro;
+  return cached === true;
 }
 
-/**
- * Activate Pro status (manual activation for early customers)
- * @param source How they got Pro ('manual', 'stripe', 'code')
- * @param expiresAt Optional expiration date (null = lifetime)
- */
-export function setProStatus(
-  source: 'manual' | 'stripe' | 'code' = 'manual',
-  expiresAt: string | null = null
-): ProStatus {
-  if (typeof window === 'undefined') {
-    return getProStatus();
+/** Ask the server for the current Pro status. */
+export function refreshProStatus(force = false): Promise<boolean> {
+  if (typeof window === 'undefined') return Promise.resolve(false);
+  if (!force && cached !== null) return Promise.resolve(cached);
+  if (!force && inflight) return inflight;
+
+  // Old builds stored a forgeable flag in localStorage; it's no longer trusted.
+  try {
+    localStorage.removeItem(LEGACY_KEY);
+  } catch {
+    /* ignore */
   }
 
-  const status: ProStatus = {
-    isPro: true,
-    activatedAt: new Date().toISOString(),
-    expiresAt,
-    source,
-  };
-
-  localStorage.setItem(PRO_STATUS_KEY, JSON.stringify(status));
-  return status;
+  inflight = fetch('/api/pro/status', { credentials: 'same-origin', cache: 'no-store' })
+    .then((r) => (r.ok ? r.json() : { isPro: false }))
+    .then((d: { isPro?: boolean }) => {
+      cached = d.isPro === true;
+      return cached;
+    })
+    .catch(() => {
+      cached = false;
+      return false;
+    })
+    .finally(() => {
+      inflight = null;
+    });
+  return inflight;
 }
 
-/**
- * Clear Pro status (e.g., on cancellation)
- */
-export function clearProStatus(): void {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem(PRO_STATUS_KEY);
-}
-
-/**
- * Activate Pro with a simple code (for manual activation)
- * In production, you'd email customers a unique code after payment
- */
-export function activateProWithCode(code: string): boolean {
-  // For now, accept a simple dev code
-  // In Session 16, this will validate against Stripe webhooks
-  const validCodes = [
-    'PRO2025', // Simple dev code
-    // Add more codes as needed for early customers
-  ];
-
-  if (validCodes.includes(code.toUpperCase())) {
-    setProStatus('code');
-    return true;
-  }
-
-  return false;
+/** Verify a Stripe Checkout session server-side; sets the Pro cookie on success. */
+export async function verifyCheckoutSession(sessionId: string): Promise<{ isPro: boolean; error?: string }> {
+  const r = await fetch('/api/pro/verify-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify({ sessionId }),
+  });
+  const d = (await r.json().catch(() => ({}))) as { isPro?: boolean; error?: string };
+  cached = d.isPro === true;
+  return { isPro: cached, error: d.error };
 }
