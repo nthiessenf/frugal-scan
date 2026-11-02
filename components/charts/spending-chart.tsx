@@ -73,7 +73,7 @@ export function SpendingChart({ data, totalSpent, onCategoryClick, title = 'Spen
               outerRadius={100}
               paddingAngle={2}
               dataKey="value"
-              onClick={(data) => onCategoryClick?.(data.name)}
+              onClick={(data) => { if (data.name) onCategoryClick?.(data.name); }}
               style={{ cursor: onCategoryClick ? 'pointer' : 'default' }}
             >
               {chartData.map((entry, index) => (
@@ -85,7 +85,11 @@ export function SpendingChart({ data, totalSpent, onCategoryClick, title = 'Spen
               ))}
             </Pie>
             <Tooltip
-              formatter={(value: number | undefined) => value ? formatCurrency(value) : ''}
+              formatter={(value) => {
+                if (value === undefined || value === null || value === '') return '';
+                const n = Number(value);
+                return Number.isFinite(n) ? (n ? formatCurrency(n) : '') : String(value);
+              }}
               contentStyle={{
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 borderRadius: '12px',
