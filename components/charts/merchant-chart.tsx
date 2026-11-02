@@ -71,7 +71,11 @@ export function MerchantChart({ data, title = 'Top 10 Merchants' }: MerchantChar
               width={160}
             />
             <Tooltip
-              formatter={(value: number | undefined) => value ? formatCurrency(value) : ''}
+              formatter={(value) => {
+                if (value === undefined || value === null || value === '') return '';
+                const n = Number(value);
+                return Number.isFinite(n) ? (n ? formatCurrency(n) : '') : String(value);
+              }}
               contentStyle={{
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 borderRadius: '12px',
